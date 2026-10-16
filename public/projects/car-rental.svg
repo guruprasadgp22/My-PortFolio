@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" width="640" height="400">
+<defs>
+  <radialGradient id="g1" cx="85%" cy="0%" r="80%"><stop offset="0" stop-color="#ffb547" stop-opacity=".35"/><stop offset="1" stop-color="#ffb547" stop-opacity="0"/></radialGradient>
+  <radialGradient id="g2" cx="0%" cy="100%" r="70%"><stop offset="0" stop-color="#ff6a3d" stop-opacity=".18"/><stop offset="1" stop-color="#ff6a3d" stop-opacity="0"/></radialGradient>
+  <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#ffffff" opacity=".06"/></pattern>
+  <linearGradient id="acc" x1="0" x2="1"><stop offset="0" stop-color="#ffb547"/><stop offset="1" stop-color="#ff6a3d"/></linearGradient>
+</defs>
+<rect width="640" height="400" fill="#0c0a12"/>
+<rect width="640" height="400" fill="url(#g1)"/><rect width="640" height="400" fill="url(#g2)"/><rect width="640" height="400" fill="url(#dots)"/>
+<rect x="40" y="34" width="560" height="332" rx="14" fill="#15121f" stroke="#2a2438"/>
+<path d="M40 48a14 14 0 0 1 14-14h532a14 14 0 0 1 14 14v18H40z" fill="#1c1829"/>
+<circle cx="60" cy="50" r="4.5" fill="#ff5f57"/><circle cx="75" cy="50" r="4.5" fill="#febc2e"/><circle cx="90" cy="50" r="4.5" fill="#28c840"/>
+<rect x="230" y="42" width="180" height="16" rx="8" fill="#0c0a12"/>
+<text x="320" y="54" text-anchor="middle" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="9" fill="#a59cb8">carrental.app/vehicles</text>
+<text x="60" y="92" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="bold" fill="#f1ecf8" text-anchor="start" >Find your ride</text>
+<rect x="60" y="104" width="64" height="22" rx="11" fill="#ffb547" stroke="#ffb547"/><text x="92" y="119" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="bold" fill="#0c0a12" text-anchor="middle" >SUV</text>
+<rect x="132" y="104" width="64" height="22" rx="11" fill="#1c1829" stroke="#2a2438"/><text x="164" y="119" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="normal" fill="#a59cb8" text-anchor="middle" >Sedan</text>
+<rect x="204" y="104" width="64" height="22" rx="11" fill="#1c1829" stroke="#2a2438"/><text x="236" y="119" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="normal" fill="#a59cb8" text-anchor="middle" >Hatchback</text>
+<rect x="276" y="104" width="64" height="22" rx="11" fill="#1c1829" stroke="#2a2438"/><text x="308" y="119" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="normal" fill="#a59cb8" text-anchor="middle" >EV</text>
+<rect x="60" y="140" width="300" height="206" rx="10" fill="#0f0d17" stroke="#2a2438" />
+<g><animateTransform attributeName="transform" type="translate" values="0 0;0 -2;0 0" dur="0.6s" repeatCount="indefinite"/>
+<path d="M92 270 L104 240 Q112 226 130 224 L184 220 Q200 196 228 194 L278 194 Q300 196 314 220 L330 228 Q342 232 342 248 L342 270 Z" fill="#ffb547"/>
+<path d="M196 222 Q208 204 228 202 L250 202 L250 222 Z M258 202 L276 202 Q294 204 304 222 L258 222 Z" fill="#0c0a12" opacity=".75"/>
+</g>
+<g transform="translate(138 272)"><circle r="18" fill="#0c0a12" stroke="#2a2438" stroke-width="3"/><circle r="7" fill="#a59cb8"/><path d="M0 -14 V14 M-14 0 H14" stroke="#2a2438" stroke-width="2"><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="0.8s" repeatCount="indefinite"/></path></g>
+<g transform="translate(300 272)"><circle r="18" fill="#0c0a12" stroke="#2a2438" stroke-width="3"/><circle r="7" fill="#a59cb8"/><path d="M0 -14 V14 M-14 0 H14" stroke="#2a2438" stroke-width="2"><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="0.8s" repeatCount="indefinite"/></path></g>
+<rect x="72" y="292" width="276" height="3" fill="#2a2438"/>
+<rect x="80" y="304" width="44" height="3" rx="1.5" fill="#3a3150"><animate attributeName="x" values="340;40" dur="1.2s" repeatCount="indefinite"/></rect>
+<rect x="170" y="304" width="44" height="3" rx="1.5" fill="#3a3150"><animate attributeName="x" values="250;-50" dur="1.2s" repeatCount="indefinite"/></rect>
+<rect x="260" y="304" width="44" height="3" rx="1.5" fill="#3a3150"><animate attributeName="x" values="160;-140" dur="1.2s" repeatCount="indefinite"/></rect>
+<text x="76" y="166" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="bold" fill="#f1ecf8" text-anchor="start" >Hyundai Creta · Automatic</text>
+<text x="76" y="182" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="9" font-weight="normal" fill="#a59cb8" text-anchor="start" >5 seats · Petrol · AC</text>
+<text x="344" y="336" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#ffb547" text-anchor="end" >₹2,300/day</text>
+<rect x="376" y="140" width="204" height="206" rx="10" fill="#1c1829" stroke="#2a2438" />
+<text x="394" y="166" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="bold" fill="#f1ecf8" text-anchor="start" >Booking</text>
+<text x="394" y="192" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="8" font-weight="normal" fill="#a59cb8" text-anchor="start" >PICK-UP</text>
+<rect x="394" y="197" width="168" height="20" rx="6" fill="#0c0a12" stroke="#2a2438" /><text x="404" y="211" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="10" font-weight="normal" fill="#f1ecf8" text-anchor="start" >12 Jun · 10:00</text>
+<text x="394" y="232" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="8" font-weight="normal" fill="#a59cb8" text-anchor="start" >DROP-OFF</text>
+<rect x="394" y="237" width="168" height="20" rx="6" fill="#0c0a12" stroke="#2a2438" /><text x="404" y="251" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="10" font-weight="normal" fill="#f1ecf8" text-anchor="start" >15 Jun · 10:00</text>
+<text x="394" y="272" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="8" font-weight="normal" fill="#a59cb8" text-anchor="start" >LOCATION</text>
+<rect x="394" y="277" width="168" height="20" rx="6" fill="#0c0a12" stroke="#2a2438" /><text x="404" y="291" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="10" font-weight="normal" fill="#f1ecf8" text-anchor="start" >Bengaluru</text>
+<text x="394" y="318" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="10" font-weight="normal" fill="#a59cb8" text-anchor="start" >3 days</text><text x="562" y="318" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="bold" fill="#ffb547" text-anchor="end" >₹6,900</text>
+<rect x="394" y="324" width="168" height="16" rx="8" fill="url(#acc)"/><text x="478" y="336" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="bold" fill="#0c0a12" text-anchor="middle" >Book now</text>
+</svg>

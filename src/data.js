@@ -1,0 +1,311 @@
+/* ==========================================================
+   EDIT YOUR DETAILS HERE
+   Everything on the site comes from this file.
+   Filled from your resume and LinkedIn profile. Lines marked "TODO" still need your input.
+   ========================================================== */
+
+export const ME = {
+  first: "GURU",
+  last: "PRASAD",
+  initials: "GP",
+  roles: ["Full Stack Developer", "Software Engineer", "Java Developer", "Backend Developer", "Python Developer"],
+  headline: "Java | Python | Spring | Spring Boot",
+  lede:
+    "Software developer with a B.E. in Computer Science, building scalable, secure and user-focused applications with Java, Python, Spring Boot and React.js.",
+  email: "guruprasad6200@gmail.com",
+  phone: "+91 76248 14091", // shown in the sidebar contacts. Set to "" to hide it.
+  website: "https://guruprasadgp.netlify.app/",
+  location: "Bengaluru, Karnataka",
+  // Recruiter quick view. TODO: set availability to something specific, e.g. "Immediate joiner" or "Notice: 15 days".
+  lookingFor: ["Software Engineer", "Java Developer", "Backend Developer", "Full Stack Developer", "Python Developer"],
+  availability: "Open to work",
+  topSkills: ["Java", "Spring Boot", "Python", "React.js", "PostgreSQL", "REST APIs", "Docker", "Microservices"],
+  socials: [
+    { label: "GitHub", url: "https://github.com/guruprasadgp22" },
+    { label: "LinkedIn", url: "https://www.linkedin.com/in/guruprasadgp22/" },
+    // Add more with the same shape, e.g. { label: "Instagram", url: "..." } or { label: "X", url: "..." }
+    { label: "Resume", url: "/Guruprasad_P_updated.pdf" }, // the PDF in the public/ folder
+  ],
+};
+
+export const ABOUT = {
+  // Your photo lives at public/me.jpg. Leave "" to show the animated monogram instead.
+  photo: "/me.jpg",
+  bio: "I'm Guruprasad, a software developer with a Bachelor's degree in Computer Science and Engineering. I enjoy designing and building scalable, secure and user-focused applications.",
+  bio2:
+    "At Sony India Software Centre I worked in SAP Identity and Access Management: user lifecycle, role-based access control, authentication, authorization and security compliance. Before that I built full-stack apps with Java, Python, Spring Boot, Hibernate and React.js at KodNest, and a Car Rental Management System at DLithe. I'm a quick learner who likes hard problems, and I'm looking for roles as a Software Engineer, Java, Backend, Full Stack or Python Developer.",
+  facts: [
+    { value: 3, suffix: "", label: "internships" },
+    { value: 1, suffix: " yr", label: "at Sony India" },
+    { value: 8, suffix: "", label: "projects built" },
+    { value: 1100, suffix: "+", label: "problems solved" },
+  ],
+  terminal: [
+    ["whoami", "guruprasad — software developer (Java · Python · Spring Boot · React)"],
+    ["cat focus.txt", "Spring Boot · Microservices · React.js · PostgreSQL · RAG"],
+    ["echo $CURRENTLY_BUILDING", "FlightWise AI — flight search with Kafka, Redis & LangChain4j"],
+    ["cat status", "open to SDE and full-stack roles ✔"],
+  ],
+  // Languages from LinkedIn. lvl is LinkedIn's 1–5 proficiency scale (5 = native or bilingual).
+  languages: [
+    { n: "Kannada", label: "Native or bilingual", lvl: 5 },
+    { n: "Tulu", label: "Native or bilingual", lvl: 5 },
+    { n: "English", label: "Limited working", lvl: 4 },
+  ],
+  // TODO: these are not on your resume. Edit the text so it sounds like you.
+  interests: [
+    { icon: "🏏", title: "Cricket", tag: "teamwork", back: "Weekend matches with friends. Reading the game is a lot like reading a codebase." },
+    { icon: "⌨", title: "Problem Solving", tag: "dsa", back: "Regular DSA practice on LeetCode, GFG, NeetCode and Code 360 keeps my thinking sharp." },
+    { icon: "♫", title: "Music", tag: "focus", back: "Music on while I code. It helps me get into deep focus." },
+    { icon: "✈", title: "Travel", tag: "explore", back: "Exploring new places around Karnataka whenever I get the chance." },
+  ],
+};
+
+// Your story, told the fun way. Shown on the Journey page.
+export const JOURNEY = [
+  { yr: "2018", t: "SSLC cleared with 86.4%", d: "Finished 10th standard with 86.4%. Exams over, holidays on. Best feeling ever.", tags: ["SSLC", "86.4%"] },
+  { yr: "2018", t: "Hello, World!", d: "Picked PCMCs for PUC and wrote my first program in C. It came with my first bug, free of cost.", tags: ["PUC", "PCMCs", "C"] },
+  { yr: "2020", t: "PUC done, then COVID said hi", d: "Wrapped up PUC with 71.33%. Then COVID arrived and the whole world pressed the pause button.", tags: ["PUC", "71.33%"] },
+  { yr: "Dec 2020", t: "Officially an engineering student", d: "Joined B.E. in Computer Science at MITE, Mangalore. New laptop, big dreams, zero idea what a semicolon could do to me.", tags: ["B.E. CSE", "MITE"] },
+  { yr: "2021 – 2023", t: "Collecting languages like Pokémon", d: "C led to C++, then Java, JavaScript, Python and more. Gotta code 'em all!", tags: ["C++", "Java", "JavaScript", "Python"] },
+  { yr: "Aug 2023", t: "First internship at DLithe", d: "Built a Car Rental Management System with React, PHP and SQL. Lots of cars on screen, sadly no free rides.", tags: ["React.js", "PHP", "SQL"] },
+  { yr: "May 2024", t: "Engineer, unlocked", d: "Finished my B.E. with a 7.26 CGPA. Four years, endless assignments, one degree, no regrets.", tags: ["Graduated", "7.26 CGPA"] },
+  { yr: "May 2024", t: "An offer letter from TCS", d: "Got an offer from TCS! Life had other plans and I couldn't join, but it told me I was on the right track.", tags: ["TCS", "Offer letter"] },
+  { yr: "Oct 2024", t: "Back to coding school at KodNest", d: "Joined KodNest to level up in full stack Java and Python. More code, more coffee, more 'aha!' moments.", tags: ["Java", "Python", "Full Stack"] },
+  { yr: "May 2025", t: "Sony is calling", d: "Got an internship offer from Sony India. Yes, that Sony! Cue the happy dance.", tags: ["Offer", "Sony"] },
+  { yr: "Jun 2025", t: "Hello, real IT world", d: "Joined Sony as a Software Developer Intern. Learned how a real IT company works: big systems, real users, real deadlines, and SAP access management.", tags: ["Sony", "SAP IAM", "RBAC"] },
+  { yr: "Jun 2026", t: "Sony chapter complete", d: "Finished my internship on 2 June 2026, with a backpack full of industry lessons and a lot more confidence.", tags: ["Completed", "Industry ready"] },
+  { yr: "Now", t: "Leveling up, every single day", d: "Sharpening DSA, polishing my communication, building projects like FlightWise AI and learning something new daily. Next level loading…", tags: ["DSA", "Communication", "Projects", "Open to work"] },
+];
+
+// Newest first. Every role from your resume and LinkedIn.
+export const EXPERIENCE = [
+  {
+    when: "Jun 2025 – Jun 2026",
+    role: "Software Developer Intern",
+    org: "Sony India Software Centre Pvt. Ltd. · Bengaluru, Karnataka",
+    pts: [
+      "Administered SAP Identity and Access Management (IAM) processes across the full user lifecycle: account creation, access provisioning, role changes, password resets and deactivation, in line with organizational security policies",
+      "Managed role-based access control (RBAC) by assigning, modifying and auditing user roles and authorizations, following least privilege and segregation of duties",
+      "Maintained authentication and authorization configurations across SAP environments, performing access reviews, resolving authorization issues and supporting audits",
+      "Worked with cross-functional teams, business stakeholders and application owners to process access requests, troubleshoot access issues and implement role changes",
+      "Handled user requests through enterprise ticketing and access management processes, monitoring SLAs and documenting provisioning and identity management work",
+      "Built knowledge of enterprise security, SAP authorization management, identity governance, risk mitigation and IT compliance in a production support environment",
+      "Strengthened communication, documentation, stakeholder management and adherence to standard operating procedures in a collaborative enterprise team",
+    ],
+  },
+  {
+    when: "Oct 2024 – Jun 2025",
+    role: "Full Stack Development Intern",
+    org: "KodNest Technologies · Bengaluru, Karnataka",
+    pts: [
+      "Completed a full stack development internship in Java and Python, designing, building, testing and deploying web applications with industry best practices",
+      "Learned Core and Advanced Java, OOP, the Collections Framework, JDBC, exception handling, multithreading and file handling",
+      "Built backend applications with Spring Framework, Spring Boot, Hibernate and Django: REST APIs, CRUD operations, dependency injection and layered architecture",
+      "Designed responsive interfaces with HTML5, CSS3, JavaScript and React.js, integrated with backend APIs",
+      "Worked with MySQL, Oracle SQL and MongoDB: schema design, SQL queries and data persistence",
+      "Gained exposure to manual and automation testing, API validation, debugging and defect tracking across the SDLC",
+      "Developed QuickNote, a To-Do List and a full-stack Currency Converter with CRUD, REST API integration, responsive UI and database connectivity",
+      "Used Git, GitHub, Maven, IntelliJ IDEA, VS Code and Postman in day-to-day development",
+    ],
+  },
+  {
+    when: "Aug 2023 – Sep 2023",
+    role: "Web Development Intern",
+    org: "DLithe Consultancy Services Pvt. Ltd. · Moodabidri, Karnataka",
+    pts: [
+      "Gained hands-on full stack web development experience and learned the software development lifecycle through a real project",
+      "Built responsive interfaces with HTML5, CSS3, JavaScript and React.js: components, state, events, routing and form validation",
+      "Wrote PHP backend logic connected to relational databases, with SQL queries and CRUD operations",
+      "Developed a Car Rental Management System where users browse vehicles, register, book rentals and manage reservations",
+      "Improved debugging and clean coding habits, and worked with Git and GitHub in a collaborative workflow",
+    ],
+  },
+];
+
+// img = cover image in public/projects/ (falls back to animated art in colour `hue` if empty) · cat = filter category on the Projects page
+// TODO: replace url with each project's GitHub repo or live demo link
+export const PROJECTS = [
+  {
+    t: "FlightWise AI",
+    img: "/projects/flightwise.svg",
+    cat: "Full-stack",
+    d: "Intelligent flight search and booking platform with personalized recommendations by price, airline, duration, departure time and layovers, plus admin controls for flights, schedules, pricing and bookings. Built on a microservices backend with Spring Cloud Gateway, Eureka, JWT auth, event-driven messaging and AI-powered conversational search.",
+    stack: ["Java 21", "Spring Boot", "React.js", "PostgreSQL", "Redis", "Apache Kafka", "Docker", "LangChain4j", "RAG"],
+    hue: 200,
+    url: "https://github.com/guruprasadgp22",
+    // Case study shown when the card is opened. TODO: add real results (users, latency, accuracy) once you have them.
+    caseStudy: {
+      when: "June 2026 – present",
+      problem:
+        "Comparing flights by price, airline, duration, departure time and layovers means jumping between tabs. FlightWise AI puts search, comparison and booking in one place, recommends flights from your preferences, and lets you ask for flights in plain English. Admins get controls for flights, schedules, pricing and bookings.",
+      architecture: [
+        [["React.js frontend", "Material UI · Tailwind CSS"]],
+        [["Spring Cloud Gateway", "routing · JWT auth"], ["Eureka", "service discovery"]],
+        [["Flight service", "Spring Boot"], ["Booking service", "Spring Boot"], ["AI search", "LangChain4j · RAG"]],
+        [["PostgreSQL", "data"], ["Redis", "fast lookups"], ["Apache Kafka", "events"]],
+      ],
+      challenges: [
+        "Splitting the backend into Spring Boot microservices behind one gateway, with Eureka so services find each other without hard-coded addresses",
+        "Keeping services in step with event-driven messaging on Kafka instead of services calling each other directly",
+        "Grounding the conversational search in real flight data with LangChain4j and RAG, so answers come from the catalogue instead of guesses",
+        "Securing every route with JWT authentication at the gateway",
+      ],
+      outcome: "In active development. Search, recommendations, admin tools and AI-powered conversational search are built on a containerised (Docker) microservices backend.",
+    },
+  },
+  {
+    t: "AI Dental Condition Detection",
+    img: "/projects/dental.svg",
+    cat: "AI / ML",
+    d: "Detects caries, deep caries, impacted teeth and peripheral lesions in panoramic dental X-rays using a YOLOv5 model, with annotated bounding-box results. A Flask web app lets users upload X-rays, run them through the model and view or download the results.",
+    stack: ["Python", "PyTorch", "YOLOv5", "OpenCV", "Flask", "JavaScript"],
+    hue: 18,
+    url: "https://github.com/guruprasadgp22",
+    // TODO: add model results (mAP, precision/recall) and dataset size if you have them.
+    caseStudy: {
+      when: "April 2026 – present",
+      problem:
+        "Spotting caries, deep caries, impacted teeth and peripheral lesions on panoramic dental X-rays takes time and a trained eye. This system flags them automatically and draws labelled boxes around each finding, so an X-ray can be reviewed at a glance.",
+      architecture: [
+        [["Upload X-ray", "HTML · CSS · JavaScript"]],
+        [["Flask web app", "Python"]],
+        [["OpenCV", "image processing"], ["YOLOv5 model", "PyTorch"]],
+        [["Annotated result", "view · download"]],
+      ],
+      challenges: [
+        "Training a YOLOv5 model to tell four different dental conditions apart on panoramic X-rays",
+        "Turning the model into a tool anyone can use: a Flask app that handles upload, inference and download",
+        "Drawing clear bounding boxes and labels with OpenCV so the results are easy to read",
+      ],
+      outcome: "Working end to end: upload a panoramic X-ray, get annotated detections for four conditions, and download the result.",
+    },
+  },
+  // From your LinkedIn summary. TODO: add the real tech stack for the last five and a link for each.
+  {
+    t: "Car Rental Management System",
+    img: "/projects/car-rental.svg",
+    cat: "Full-stack",
+    d: "Rental platform where users browse available vehicles, register accounts, book cars and manage their reservations through a responsive interface. Built during my DLithe internship.",
+    stack: ["HTML", "CSS", "JavaScript", "React.js", "PHP", "SQL"],
+    hue: 38,
+    url: "https://github.com/guruprasadgp22",
+  },
+  {
+    t: "Full-Stack E-Commerce Application",
+    img: "/projects/ecommerce.svg",
+    cat: "Full-stack",
+    d: "Full-stack online store with authentication, API integration and CRUD operations over the product and order data.",
+    stack: ["Full-stack", "Authentication", "REST API", "CRUD"],
+    hue: 330,
+    url: "https://github.com/guruprasadgp22",
+  },
+  {
+    t: "Job Portal",
+    img: "/projects/job-portal.svg",
+    cat: "Full-stack",
+    d: "Job listing and application portal with user authentication, API integration and database-backed CRUD.",
+    stack: ["Full-stack", "Authentication", "REST API", "CRUD"],
+    hue: 260,
+    url: "https://github.com/guruprasadgp22",
+  },
+  {
+    t: "Currency Converter",
+    img: "/projects/currency.svg",
+    cat: "Full-stack",
+    d: "Full-stack currency converter with REST API integration, a responsive UI and database connectivity. Built at KodNest.",
+    stack: ["REST API", "Responsive UI", "Database"],
+    hue: 150,
+    url: "https://github.com/guruprasadgp22",
+  },
+  {
+    t: "QuickNote",
+    img: "/projects/quicknote.svg",
+    cat: "Web app",
+    d: "Note-taking app with create, edit and delete, a responsive UI and persistent storage. Built at KodNest.",
+    stack: ["CRUD", "REST API", "Responsive UI"],
+    hue: 50,
+    url: "https://github.com/guruprasadgp22",
+  },
+  {
+    t: "To-Do List",
+    img: "/projects/todo.svg",
+    cat: "Web app",
+    d: "Task manager with CRUD operations, REST API integration and database connectivity. Built at KodNest.",
+    stack: ["CRUD", "REST API", "Database"],
+    hue: 100,
+    url: "https://github.com/guruprasadgp22",
+  },
+];
+
+// From your resume and LinkedIn summary. lv = how confident you are with the group (0–100), shown as an LED meter.
+// TODO: the lv values are estimates. Set them to what feels right.
+export const SKILLS = [
+  { h: "Languages", lv: 85, s: ["Java", "Python", "JavaScript", "SQL", "C++"] },
+  { h: "Backend", lv: 85, s: ["Spring Framework", "Spring Boot", "Hibernate", "JDBC", "Django", "RESTful APIs", "Microservices"] },
+  { h: "Frontend", lv: 80, s: ["React.js", "HTML5", "CSS3", "JavaScript", "Tailwind CSS", "Material UI"] },
+  { h: "Databases", lv: 80, s: ["PostgreSQL", "MySQL", "MongoDB", "Oracle SQL", "Redis", "Firebase"] },
+  { h: "Cloud & DevOps", lv: 75, s: ["Docker", "Kubernetes", "CI/CD", "Apache Kafka", "Linux/Unix"] },
+  { h: "AI / ML", lv: 70, s: ["PyTorch", "YOLOv5", "OpenCV", "LangChain4j", "RAG"] },
+  { h: "Tools", lv: 85, s: ["Git", "GitHub", "Maven", "Postman", "IntelliJ IDEA", "VS Code"] },
+  { h: "CS, Testing & Soft Skills", lv: 80, s: ["OOP", "Collections Framework", "Database Design", "Manual Testing", "Automation Testing", "Agile", "Leadership", "Time Management"] },
+];
+
+// Certifications from your resume and LinkedIn (newest first). by / when / url are optional.
+// TODO: add url: "https://..." (the certificate or its verification page) to show a "Verify" link.
+export const CERTIFICATIONS = [
+  { t: "Java Spring Framework, Spring Boot & Spring AI (Generative AI)", by: "Udemy", when: "May 2026" },
+  { t: "Python For Beginners Course In-Depth", by: "Udemy", when: "Apr 2026" },
+  { t: "Artificial Intelligence for Beginners: Python and AI Basics", by: "Udemy", when: "Dec 2025" },
+  { t: "Full Stack Development in Java and Python", by: "KodNest Technologies", when: "Jun 2025" }
+];
+
+// LeetCode, GFG and Code360 numbers pulled from the public profiles on 17 Oct 2026.
+export const PLATFORMS = [
+  { n: "LeetCode", c: "#ffa116", val: 444, lbl: "problems solved · 194 E / 201 M / 49 H", meta: [["Rating", "1311"], ["Max streak", "109d"]], url: "https://leetcode.com/u/guruprasadgp22/" },
+  { n: "GeeksforGeeks", c: "#2f8d46", val: 652, lbl: "problems solved", meta: [["Score", "1965"], ["Institute", "#1"]], url: "https://www.geeksforgeeks.org/profile/guruprasadgp22" },
+  { n: "NeetCode", c: "#3de0ff", val: 232, lbl: "problems solved", meta: [["Blind 75", "39/75"]], url: "https://neetcode.io/user/PrimalPikachu220" }, // sample: NeetCode stats aren't public, fill these in
+  { n: "Code360", c: "#f05b5b", val: 4, lbl: "problems · Naukri Code 360", meta: [["Moderate", "1"], ["Hard", "1"]], url: "https://www.naukri.com/code360/profile/guruprasadgp" },
+];
+
+// score is optional: shown on a split-flap board
+export const EDUCATION = [
+  {
+    yr: "Dec 2020 – May 2024",
+    t: "Bachelor of Engineering - Computer Science and Engineering",
+    p: "Mangalore Institute of Technology and Engineering, Mangalore, Karnataka",
+    score: "7.26 CGPA",
+  },
+  {
+    yr: "Jun 2018 – Mar 2020",
+    t: "PUC (Pre-University Course) - Science (PCMCs)",
+    p: "Karnataka Public School, Hiriadka, Udupi",
+    score: "71.33%",
+  },
+  {
+    yr: "Jun 2017 – May 2018",
+    t: "SSLC (10th Standard)",
+    p: "M N D S M Aided High School, Mudrady, Udupi",
+    score: "86.4%",
+  },
+];
+
+// "What I'm doing" cards on the About page. icon: code | server | brain | git
+export const DOING = [
+  { icon: "server", t: "Backend & APIs", d: "Spring Boot microservices, REST APIs, JWT auth and event-driven systems with Kafka, Redis and PostgreSQL." },
+  { icon: "code", t: "Frontend development", d: "Responsive React.js interfaces styled with Material UI and Tailwind CSS." },
+  { icon: "brain", t: "AI & ML", d: "Computer vision with PyTorch and YOLOv5, and AI-powered search with LangChain4j and RAG." },
+  { icon: "git", t: "DevOps & tooling", d: "Docker, Kubernetes and CI/CD pipelines, with Git, Maven and Linux in daily use." },
+];
+
+// Tabs in the navbar: [page id, label, icon, short label for the phone tab bar]
+export const NAV = [
+  ["about", "About", "user"],
+  ["experience", "Experience", "briefcase", "Work"],
+  ["education", "Education", "cap", "Study"],
+  ["journey", "Journey", "route"],
+  ["skills", "Skills", "layers"],
+  ["projects", "Projects", "folder"],
+  ["coding", "Coding", "code"],
+  ["contact", "Contact", "mail"],
+];

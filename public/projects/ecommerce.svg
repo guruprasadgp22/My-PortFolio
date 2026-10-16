@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" width="640" height="400">
+<defs>
+  <radialGradient id="g1" cx="85%" cy="0%" r="80%"><stop offset="0" stop-color="#ff4fa3" stop-opacity=".35"/><stop offset="1" stop-color="#ff4fa3" stop-opacity="0"/></radialGradient>
+  <radialGradient id="g2" cx="0%" cy="100%" r="70%"><stop offset="0" stop-color="#ffb547" stop-opacity=".18"/><stop offset="1" stop-color="#ffb547" stop-opacity="0"/></radialGradient>
+  <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#ffffff" opacity=".06"/></pattern>
+  <linearGradient id="acc" x1="0" x2="1"><stop offset="0" stop-color="#ff4fa3"/><stop offset="1" stop-color="#ffb547"/></linearGradient>
+</defs>
+<rect width="640" height="400" fill="#0c0a12"/>
+<rect width="640" height="400" fill="url(#g1)"/><rect width="640" height="400" fill="url(#g2)"/><rect width="640" height="400" fill="url(#dots)"/>
+<rect x="40" y="34" width="560" height="332" rx="14" fill="#15121f" stroke="#2a2438"/>
+<path d="M40 48a14 14 0 0 1 14-14h532a14 14 0 0 1 14 14v18H40z" fill="#1c1829"/>
+<circle cx="60" cy="50" r="4.5" fill="#ff5f57"/><circle cx="75" cy="50" r="4.5" fill="#febc2e"/><circle cx="90" cy="50" r="4.5" fill="#28c840"/>
+<rect x="230" y="42" width="180" height="16" rx="8" fill="#0c0a12"/>
+<text x="320" y="54" text-anchor="middle" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="9" fill="#a59cb8">shop.app/products</text>
+<text x="60" y="94" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="bold" fill="#f1ecf8" text-anchor="start" letter-spacing="3">SHOP</text>
+<rect x="150" y="78" width="300" height="24" rx="12" fill="#0c0a12" stroke="#2a2438" /><text x="166" y="94" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="10" font-weight="normal" fill="#a59cb8" text-anchor="start" >Search products…</text>
+<g transform="translate(548 90)"><path d="M-14 -8 h4 l4 14 h14 l4 -10 h-20" fill="none" stroke="#f1ecf8" stroke-width="2"/><circle cx="-4" cy="10" r="2" fill="#f1ecf8"/><circle cx="8" cy="10" r="2" fill="#f1ecf8"/></g>
+<circle cx="566" cy="80" r="8" fill="#ff4fa3"><animate attributeName="r" values="8;10;8" dur="1.2s" repeatCount="indefinite"/></circle><text x="566" y="84" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="bold" fill="#0c0a12" text-anchor="middle" >3</text>
+<rect x="60" y="116" width="164" height="234" rx="10" fill="#1c1829" stroke="#2a2438" />
+<rect x="70" y="126" width="144" height="110" rx="8" fill="#0f0d17"/>
+<path d="M114 190 v-12 a28 28 0 0 1 56 0 v12" fill="none" stroke="#ff4fa3" stroke-width="6"/><rect x="106" y="182" width="16" height="26" rx="6" fill="#ff4fa3"/><rect x="162" y="182" width="16" height="26" rx="6" fill="#ff4fa3"/>
+<text x="72" y="256" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="bold" fill="#f1ecf8" text-anchor="start" >Wireless Headphones</text>
+<text x="72" y="272" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="normal" fill="#ffb547" text-anchor="start" >★★★★☆</text>
+<text x="72" y="296" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="bold" fill="#f1ecf8" text-anchor="start" >₹2,499</text>
+<rect x="72" y="310" width="140" height="26" rx="13" fill="#0c0a12" stroke="#ff4fa3"/><text x="142" y="327" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="bold" fill="#ff4fa3" text-anchor="middle" >Add to cart</text>
+<rect x="238" y="116" width="164" height="234" rx="10" fill="#1c1829" stroke="#2a2438" />
+<rect x="248" y="126" width="144" height="110" rx="8" fill="#0f0d17"/>
+<rect x="308" y="140" width="24" height="84" rx="6" fill="#3a3150"/><circle cx="320" cy="182" r="26" fill="#ffb547"/><circle cx="320" cy="182" r="20" fill="#0c0a12"/><path d="M320 182 V169" stroke="#ffb547" stroke-width="2.5"><animateTransform attributeName="transform" type="rotate" from="0 320 182" to="360 320 182" dur="6s" repeatCount="indefinite"/></path><path d="M320 182 H329" stroke="#f1ecf8" stroke-width="2.5"/>
+<text x="250" y="256" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="bold" fill="#f1ecf8" text-anchor="start" >Smart Watch</text>
+<text x="250" y="272" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="normal" fill="#ffb547" text-anchor="start" >★★★★★</text>
+<text x="250" y="296" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="bold" fill="#f1ecf8" text-anchor="start" >₹3,999</text>
+<rect x="250" y="310" width="140" height="26" rx="13" fill="url(#acc)" stroke="#ff4fa3"/><text x="320" y="327" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="bold" fill="#0c0a12" text-anchor="middle" >Added ✓</text>
+<rect x="416" y="116" width="164" height="234" rx="10" fill="#1c1829" stroke="#2a2438" />
+<rect x="426" y="126" width="144" height="110" rx="8" fill="#0f0d17"/>
+<path d="M484 158 a14 12 0 0 1 28 0" fill="none" stroke="#3de0ff" stroke-width="4"/><rect x="468" y="158" width="60" height="64" rx="12" fill="#3de0ff"/><rect x="480" y="186" width="36" height="22" rx="5" fill="#0c0a12" opacity=".35"/>
+<text x="428" y="256" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="bold" fill="#f1ecf8" text-anchor="start" >Travel Backpack</text>
+<text x="428" y="272" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="normal" fill="#ffb547" text-anchor="start" >★★★★☆</text>
+<text x="428" y="296" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="bold" fill="#f1ecf8" text-anchor="start" >₹1,799</text>
+<rect x="428" y="310" width="140" height="26" rx="13" fill="#0c0a12" stroke="#ff4fa3"/><text x="498" y="327" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="bold" fill="#ff4fa3" text-anchor="middle" >Add to cart</text>
+</svg>
