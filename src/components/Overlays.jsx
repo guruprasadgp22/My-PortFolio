@@ -7,6 +7,8 @@ import { startScroll, stopScroll } from "../hooks/useSmoothScroll";
 import { toggleTheme } from "../hooks/theme";
 import useStats from "../hooks/useStats";
 import Icon from "./Icons";
+import { replayBoot } from "./Boot";
+import { openChat } from "./Chat";
 
 const resume = ME.socials.find((s) => s.label === "Resume")?.url;
 const social = (label) => ME.socials.find((s) => s.label === label)?.url;
@@ -63,12 +65,14 @@ function Palette({ go, onClose }) {
     () => [
       ...NAV.map(([id, label, icon]) => ({ k: `Go to ${label}`, icon, run: () => go(id) })),
       { k: "Recruiter quick view", icon: "zap", run: openQuickView, keep: true }, // swaps the palette for the quick view
+      { k: "Ask GP Assistant (AI chat, job matcher)", icon: "sparkle", run: openChat },
       { k: "Copy email address", icon: "copy", run: () => navigator.clipboard?.writeText(ME.email).then(() => setCopied(true)), keep: true },
       resume && { k: "Download resume", icon: "download", run: () => open(resume, "_blank") },
       { k: "Toggle light / dark theme", icon: "sun", run: () => toggleTheme() },
       social("GitHub") && { k: "Open GitHub", icon: "github", run: () => open(social("GitHub"), "_blank") },
       social("LinkedIn") && { k: "Open LinkedIn", icon: "linkedin", run: () => open(social("LinkedIn"), "_blank") },
       { k: "Send an email", icon: "mail", run: () => (location.href = `mailto:${ME.email}`) },
+      { k: "Replay boot screen", icon: "zap", run: replayBoot },
     ].filter(Boolean),
     [go]
   );

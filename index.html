@@ -3,12 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="Guruprasad — Full-stack developer and problem solver. Projects, experience, skills and coding profiles." />
+    <meta name="description" content="Guruprasad, full stack developer in Bengaluru (Java, Spring Boot, Python, React). Ex-Sony India intern. Projects, experience, skills and live coding stats." />
     <meta name="theme-color" content="#0c0a12" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Manrope:wght@400;500;700&family=JetBrains+Mono:wght@400;600&family=VT323&display=swap" />
+    <!-- fonts load without blocking the first paint; text shows in fallback fonts for a moment, then swaps -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Manrope:wght@400;500;700&family=JetBrains+Mono:wght@400;600&family=VT323&display=swap" />
+    <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Manrope:wght@400;500;700&family=JetBrains+Mono:wght@400;600&family=VT323&display=swap" />
     <script>
       // Apply the saved (or system) theme before first paint so the page never flashes the wrong one.
       (function () {
@@ -18,7 +20,22 @@
         document.documentElement.dataset.theme = t;
       })();
     </script>
-    <title>Guruprasad · Portfolio</title>
+    <title>Guruprasad · Full Stack Developer (Java, Spring Boot, React)</title>
+    <link rel="canonical" href="https://guruprasadgp.netlify.app/" />
+    <!-- link previews (LinkedIn, WhatsApp, X, Slack). og:image must be an absolute URL. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Guruprasad · Portfolio" />
+    <meta property="og:url" content="https://guruprasadgp.netlify.app/" />
+    <meta property="og:title" content="Guruprasad · Full Stack Developer (Java, Spring Boot, React)" />
+    <meta property="og:description" content="Software developer from Bengaluru. Ex-Sony India intern, 8 projects including FlightWise AI (Spring Boot microservices, Kafka, Redis, RAG), 1,300+ DSA problems solved." />
+    <meta property="og:image" content="https://guruprasadgp.netlify.app/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Guruprasad, Full Stack Developer: Java, Spring Boot" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Guruprasad · Full Stack Developer (Java, Spring Boot, React)" />
+    <meta name="twitter:description" content="Ex-Sony India intern. Spring Boot microservices, React, 1,300+ DSA problems solved." />
+    <meta name="twitter:image" content="https://guruprasadgp.netlify.app/og.jpg" />
   </head>
   <body>
     <div id="root"></div>

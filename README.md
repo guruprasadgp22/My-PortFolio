@@ -19,15 +19,23 @@ Personal portfolio of **Guruprasad**, a full stack developer (Java · Spring Boo
 - A soft highlight glides behind the active tab, buttons sink to 96% when pressed, and Android phones get a small haptic tick.
 - On phones: swipe left or right to change tabs, and contacts open in a draggable bottom sheet.
 - Stats roll into place like an odometer.
+- Jitter-style scroll effects: the About text lights up word by word as you scroll, and Experience roles pile up as stacked cards that shrink back as the next one slides over.
 
 **Retro touches**
-- An optional BIOS-style boot screen (once per visit, any key skips it) and an "old TV" channel change between pages.
+- A BIOS-style boot screen you can replay from the command palette (it never delays the first visit), and an "old TV" channel change between pages.
 - Page titles that decode with a glitch effect, CRT scanlines and film grain, a split-flap board for exam scores, and LED meters for skills.
 
+**Personal touches**
+- Tech logos orbit the profile photo on two rings, and speed up when you hover over or tap them.
+- An animated map draws the route from school in Udupi to college in Moodabidri to work in Bengaluru.
+- A "two truths and a lie" game and a "say hello in Tulu" button on the About page.
+
 **Useful features**
+- **GP Assistant (AI chatbot):** a floating "Ask GP" button opens a chat that answers recruiters' questions from the portfolio's own content, cites the section each answer came from, and says "I don't know" instead of guessing. A **Match a job** tab scores a pasted job description against the profile (matched and missing skills, most relevant projects, and a pitch to paste into notes). See [GP Assistant](#gp-assistant-chatbot).
 - **Live coding stats:** LeetCode, GeeksforGeeks and Code360 numbers, plus a heatmap of real LeetCode activity, load automatically (see [Live coding stats](#live-coding-stats)).
 - **Case studies** for the main projects: the problem, an architecture diagram, what was hard, and where it stands.
-- **Command palette:** press <kbd>⌘</kbd>/<kbd>Ctrl</kbd> + <kbd>K</kbd> to jump to any page, copy the email, download the resume or switch theme.
+- **Interactive system design:** in the FlightWise AI case study, tap any box (gateway, Eureka, services, Kafka, Redis, PostgreSQL) to see what it does and why it was chosen.
+- **Command palette:** press <kbd>⌘</kbd>/<kbd>Ctrl</kbd> + <kbd>K</kbd> to jump to any page, copy the email, download the resume, switch theme or replay the boot screen.
 - **Recruiter quick view:** a one-screen summary of target roles, top skills, experience and contact buttons.
 - **Light and dark themes:** the new theme spreads out in a circle from the toggle button and is remembered between visits.
 
@@ -39,7 +47,8 @@ Personal portfolio of **Guruprasad**, a full stack developer (Java · Spring Boo
 | --- | --- |
 | UI | React 18, Vite 5, plain CSS (custom properties for theming) |
 | Motion | Framer Motion (springs, shared layout), Lenis (smooth scrolling), View Transitions API |
-| Data | Netlify Functions (live coding stats), cached on Netlify's CDN |
+| Data | Netlify Functions: live coding stats (cached on Netlify's CDN) and the chatbot |
+| AI | Claude API (Anthropic), called only from the server |
 | Hosting | Netlify, deployed automatically from `main` |
 
 ## Run it locally
@@ -59,7 +68,7 @@ npm run dev        # http://localhost:5173
 | `npm run build` | Builds the production site into `dist/` |
 | `npm run preview` | Serves the built site at http://localhost:4173 |
 
-Live coding stats also work locally: Vite serves the same function at `/api/stats` (see `vite.config.js`).
+Live coding stats and the chatbot also work locally: Vite serves the same functions at `/api/stats` and `/api/chat` (see `vite.config.js`).
 
 ## Updating the content
 
@@ -68,13 +77,13 @@ All text, numbers and links live in **[`src/data.js`](src/data.js)**, so you rar
 | To change | Edit in `src/data.js` |
 | --- | --- |
 | Name, roles, email, phone, location, social links, recruiter quick-view details | `ME` |
-| Bio, stats, terminal lines, languages, interest cards | `ABOUT` |
-| Jobs and internships | `EXPERIENCE` |
+| Bio, stats, terminal lines, languages, Tulu phrase, orbiting tech, "two truths and a lie", interest cards | `ABOUT` |
+| Jobs and internships (stacked-card summary, tech and lifecycle flow, full details) | `EXPERIENCE` |
 | Degrees and school results | `EDUCATION` |
 | Certificates (add `url` to show a **Verify** link) | `CERTIFICATIONS` |
-| Timeline on the Journey page | `JOURNEY` |
+| Timeline and route map on the Journey page | `JOURNEY`, `JOURNEY_MAP` |
 | Skill groups and their LED meter levels | `SKILLS` |
-| Projects, cover images, case studies | `PROJECTS` |
+| Projects, repo and demo links, cover images, case studies, system-design notes | `PROJECTS` |
 | Coding profiles (saved numbers and profile links) | `PLATFORMS` |
 | "What I'm doing" cards | `DOING` |
 | Navbar tabs | `NAV` |
@@ -82,6 +91,7 @@ All text, numbers and links live in **[`src/data.js`](src/data.js)**, so you rar
 **Files in `public/`:**
 - `me.jpg`: profile photo
 - `Guruprasad_P_updated.pdf`: resume. If you rename it, update the `Resume` link in `ME.socials`.
+- `og.jpg`: the 1200×630 preview image shown when the link is shared (LinkedIn, WhatsApp, X).
 - `projects/*.svg`: project cover art. Swap in real screenshots (PNG/JPG) and point the project's `img` at them.
 
 **Colours and fonts** are CSS variables at the top of [`src/styles/global.css`](src/styles/global.css): `:root` holds the dark theme and `:root[data-theme="light"]` the light one.
@@ -96,10 +106,33 @@ All text, numbers and links live in **[`src/data.js`](src/data.js)**, so you rar
 
 The response is cached on Netlify's CDN for 6 hours. If a source is down, that card falls back to the numbers saved in `PLATFORMS`, so the page never breaks. NeetCode has no public data and is updated by hand. To track a different account, change `USERS` at the top of the function.
 
+## GP Assistant (chatbot)
+
+The browser talks only to [`netlify/functions/chat.mjs`](netlify/functions/chat.mjs) at `POST /api/chat`. That function adds the knowledge sheet and calls the Claude API, so **the API key never reaches the browser**.
+
+**What it knows.** [`src/chat/knowledge.js`](src/chat/knowledge.js) builds one knowledge sheet from everything in `src/data.js`, plus your own notes in [`src/chat/notes.js`](src/chat/notes.js) (plain Markdown: availability, interview notes, fun facts). It answers only from that sheet, so to teach it something, add it there. No other code changes are needed.
+
+**Turning on the AI**
+1. Create an API key at [console.anthropic.com](https://console.anthropic.com) and **set a monthly spend limit** there. That limit is the hard stop on cost.
+2. In Netlify: *Site configuration → Environment variables*, add `ANTHROPIC_API_KEY`. Optionally add `CHAT_MODEL` (default `claude-sonnet-5-5`; `claude-haiku-5-5` is cheaper).
+3. Redeploy. To try it locally, put the same `ANTHROPIC_API_KEY=...` line in a `.env` file (git-ignored) and run `npm run dev`.
+
+**Without a key, or if the API is down,** the bot switches to offline mode: it answers common questions straight from `data.js` ([`src/chat/offline.js`](src/chat/offline.js)), and the job matcher falls back to keyword matching.
+
+**Built-in limits:**
+- Questions are capped at 600 characters and job descriptions at 6,000.
+- Only the last 10 messages are sent as context.
+- Answers are capped at 600 tokens.
+- Each visitor gets 20 questions and 5 job matches per 10 minutes. This limit is kept in memory, so it is best-effort.
+- Requests from other websites are refused.
+- Visitor text is wrapped and treated as data, so it can't change the bot's rules.
+- The system prompt is cached to cut cost.
+
 ## Project structure
 
 ```
 ├── netlify/functions/stats.mjs   Live coding stats (Netlify Function)
+├── netlify/functions/chat.mjs    GP Assistant: Claude API proxy with limits (Netlify Function)
 ├── netlify.toml                  Build command, publish folder, functions folder
 ├── public/                       Photo, resume, project covers, favicon
 ├── src/
@@ -107,18 +140,20 @@ The response is cached on Netlify's CDN for 6 hours. If a source is down, that c
 │   ├── App.jsx                   Layout, page switching, swipe gestures, channel-change transition
 │   ├── main.jsx                  Entry point, theme class, haptic feedback
 │   ├── socials.js                Social link helpers
+│   ├── chat/                     knowledge.js (what the bot knows), notes.js (your extra notes), offline.js (fallback answers, job matcher)
 │   ├── styles/global.css         Theme tokens, layout, breakpoints, animations
 │   ├── hooks/                    spring.js, theme.js, useStats.js, useSmoothScroll.js, useInView.js, motion.js
 │   └── components/
-│       ├── Sidebar.jsx, Avatar.jsx, Navbar.jsx, Overlays.jsx, Boot.jsx   Shell and overlays
+│       ├── Sidebar.jsx, Avatar.jsx, Navbar.jsx, Overlays.jsx, Boot.jsx, Chat.jsx   Shell, overlays and chatbot
 │       ├── About, Experience, Education, Journey, Skills, Projects, Coding, Contact (.jsx)   Pages
-│       └── ProjectDetail, Timeline, Glitch, SplitFlap, LedMeter, Odometer, Reveal, Icons (.jsx)   Building blocks
+│       └── ProjectDetail, Timeline, Glitch, SplitFlap, LedMeter, Odometer, Reveal, ScrollWords,
+│           TechOrbit, TwoTruths, JourneyMap, Icons (.jsx)   Building blocks
 └── vite.config.js                React plugin and local /api/stats
 ```
 
 ## Deployment
 
-The site is hosted on Netlify and linked to this repository. Every push to `main` builds (`npm run build`), publishes `dist/` and deploys the stats function. No environment variables are needed.
+The site is hosted on Netlify and linked to this repository. Every push to `main` builds (`npm run build`), publishes `dist/` and deploys both functions. The only environment variable is the optional `ANTHROPIC_API_KEY` for the chatbot.
 
 To host your own copy, create a site on Netlify from this repo. `netlify.toml` already has the right settings.
 

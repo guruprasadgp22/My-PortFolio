@@ -1,34 +1,77 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { motion, useDragControls } from "framer-motion";
+import { AnimatePresence, motion, useDragControls } from "framer-motion";
 import { SPRING, SOFT, haptic } from "../hooks/spring";
 import { startScroll, stopScroll } from "../hooks/useSmoothScroll";
 import Icon from "./Icons";
+import { ME } from "../data";
 
 // Layered architecture diagram: each row is a tier, nodes inside a row sit side by side.
+// Nodes written as [name, sub, does, why] are tappable and open a panel explaining that part of the system.
 function Architecture({ rows }) {
+  const [sel, setSel] = useState(null);
+  const panel = useRef(null);
+  const nodes = rows.flat();
+  const info = nodes.find(([n]) => n === sel);
+  const explorable = nodes.some((n) => n[2]);
   return (
-    <div className="arch" role="img" aria-label={rows.map((r) => r.map(([n]) => n).join(", ")).join(" → ")}>
-      {rows.map((row, i) => (
-        <motion.div
-          className="arch-row"
-          key={i}
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ ...SOFT, delay: 0.25 + i * 0.08 }}
-        >
-          {i > 0 && <span className="arch-arrow" aria-hidden="true" />}
-          <div className="arch-nodes">
-            {row.map(([name, sub]) => (
-              <div className="arch-node" key={name}>
-                <b>{name}</b>
-                <small>{sub}</small>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-      ))}
-    </div>
+    <>
+      {explorable && <p className="arch-hint">Tap a box to see what it does and why I chose it.</p>}
+      <div className="arch" role={explorable ? undefined : "img"} aria-label={explorable ? "System design" : rows.map((r) => r.map(([n]) => n).join(", ")).join(" → ")}>
+        {rows.map((row, i) => (
+          <motion.div
+            className="arch-row"
+            key={i}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...SOFT, delay: 0.25 + i * 0.08 }}
+          >
+            {i > 0 && <span className="arch-arrow" aria-hidden="true" />}
+            <div className="arch-nodes">
+              {row.map(([name, sub, does]) =>
+                does ? (
+                  <button
+                    className={`arch-node tap ${sel === name ? "on" : ""}`}
+                    key={name}
+                    onClick={() => setSel(sel === name ? null : name)}
+                    aria-expanded={sel === name}
+                    aria-controls="arch-info"
+                  >
+                    <b>{name}</b>
+                    <small>{sub}</small>
+                  </button>
+                ) : (
+                  <div className="arch-node" key={name}>
+                    <b>{name}</b>
+                    <small>{sub}</small>
+                  </div>
+                )
+              )}
+            </div>
+          </motion.div>
+        ))}
+      </div>
+      <AnimatePresence mode="wait" initial={false}>
+        {info && (
+          <motion.div
+            className="arch-info"
+            id="arch-info"
+            ref={panel}
+            onAnimationStart={() => panel.current?.scrollIntoView({ block: "nearest", behavior: "smooth" })}
+            key={info[0]}
+            aria-live="polite"
+            initial={{ opacity: 0, y: 8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -4, transition: { duration: 0.12 } }}
+            transition={SPRING}
+          >
+            <h5>{info[0]} <small>{info[1]}</small></h5>
+            <p><b>What it does.</b> {info[2]}</p>
+            {info[3] && <p><b>Why this choice.</b> {info[3]}</p>}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 
@@ -123,9 +166,16 @@ export default function ProjectDetail({ p, onClose }) {
           )}
 
           <motion.div className="pd-actions" {...fade(0.4)}>
-            <a className="form-btn" href={p.url} target="_blank" rel="noopener noreferrer">
-              <Icon name="github" /><span>View code</span>
-            </a>
+            {p.url ? (
+              <a className="form-btn" href={p.url} target="_blank" rel="noopener noreferrer">
+                <Icon name="github" /><span>View code</span>
+              </a>
+            ) : (
+              // No public repo yet: offer a walkthrough instead of a link that lands on the GitHub profile.
+              <a className="form-btn" href={`mailto:${ME.email}?subject=${encodeURIComponent(`Walkthrough: ${p.t}`)}`}>
+                <Icon name="mail" /><span>Ask for a code walkthrough</span>
+              </a>
+            )}
             {p.demo && (
               <a className="form-btn ghost" href={p.demo} target="_blank" rel="noopener noreferrer">
                 <Icon name="arrow" /><span>Live demo</span>

@@ -6,6 +6,9 @@ import Odometer from "./Odometer";
 import Icon from "./Icons";
 import Glitch from "./Glitch";
 import Reveal from "./Reveal";
+import ScrollWords from "./ScrollWords";
+import TechOrbit from "./TechOrbit";
+import TwoTruths from "./TwoTruths";
 
 // Fake terminal that types each command, then prints its output.
 function Terminal() {
@@ -77,14 +80,37 @@ function Flip({ it }) {
   );
 }
 
+// Tulu is spoken by under two million people, mostly in coastal Karnataka. Tap to hear (well, read) a hello.
+function Tulu() {
+  const [on, setOn] = useState(false);
+  const t = ABOUT.tulu;
+  if (!t) return null;
+  return (
+    <div className="tulu">
+      <button className={`tulu-btn ${on ? "on" : ""}`} onClick={() => setOn(!on)} aria-expanded={on} aria-controls="tulu-bubble">
+        <span aria-hidden="true">👋</span> {on ? "That's Tulu!" : "Ask me to say hello in Tulu"}
+      </button>
+      <div className={`tulu-bubble ${on ? "on" : ""}`} id="tulu-bubble" role="status">
+        {on && (
+          <>
+            <b lang="tcy">{t.phrase}</b>
+            <span>say it: <em>{t.say}</em></span>
+            <small>{t.means}</small>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function About() {
   return (
     <>
       <Glitch text="About me" />
 
       <section className="about-text">
-        <p>{ABOUT.bio}</p>
-        <p>{ABOUT.bio2}</p>
+        <ScrollWords text={ABOUT.bio} />
+        <ScrollWords text={ABOUT.bio2} />
       </section>
 
       <section className="block">
@@ -100,6 +126,11 @@ export default function About() {
             </Reveal>
           ))}
         </ul>
+      </section>
+
+      <section className="block">
+        <h3 className="h3">My stack, in orbit</h3>
+        <Reveal><TechOrbit /></Reveal>
       </section>
 
       <section className="block">
@@ -132,8 +163,14 @@ export default function About() {
               </Reveal>
             ))}
           </ul>
+          <Tulu />
         </section>
       )}
+
+      <section className="block">
+        <h3 className="h3">Two truths and a lie</h3>
+        <Reveal><TwoTruths /></Reveal>
+      </section>
 
       <section className="block">
         <h3 className="h3">Beyond code</h3>

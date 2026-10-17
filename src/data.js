@@ -50,7 +50,22 @@ export const ABOUT = {
   languages: [
     { n: "Kannada", label: "Native or bilingual", lvl: 5 },
     { n: "Tulu", label: "Native or bilingual", lvl: 5 },
-    { n: "English", label: "Limited working", lvl: 4 },
+    { n: "English", label: "Professional working", lvl: 3 },
+  ],
+  // Tech that circles your photo on the About page. Inner ring first, outer ring second. c = brand colour.
+  orbit: [
+    [{ n: "Java", c: "#f89820" }, { n: "Spring Boot", c: "#6db33f" }, { n: "React", c: "#61dafb" }, { n: "Python", c: "#ffd43b" }],
+    [{ n: "Kafka", c: "#e8e8e8" }, { n: "Docker", c: "#2496ed" }, { n: "PostgreSQL", c: "#699eca" }, { n: "Redis", c: "#ff4438" }, { n: "Hibernate", c: "#bcae79" }, { n: "MySQL", c: "#00a0c4" }],
+  ],
+  // "Ask me to say hello in Tulu" on the About page.
+  // TODO: you're the native speaker, so check the phrase and the way it's spelled out.
+  tulu: { phrase: "Encha ullar?", say: "EN-cha ool-LAR", means: "How are you? (the polite way to say hi)" },
+  // "Two truths and a lie". Exactly one has lie: true. Every truth here is already on your site.
+  // TODO: swap in your own, e.g. something surprising you've done or a skill outside tech.
+  truths: [
+    { s: "I once kept a LeetCode streak going for 109 days in a row.", why: "True! 109 days is my max streak. Some days the problem was easy, some days it was 11:58 pm." },
+    { s: "I've never written a single line of C.", lie: true, why: "The lie! My very first program was in C, back in PUC. It came with my first bug, free of cost." },
+    { s: "I'm ranked #1 in my institute on GeeksforGeeks.", why: "True! #1 in my institute on GFG, with 650+ problems solved." },
   ],
   // TODO: these are not on your resume. Edit the text so it sounds like you.
   interests: [
@@ -78,12 +93,25 @@ export const JOURNEY = [
   { yr: "Now", t: "Leveling up, every single day", d: "Sharpening DSA, polishing my communication, building projects like FlightWise AI and learning something new daily. Next level loading…", tags: ["DSA", "Communication", "Projects", "Open to work"] },
 ];
 
+// Stops on the animated map at the top of the Journey page, oldest first. lat/lon are the real places
+// (from OpenStreetMap). lbl = where the name sits relative to its pin: [dx, dy, "start" | "end"].
+export const JOURNEY_MAP = [
+  { n: "Mudradi", d: "SSLC · M N D S M Aided High School", yrs: "2017 – 2018", lat: 13.4205, lon: 74.9924, lbl: [34, -30, "start"] },
+  { n: "Hiriadka", d: "PUC · Karnataka Public School", yrs: "2018 – 2020", lat: 13.3506, lon: 74.8659, lbl: [-4, -50, "end"] },
+  { n: "Moodabidri", d: "B.E. at MITE · DLithe internship", yrs: "2020 – 2024", lat: 13.051, lon: 74.9648, lbl: [32, 40, "start"] },
+  { n: "Bengaluru", d: "KodNest · Sony India", yrs: "2024 – now", lat: 12.9767, lon: 77.59, lbl: [-6, 44, "end"] },
+];
+
 // Newest first. Every role from your resume and LinkedIn.
+// sum, tech and flow feed the stacked cards at the top of the Experience page; pts are the full details below them.
 export const EXPERIENCE = [
   {
     when: "Jun 2025 – Jun 2026",
     role: "Software Developer Intern",
     org: "Sony India Software Centre Pvt. Ltd. · Bengaluru, Karnataka",
+    sum: "SAP Identity and Access Management in a production enterprise environment: who gets access to what, and keeping it safe.",
+    tech: ["SAP IAM", "RBAC", "Access reviews", "Audits", "Ticketing & SLAs"],
+    flow: ["Create", "Provision", "Modify", "Audit", "Deactivate"], // the user lifecycle I handled
     pts: [
       "Administered SAP Identity and Access Management (IAM) processes across the full user lifecycle: account creation, access provisioning, role changes, password resets and deactivation, in line with organizational security policies",
       "Managed role-based access control (RBAC) by assigning, modifying and auditing user roles and authorizations, following least privilege and segregation of duties",
@@ -98,6 +126,8 @@ export const EXPERIENCE = [
     when: "Oct 2024 – Jun 2025",
     role: "Full Stack Development Intern",
     org: "KodNest Technologies · Bengaluru, Karnataka",
+    sum: "Full stack Java and Python, end to end. Built QuickNote, a To-Do List and a full-stack Currency Converter.",
+    tech: ["Java", "Spring Boot", "Hibernate", "Django", "React.js", "MySQL"],
     pts: [
       "Completed a full stack development internship in Java and Python, designing, building, testing and deploying web applications with industry best practices",
       "Learned Core and Advanced Java, OOP, the Collections Framework, JDBC, exception handling, multithreading and file handling",
@@ -113,6 +143,8 @@ export const EXPERIENCE = [
     when: "Aug 2023 – Sep 2023",
     role: "Web Development Intern",
     org: "DLithe Consultancy Services Pvt. Ltd. · Moodabidri, Karnataka",
+    sum: "My first real project: a Car Rental Management System, from the React screens down to the SQL.",
+    tech: ["React.js", "PHP", "SQL", "Git"],
     pts: [
       "Gained hands-on full stack web development experience and learned the software development lifecycle through a real project",
       "Built responsive interfaces with HTML5, CSS3, JavaScript and React.js: components, state, events, routing and form validation",
@@ -124,7 +156,8 @@ export const EXPERIENCE = [
 ];
 
 // img = cover image in public/projects/ (falls back to animated art in colour `hue` if empty) · cat = filter category on the Projects page
-// TODO: replace url with each project's GitHub repo or live demo link
+// url = the project's own GitHub repo, demo = live site (both optional).
+// TODO: projects with url: "" have no public repo yet. Push the code and paste the repo link to show a "View code" button.
 export const PROJECTS = [
   {
     t: "FlightWise AI",
@@ -133,17 +166,42 @@ export const PROJECTS = [
     d: "Intelligent flight search and booking platform with personalized recommendations by price, airline, duration, departure time and layovers, plus admin controls for flights, schedules, pricing and bookings. Built on a microservices backend with Spring Cloud Gateway, Eureka, JWT auth, event-driven messaging and AI-powered conversational search.",
     stack: ["Java 21", "Spring Boot", "React.js", "PostgreSQL", "Redis", "Apache Kafka", "Docker", "LangChain4j", "RAG"],
     hue: 200,
-    url: "https://github.com/guruprasadgp22",
+    url: "",
     // Case study shown when the card is opened. TODO: add real results (users, latency, accuracy) once you have them.
     caseStudy: {
       when: "June 2026 – present",
       problem:
         "Comparing flights by price, airline, duration, departure time and layovers means jumping between tabs. FlightWise AI puts search, comparison and booking in one place, recommends flights from your preferences, and lets you ask for flights in plain English. Admins get controls for flights, schedules, pricing and bookings.",
+      // System design. Each node is [name, sub, what it does, why this choice]; tapping a box shows the last two.
+      // TODO: check the explanations match exactly how you built it, and edit them in your own words.
       architecture: [
-        [["React.js frontend", "Material UI · Tailwind CSS"]],
-        [["Spring Cloud Gateway", "routing · JWT auth"], ["Eureka", "service discovery"]],
-        [["Flight service", "Spring Boot"], ["Booking service", "Spring Boot"], ["AI search", "LangChain4j · RAG"]],
-        [["PostgreSQL", "data"], ["Redis", "fast lookups"], ["Apache Kafka", "events"]],
+        [["React.js frontend", "Material UI · Tailwind CSS",
+          "Search screen with filters, the booking flow, the admin dashboard and the chat-style AI search.",
+          "Components keep search results, filters and booking state in sync. Material UI and Tailwind give a consistent look without hand-writing every style."]],
+        [["Spring Cloud Gateway", "routing · JWT auth",
+          "The single entry point for every request. It routes each call to the right service and checks the JWT before letting it through.",
+          "Authentication happens once at the edge instead of being repeated in every service, and the frontend only ever talks to one URL."],
+         ["Eureka", "service discovery",
+          "A service registry. Each service registers itself when it starts, and the gateway asks Eureka where to send traffic.",
+          "No hard-coded hosts or ports, so a service can restart, move or run several copies without any config change."]],
+        [["Flight service", "Spring Boot",
+          "Owns flights, schedules and prices. Handles search and filtering by price, airline, duration, departure time and layovers, plus admin edits.",
+          "Search is read-heavy and changes on its own schedule, so it can scale and deploy separately from booking."],
+         ["Booking service", "Spring Boot",
+          "Creates and manages bookings, and publishes an event to Kafka whenever a booking changes.",
+          "Booking has its own data and rules. Keeping it separate means a flood of searches can't slow down people who are trying to book."],
+         ["AI search", "LangChain4j · RAG",
+          "Turns a plain-English request like “cheapest evening flight to Delhi next Friday” into a real search over the flight catalogue.",
+          "RAG grounds every answer in actual flight data, so the model suggests flights that exist instead of making them up."]],
+        [["PostgreSQL", "data",
+          "The source of truth for flights, users and bookings.",
+          "Bookings need transactions: a booking and the seats it uses must change together or not at all, which a relational database guarantees."],
+         ["Redis", "fast lookups",
+          "Caches popular search results and frequent lookups in memory.",
+          "The same routes get searched again and again. Answering them from memory is much faster and takes load off PostgreSQL."],
+         ["Apache Kafka", "events",
+          "The event bus. Booking events flow to whichever services need to react to them.",
+          "Services stay loosely coupled: booking doesn't call other services directly, so it keeps working even if one of them is slow or down."]],
       ],
       challenges: [
         "Splitting the backend into Spring Boot microservices behind one gateway, with Eureka so services find each other without hard-coded addresses",
@@ -161,7 +219,7 @@ export const PROJECTS = [
     d: "Detects caries, deep caries, impacted teeth and peripheral lesions in panoramic dental X-rays using a YOLOv5 model, with annotated bounding-box results. A Flask web app lets users upload X-rays, run them through the model and view or download the results.",
     stack: ["Python", "PyTorch", "YOLOv5", "OpenCV", "Flask", "JavaScript"],
     hue: 18,
-    url: "https://github.com/guruprasadgp22",
+    url: "",
     // TODO: add model results (mAP, precision/recall) and dataset size if you have them.
     caseStudy: {
       when: "April 2026 – present",
@@ -189,7 +247,7 @@ export const PROJECTS = [
     d: "Rental platform where users browse available vehicles, register accounts, book cars and manage their reservations through a responsive interface. Built during my DLithe internship.",
     stack: ["HTML", "CSS", "JavaScript", "React.js", "PHP", "SQL"],
     hue: 38,
-    url: "https://github.com/guruprasadgp22",
+    url: "",
   },
   {
     t: "Full-Stack E-Commerce Application",
@@ -198,7 +256,7 @@ export const PROJECTS = [
     d: "Full-stack online store with authentication, API integration and CRUD operations over the product and order data.",
     stack: ["Full-stack", "Authentication", "REST API", "CRUD"],
     hue: 330,
-    url: "https://github.com/guruprasadgp22",
+    url: "",
   },
   {
     t: "Job Portal",
@@ -207,7 +265,7 @@ export const PROJECTS = [
     d: "Job listing and application portal with user authentication, API integration and database-backed CRUD.",
     stack: ["Full-stack", "Authentication", "REST API", "CRUD"],
     hue: 260,
-    url: "https://github.com/guruprasadgp22",
+    url: "",
   },
   {
     t: "Currency Converter",
@@ -216,7 +274,7 @@ export const PROJECTS = [
     d: "Full-stack currency converter with REST API integration, a responsive UI and database connectivity. Built at KodNest.",
     stack: ["REST API", "Responsive UI", "Database"],
     hue: 150,
-    url: "https://github.com/guruprasadgp22",
+    url: "https://github.com/guruprasadgp22/Currency-Converter",
   },
   {
     t: "QuickNote",
@@ -225,7 +283,8 @@ export const PROJECTS = [
     d: "Note-taking app with create, edit and delete, a responsive UI and persistent storage. Built at KodNest.",
     stack: ["CRUD", "REST API", "Responsive UI"],
     hue: 50,
-    url: "https://github.com/guruprasadgp22",
+    url: "https://github.com/guruprasadgp22/Quick-Note",
+    demo: "https://quick-note-phi.vercel.app",
   },
   {
     t: "To-Do List",
@@ -234,7 +293,7 @@ export const PROJECTS = [
     d: "Task manager with CRUD operations, REST API integration and database connectivity. Built at KodNest.",
     stack: ["CRUD", "REST API", "Database"],
     hue: 100,
-    url: "https://github.com/guruprasadgp22",
+    url: "",
   },
 ];
 

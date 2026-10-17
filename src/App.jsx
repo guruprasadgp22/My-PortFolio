@@ -14,6 +14,7 @@ import Projects from "./components/Projects";
 import Coding from "./components/Coding";
 import Contact from "./components/Contact";
 import Overlays from "./components/Overlays";
+import Chat from "./components/Chat";
 
 const PAGES = { about: About, experience: Experience, education: Education, journey: Journey, skills: Skills, projects: Projects, coding: Coding, contact: Contact };
 const fromHash = () => {
@@ -113,6 +114,7 @@ export default function App() {
         </div>
       </main>
       <Overlays go={go} />
+      <Chat go={go} />
       {osd && (
         <div className="osd" key={osd.key} aria-hidden="true">
           <b>CH {String(osd.n).padStart(2, "0")}</b>
