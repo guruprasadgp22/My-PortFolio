@@ -42,7 +42,7 @@ function Stage({ p, dir, onPrev, onNext, onOpen }) {
       <span className="sc-phone" aria-hidden="true">
         <span className="sc-screen">
           <AnimatePresence initial={false} custom={dir} mode="popLayout">
-            <motion.img key={p.t} src={p.phone || p.img} alt="" custom={dir} variants={PHONE} initial="enter" animate="show" exit="exit" draggable="false" />
+            <motion.img key={p.t} src={p.phone || p.img} className={p.phone ? "real" : undefined} alt="" custom={dir} variants={PHONE} initial="enter" animate="show" exit="exit" draggable="false" />
           </AnimatePresence>
         </span>
         <span className="sc-notch" />
