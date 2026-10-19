@@ -1,5 +1,8 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
+import { statSync } from "node:fs";
+import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 
 // Serves the Netlify functions at /api/stats and /api/chat during `npm run dev` and `npm run preview`,
 // so live coding stats and the chatbot work locally too. On Netlify the real functions answer these paths.
@@ -11,7 +14,10 @@ function localFunctions() {
     const path = req.url?.split("?")[0];
     if (!FUNCTIONS[path]) return next();
     try {
-      const { default: fn } = await import(FUNCTIONS[path]);
+      // Node caches imported modules, so add the file's modified time to the URL: an edited function
+      // is picked up straight away instead of needing a dev-server restart.
+      const file = resolve(FUNCTIONS[path]);
+      const { default: fn } = await import(`${pathToFileURL(file).href}?v=${statSync(file).mtimeMs}`);
       const chunks = [];
       for await (const c of req) chunks.push(c);
       const request = new Request(`http://localhost${req.url}`, {

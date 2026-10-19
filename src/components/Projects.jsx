@@ -1,150 +1,155 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { PROJECTS } from "../data";
-import { REDUCED, FINE } from "../hooks/motion";
+import { ME, PROJECTS } from "../data";
+import { REDUCED, revealInRow } from "../hooks/motion";
+import { SPRING, haptic } from "../hooks/spring";
 import Icon from "./Icons";
 import Glitch from "./Glitch";
 import ProjectDetail from "./ProjectDetail";
-import { SPRING } from "../hooks/spring";
 
-// Animated wave artwork used as each project's cover. Only runs while on screen.
-function Art({ hue, seed }) {
-  const ref = useRef(null);
-  useEffect(() => {
-    const cv = ref.current;
-    const ctx = cv.getContext("2d");
-    let raf, t = seed * 10, visible = false;
-    const size = () => {
-      const d = Math.min(devicePixelRatio || 1, 2);
-      cv.width = cv.offsetWidth * d;
-      cv.height = cv.offsetHeight * d;
-      ctx.setTransform(d, 0, 0, d, 0, 0);
-    };
-    const draw = () => {
-      const w = cv.offsetWidth, h = cv.offsetHeight;
-      ctx.clearRect(0, 0, w, h);
-      for (let l = 0; l < 7; l++) {
-        ctx.beginPath();
-        for (let x = 0; x <= w; x += 6) {
-          const y = h / 2 + Math.sin(x * 0.012 + t + l * 0.6) * (18 + l * 6) * Math.sin(t * 0.5 + l) + (l - 3) * 9;
-          x ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
-        }
-        ctx.strokeStyle = `hsla(${hue + l * 14}, 95%, ${55 + l * 3}%, ${0.25 + l * 0.1})`;
-        ctx.lineWidth = 1.6;
-        ctx.stroke();
-      }
-      t += 0.012;
-      if (!REDUCED && visible) raf = requestAnimationFrame(draw);
-    };
-    const io = new IntersectionObserver(([e]) => {
-      visible = e.isIntersecting;
-      cancelAnimationFrame(raf);
-      draw();
-    });
-    size();
-    draw();
-    io.observe(cv);
-    addEventListener("resize", size);
-    return () => {
-      cancelAnimationFrame(raf);
-      io.disconnect();
-      removeEventListener("resize", size);
-    };
-  }, [hue, seed]);
-  return <canvas ref={ref} aria-hidden="true" />;
-}
+const N = PROJECTS.length;
+const pad = (n) => String(n).padStart(2, "0");
 
-// Cover that tilts in 3D toward the cursor, with a glare that follows it.
-function Tilt({ children }) {
-  const ref = useRef(null);
-  const move = (e) => {
-    if (!FINE || REDUCED) return;
-    const el = ref.current;
-    const r = el.getBoundingClientRect();
-    const px = (e.clientX - r.left) / r.width;
-    const py = (e.clientY - r.top) / r.height;
-    el.style.setProperty("--mx", `${px * 100}%`);
-    el.style.setProperty("--my", `${py * 100}%`);
-    el.style.transform = `perspective(700px) rotateX(${(0.5 - py) * 14}deg) rotateY(${(px - 0.5) * 16}deg) scale(1.02)`;
+// Screens slide in from the side you're heading to; the phone trails a little behind for depth.
+const slide = (lag = 0) => ({
+  enter: (dir) => (REDUCED ? { opacity: 0 } : { opacity: 0, x: `${dir * (14 + lag * 10)}%`, scale: 0.96 }),
+  show: { opacity: 1, x: 0, scale: 1, transition: { ...SPRING, delay: REDUCED ? 0 : lag * 0.06 } },
+  exit: (dir) => (REDUCED ? { opacity: 0 } : { opacity: 0, x: `${dir * -(10 + lag * 8)}%`, scale: 0.97, transition: { duration: 0.22 } }),
+});
+const TABLET = slide(0), PHONE = slide(1);
+
+// Big device mockup: a tablet with a phone leaning on it, both showing the selected project.
+function Stage({ p, dir, onPrev, onNext, onOpen }) {
+  const touch = useRef(null);
+  const onTouchStart = (e) => (touch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY });
+  const onTouchEnd = (e) => {
+    const s = touch.current;
+    touch.current = null;
+    if (!s) return;
+    const dx = e.changedTouches[0].clientX - s.x, dy = e.changedTouches[0].clientY - s.y;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.4) (dx < 0 ? onNext : onPrev)();
   };
   return (
-    <figure className="project-img" ref={ref} onMouseMove={move} onMouseLeave={() => (ref.current.style.transform = "")} onPointerDown={() => (ref.current.style.transform = "")}>
-      {children}
-    </figure>
+    <div className="sc-stage" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+      <motion.button className="sc-tablet" layoutId={`card-${p.t}`} transition={SPRING} onClick={onOpen} aria-label={`Open ${p.t} ${p.caseStudy ? "case study" : "details"}`}>
+        <span className="sc-screen">
+          <AnimatePresence initial={false} custom={dir} mode="popLayout">
+            <motion.img key={p.t} src={p.img} alt={`${p.t} on a tablet`} custom={dir} variants={TABLET} initial="enter" animate="show" exit="exit" draggable="false" />
+          </AnimatePresence>
+        </span>
+        <span className="sc-cam" aria-hidden="true" />
+      </motion.button>
+      <span className="sc-phone" aria-hidden="true">
+        <span className="sc-screen">
+          <AnimatePresence initial={false} custom={dir} mode="popLayout">
+            <motion.img key={p.t} src={p.phone || p.img} alt="" custom={dir} variants={PHONE} initial="enter" animate="show" exit="exit" draggable="false" />
+          </AnimatePresence>
+        </span>
+        <span className="sc-notch" />
+      </span>
+      <button className="sc-arrow prev" onClick={onPrev} aria-label="Previous project"><Icon name="next" size={20} /></button>
+      <button className="sc-arrow next" onClick={onNext} aria-label="Next project"><Icon name="next" size={20} /></button>
+    </div>
   );
 }
 
-const CATS = ["All", ...new Set(PROJECTS.map((p) => p.cat))];
-
+/*
+  Projects as a showcase: a device mockup of the selected project, a numbered thumbnail strip to jump
+  between them (number pills on phones), then the title, highlight numbers, links and description.
+  Arrow keys, the arrow buttons and swiping on the mockup all move between projects.
+*/
 export default function Projects() {
-  const [cat, setCat] = useState("All");
-  const [open, setOpen] = useState(false);
+  const [[i, dir], setI] = useState([0, 1]);
   const [sel, setSel] = useState(null);
   const close = useCallback(() => setSel(null), []);
-  const shown = PROJECTS.filter((p) => cat === "All" || p.cat === cat);
-  const pick = (c) => {
-    setCat(c);
-    setOpen(false);
+  const strip = useRef(null);
+  const p = PROJECTS[i];
+
+  const go = useCallback((to, d) => {
+    haptic(5);
+    setI(([cur]) => {
+      const next = (to + N) % N;
+      return [next, d ?? (next > cur ? 1 : -1)];
+    });
+  }, []);
+  const prev = () => go(i - 1, -1);
+  const next = () => go(i + 1, 1);
+
+  // keep the active thumbnail in view when the strip scrolls sideways
+  useEffect(() => {
+    revealInRow(strip.current, strip.current?.querySelector(`[data-i="${i}"]`));
+  }, [i]);
+
+  // warm the cache so switching projects never waits on an image
+  useEffect(() => {
+    PROJECTS.forEach((x) => [x.img, x.phone].filter(Boolean).forEach((src) => (new Image().src = src)));
+  }, []);
+
+  const onKey = (e) => {
+    if (e.target.closest("input, textarea")) return;
+    if (e.key === "ArrowRight") (e.preventDefault(), next());
+    if (e.key === "ArrowLeft") (e.preventDefault(), prev());
   };
 
   return (
     <>
       <Glitch text="Projects" />
 
-      <section className="projects">
-        <ul className="filter-list">
-          {CATS.map((c) => (
-            <li key={c}>
-              <button className={c === cat ? "active" : ""} onClick={() => pick(c)}>{c}</button>
-            </li>
-          ))}
-        </ul>
+      <section className="showcase" onKeyDown={onKey} aria-roledescription="carousel" aria-label="Projects">
+        <Stage p={p} dir={dir} onPrev={prev} onNext={next} onOpen={() => setSel(p)} />
 
-        <div className="filter-select-box">
-          <button className={`filter-select ${open ? "active" : ""}`} onClick={() => setOpen(!open)} aria-expanded={open}>
-            <span>{cat === "All" ? "Select category" : cat}</span>
-            <Icon name="chevron" size={16} />
-          </button>
-          <ul className="select-list">
-            {CATS.map((c) => (
-              <li key={c}><button className="select-item" onClick={() => pick(c)}>{c}</button></li>
-            ))}
-          </ul>
+        <div className="sc-strip" ref={strip} role="tablist" aria-label="Choose a project">
+          {PROJECTS.map((x, k) => (
+            <button key={x.t} data-i={k} role="tab" aria-selected={k === i} aria-label={`${k + 1}. ${x.t}`} className={`sc-thumb ${k === i ? "on" : ""}`} onClick={() => go(k)}>
+              {k === i && <motion.span className="sc-ring" layoutId="sc-ring" transition={SPRING} />}
+              <img src={x.img} alt="" loading="lazy" draggable="false" />
+              <b>{k + 1}</b>
+            </button>
+          ))}
         </div>
 
-        <ul className="project-list">
-          {shown.map((p, k) => (
-            <li className="project-item" key={cat + p.t} style={{ "--i": k }}>
-              <motion.div
-                className="project-card"
-                layoutId={`card-${p.t}`}
-                transition={SPRING}
-                role="button"
-                tabIndex={0}
-                aria-label={`Open ${p.t}`}
-                whileTap={{ scale: 0.96 }}
-                onClick={() => setSel(p)}
-                onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), setSel(p))}
-              >
-                <Tilt>
-                  <div className="project-item-icon-box"><Icon name="eye" /></div>
-                  <span className="glare" aria-hidden="true" />
-                  <motion.span className="project-media" layoutId={`media-${p.t}`} transition={SPRING}>
-                    {p.img ? (
-                      <img className="project-cover" src={p.img} alt={`${p.t} preview`} loading="lazy" decoding="async" />
-                    ) : (
-                      <Art hue={p.hue} seed={k} />
-                    )}
-                  </motion.span>
-                </Tilt>
-                <motion.h3 className="project-title" layoutId={`title-${p.t}`} transition={SPRING}>{p.t}</motion.h3>
-                <p className="project-category">{p.cat}{p.caseStudy && <span className="cs-badge">Case study</span>}</p>
-              </motion.div>
-              <p className="project-desc">{p.d}</p>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={p.t}
+            className="sc-info"
+            initial={REDUCED ? { opacity: 0 } : { opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={REDUCED ? { opacity: 0 } : { opacity: 0, y: -8, transition: { duration: 0.14 } }}
+            transition={SPRING}
+            aria-live="polite"
+          >
+            <div className="sc-left">
+              <div className="sc-titlebar">
+                <p className="sc-count">{pad(i + 1)} / {pad(N)} · {p.cat}{p.caseStudy?.when ? ` · ${p.caseStudy.when}` : ""}</p>
+                <div className="sc-mini" aria-hidden="true">
+                  <button onClick={prev} tabIndex={-1}><Icon name="next" size={18} /></button>
+                  <button onClick={next} tabIndex={-1}><Icon name="next" size={18} /></button>
+                </div>
+              </div>
+              <h3 className="sc-title">{p.t}</h3>
+              {p.stats?.length > 0 && (
+                <dl className="sc-stats">
+                  {p.stats.map(([n, l]) => (
+                    <div key={l}><dt className="sr-only">{l}</dt><dd><b>{n}</b> {l}</dd></div>
+                  ))}
+                </dl>
+              )}
+            </div>
+            <div className="sc-right">
+              <div className="sc-btns">
+                {p.demo && <a className="sc-btn live" href={p.demo} target="_blank" rel="noopener noreferrer"><Icon name="arrow" size={16} />Live</a>}
+                {p.url ? (
+                  <a className="sc-btn" href={p.url} target="_blank" rel="noopener noreferrer"><Icon name="github" size={16} />Code</a>
+                ) : (
+                  <a className="sc-btn" href={`mailto:${ME.email}?subject=${encodeURIComponent(`Walkthrough: ${p.t}`)}`} title="The code isn't public yet"><Icon name="mail" size={16} />Ask for a walkthrough</a>
+                )}
+                <button className={`sc-btn ${p.demo ? "" : "live"}`} onClick={() => setSel(p)}><Icon name="eye" size={16} />{p.caseStudy ? "Case study" : "Details"}</button>
+              </div>
+              <p className="sc-desc">{p.d}</p>
               <div className="stack">{p.stack.map((s) => <span className="tag" key={s}>{s}</span>)}</div>
-            </li>
-          ))}
-        </ul>
+            </div>
+          </motion.div>
+        </AnimatePresence>
       </section>
 
       <AnimatePresence>{sel && <ProjectDetail key={sel.t} p={sel} onClose={close} />}</AnimatePresence>

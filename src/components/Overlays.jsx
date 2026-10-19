@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { EDUCATION, EXPERIENCE, ME, NAV, PLATFORMS } from "../data";
+import { EDUCATION, EXPERIENCE, ME, NAV } from "../data";
+import { livePlatforms } from "./Coding";
 import { SPRING } from "../hooks/spring";
 import { startScroll, stopScroll } from "../hooks/useSmoothScroll";
 import { toggleTheme } from "../hooks/theme";
@@ -119,11 +120,8 @@ function Palette({ go, onClose }) {
 // One-screen summary for busy recruiters.
 function QuickView({ go, onClose }) {
   const stats = useStats();
-  const solved =
-    (stats?.leetcode?.solved ?? PLATFORMS.find((p) => p.n === "LeetCode")?.val ?? 0) +
-    (stats?.gfg?.solved ?? PLATFORMS.find((p) => p.n === "GeeksforGeeks")?.val ?? 0) +
-    (stats?.code360?.solved ?? PLATFORMS.find((p) => p.n === "Code360")?.val ?? 0) +
-    (PLATFORMS.find((p) => p.n === "NeetCode")?.val ?? 0);
+  // same total as the Coding page: every platform, live where possible
+  const solved = livePlatforms(stats).reduce((n, p) => n + p.val, 0);
   const degree = EDUCATION[0];
   return (
     <Modal onClose={onClose} className="quick" label="Recruiter quick view">

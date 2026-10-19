@@ -157,10 +157,14 @@ export const EXPERIENCE = [
 
 // img = cover image in public/projects/ (falls back to animated art in colour `hue` if empty) · cat = filter category on the Projects page
 // url = the project's own GitHub repo, demo = live site (both optional).
+// stats = the two highlight numbers shown under the title in the showcase: [big text, label].
+// TODO: swap the stats for real results when you have them (users, GitHub stars, accuracy, response time…).
+// phone = optional phone-sized screenshot for the phone mockup (otherwise img is cropped to fit).
 // TODO: projects with url: "" have no public repo yet. Push the code and paste the repo link to show a "View code" button.
 export const PROJECTS = [
   {
     t: "FlightWise AI",
+    stats: [["5", "backend services behind one gateway"], ["9", "technologies"]],
     img: "/projects/flightwise.svg",
     cat: "Full-stack",
     d: "Intelligent flight search and booking platform with personalized recommendations by price, airline, duration, departure time and layovers, plus admin controls for flights, schedules, pricing and bookings. Built on a microservices backend with Spring Cloud Gateway, Eureka, JWT auth, event-driven messaging and AI-powered conversational search.",
@@ -214,6 +218,7 @@ export const PROJECTS = [
   },
   {
     t: "AI Dental Condition Detection",
+    stats: [["4", "conditions detected on X-rays"], ["YOLOv5", "object-detection model"]],
     img: "/projects/dental.svg",
     cat: "AI / ML",
     d: "Detects caries, deep caries, impacted teeth and peripheral lesions in panoramic dental X-rays using a YOLOv5 model, with annotated bounding-box results. A Flask web app lets users upload X-rays, run them through the model and view or download the results.",
@@ -242,6 +247,7 @@ export const PROJECTS = [
   // From your LinkedIn summary. TODO: add the real tech stack for the last five and a link for each.
   {
     t: "Car Rental Management System",
+    stats: [["DLithe", "internship project"], ["6", "technologies"]],
     img: "/projects/car-rental.svg",
     cat: "Full-stack",
     d: "Rental platform where users browse available vehicles, register accounts, book cars and manage their reservations through a responsive interface. Built during my DLithe internship.",
@@ -251,6 +257,7 @@ export const PROJECTS = [
   },
   {
     t: "Full-Stack E-Commerce Application",
+    stats: [["Full-stack", "auth, REST API and CRUD"]],
     img: "/projects/ecommerce.svg",
     cat: "Full-stack",
     d: "Full-stack online store with authentication, API integration and CRUD operations over the product and order data.",
@@ -260,6 +267,7 @@ export const PROJECTS = [
   },
   {
     t: "Job Portal",
+    stats: [["Full-stack", "auth, REST API and CRUD"]],
     img: "/projects/job-portal.svg",
     cat: "Full-stack",
     d: "Job listing and application portal with user authentication, API integration and database-backed CRUD.",
@@ -269,6 +277,7 @@ export const PROJECTS = [
   },
   {
     t: "Currency Converter",
+    stats: [["KodNest", "internship project"], ["REST", "API integration"]],
     img: "/projects/currency.svg",
     cat: "Full-stack",
     d: "Full-stack currency converter with REST API integration, a responsive UI and database connectivity. Built at KodNest.",
@@ -278,6 +287,7 @@ export const PROJECTS = [
   },
   {
     t: "QuickNote",
+    stats: [["Live", "demo on Vercel"], ["KodNest", "internship project"]],
     img: "/projects/quicknote.svg",
     cat: "Web app",
     d: "Note-taking app with create, edit and delete, a responsive UI and persistent storage. Built at KodNest.",
@@ -288,6 +298,7 @@ export const PROJECTS = [
   },
   {
     t: "To-Do List",
+    stats: [["KodNest", "internship project"], ["CRUD", "with a database"]],
     img: "/projects/todo.svg",
     cat: "Web app",
     d: "Task manager with CRUD operations, REST API integration and database connectivity. Built at KodNest.",
@@ -316,15 +327,27 @@ export const CERTIFICATIONS = [
   { t: "Java Spring Framework, Spring Boot & Spring AI (Generative AI)", by: "Udemy", when: "May 2026" },
   { t: "Python For Beginners Course In-Depth", by: "Udemy", when: "Apr 2026" },
   { t: "Artificial Intelligence for Beginners: Python and AI Basics", by: "Udemy", when: "Dec 2025" },
-  { t: "Full Stack Development in Java and Python", by: "KodNest Technologies", when: "Jun 2025" }
+  { t: "Full Stack Development in Java and Python", by: "KodNest Technologies", when: "Jun 2025" },
+  { t: "SQL (Intermediate)", by: "HackerRank", when: "Dec 2024", url: "https://www.hackerrank.com/certificates/96fb11a6b514" },
+  { t: "SQL (Basic)", by: "HackerRank", when: "Dec 2024", url: "https://www.hackerrank.com/certificates/e379be5c665c" },
+  { t: "Java (Basic)", by: "HackerRank", when: "Dec 2024", url: "https://www.hackerrank.com/certificates/6f23e9c5497d" },
 ];
 
 // LeetCode, GFG and Code360 numbers pulled from the public profiles on 17 Oct 2026.
 export const PLATFORMS = [
   { n: "LeetCode", c: "#ffa116", val: 444, lbl: "problems solved · 194 E / 201 M / 49 H", meta: [["Rating", "1311"], ["Max streak", "109d"]], url: "https://leetcode.com/u/guruprasadgp22/" },
   { n: "GeeksforGeeks", c: "#2f8d46", val: 652, lbl: "problems solved", meta: [["Score", "1965"], ["Institute", "#1"]], url: "https://www.geeksforgeeks.org/profile/guruprasadgp22" },
-  { n: "NeetCode", c: "#3de0ff", val: 232, lbl: "problems solved", meta: [["Blind 75", "39/75"]], url: "https://neetcode.io/user/PrimalPikachu220" }, // sample: NeetCode stats aren't public, fill these in
+  { n: "NeetCode", c: "#ff5fa2", val: 235, lbl: "problems solved · 114 E / 115 M / 6 H", meta: [["Max streak", "135d"], ["Rank", "Top 1.2%"]], url: "https://neetcode.io/user/PrimalPikachu220" },
   { n: "Code360", c: "#f05b5b", val: 4, lbl: "problems · Naukri Code 360", meta: [["Moderate", "1"], ["Hard", "1"]], url: "https://www.naukri.com/code360/profile/guruprasadgp" },
+  // Two HackerRank accounts, added together. The card links to the first; both are listed under accounts.
+  {
+    n: "HackerRank", c: "#c6e55c", val: 93, lbl: "challenges solved · 2 accounts", meta: [["Java", "4★"], ["Certificates", "3"]],
+    url: "https://www.hackerrank.com/profile/guruprasad6200",
+    accounts: ["https://www.hackerrank.com/profile/guruprasad6200", "https://www.hackerrank.com/profile/gp130143"],
+  },
+  { n: "HackerEarth", c: "#7b83ff", val: 9, lbl: "problems solved · 35 submissions", meta: [["Score", "160"], ["Rank", "Top 20%"]], url: "https://www.hackerearth.com/@guruprasadgp/" },
+  // Loads live while the InterviewBit profile is public. Set val to null to hide the card.
+  { n: "InterviewBit", c: "#14b8a6", val: 6, lbl: "problems solved · score 1,228", meta: [["University rank", "#7"], ["Streak", "1d"]], url: "https://www.interviewbit.com/profile/guruprasad-gp_339/" },
 ];
 
 // score is optional: shown on a split-flap board

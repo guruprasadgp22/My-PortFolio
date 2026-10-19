@@ -98,7 +98,7 @@ export function faq(q) {
   if (has(q, "experience", "intern", "work", "job", "kodnest", "dlithe")) return { text: EXPERIENCE.map((x) => `- **${x.role}**, ${x.org.split(" · ")[0]} (${x.when})`).join("\n"), from: ["experience"] };
   if (has(q, "project")) return { text: PROJECTS.map((p) => `- **${p.t}**: ${p.stack.slice(0, 4).join(", ")}`).join("\n"), from: ["projects"] };
   if (has(q, "educat", "degree", "college", "cgpa", "puc", "sslc", "mite")) return { text: EDUCATION.map((e) => `- ${e.t}, ${e.p.split(",")[0]}: ${e.score}`).join("\n"), from: ["education"] };
-  if (has(q, "leetcode", "gfg", "geeks", "dsa", "coding", "problems", "neetcode")) return { text: PLATFORMS.map((p) => `- ${p.n}: ${p.val} ${p.lbl.split(" · ")[0]}`).join("\n"), from: ["coding"] };
+  if (has(q, "leetcode", "gfg", "geeks", "dsa", "coding", "problems", "neetcode", "hackerrank", "hackerearth", "code360")) return { text: PLATFORMS.filter((p) => p.val != null).map((p) => `- ${p.n}: ${p.val} ${p.lbl.split(" · ")[0]}`).join("\n"), from: ["coding"] };
   if (has(q, "tulu", "hello in")) return ABOUT.tulu ? { text: `Hello in Tulu: **${ABOUT.tulu.phrase}** (say it: ${ABOUT.tulu.say}). It means "${ABOUT.tulu.means}".`, from: ["about"] } : null;
   if (has(q, "contact", "email", "phone", "reach", "call", "linkedin")) return { text: `Email: ${ME.email}${ME.phone ? `\nPhone: ${ME.phone}` : ""}\nLinkedIn: ${ME.socials.find((s) => s.label === "LinkedIn")?.url}`, from: ["contact"] };
   const tech = Object.entries(ALIASES).find(([, w]) => found(q, w));

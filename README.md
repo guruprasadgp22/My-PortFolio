@@ -15,7 +15,7 @@ Personal portfolio of **Guruprasad**, a full stack developer (Java · Spring Boo
 
 **Motion that feels native (iOS / OxygenOS style)**
 - One spring-physics setting (Framer Motion) drives tabs, cards, sheets and dialogs, so everything moves with the same weight.
-- Project cards open into a full-screen detail view from where they sit, like an app opening from the home screen. Drag down to close.
+- **Projects showcase:** each project appears in a tablet and phone mockup, with a numbered thumbnail strip (number pills on phones), arrow buttons, ← → keys and swipe to move between them. Below the mockup are the title, highlight numbers, Live / Code buttons and a case study that grows out of the mockup. Drag down to close it.
 - A soft highlight glides behind the active tab, buttons sink to 96% when pressed, and Android phones get a small haptic tick.
 - On phones: swipe left or right to change tabs, and contacts open in a draggable bottom sheet.
 - Stats roll into place like an odometer.
@@ -32,7 +32,7 @@ Personal portfolio of **Guruprasad**, a full stack developer (Java · Spring Boo
 
 **Useful features**
 - **GP Assistant (AI chatbot):** a floating "Ask GP" button opens a chat that answers recruiters' questions from the portfolio's own content, cites the section each answer came from, and says "I don't know" instead of guessing. A **Match a job** tab scores a pasted job description against the profile (matched and missing skills, most relevant projects, and a pitch to paste into notes). See [GP Assistant](#gp-assistant-chatbot).
-- **Live coding stats:** LeetCode, GeeksforGeeks and Code360 numbers, plus a heatmap of real LeetCode activity, load automatically (see [Live coding stats](#live-coding-stats)).
+- **Live coding stats:** LeetCode, GeeksforGeeks and Code360 numbers load automatically, plus a **contributions carousel**: slides sit side by side and snap one at a time. Swipe, trackpad-scroll, use the ‹ › buttons or arrow keys, or tap the toggles for **All, LeetCode, GFG, GitHub, Code360, HackerRank, NeetCode, HackerEarth and InterviewBit**. Each platform slide covers the last 12 months (on phones the grid shows the most recent months that fit, while the stats still cover the full year) in that platform's colour, with month labels, day-by-day hover details, active days and longest and current streaks. **All** adds everything together and shows a side-by-side stats table for every platform (see [Live coding stats](#live-coding-stats)).
 - **Case studies** for the main projects: the problem, an architecture diagram, what was hard, and where it stands.
 - **Interactive system design:** in the FlightWise AI case study, tap any box (gateway, Eureka, services, Kafka, Redis, PostgreSQL) to see what it does and why it was chosen.
 - **Command palette:** press <kbd>⌘</kbd>/<kbd>Ctrl</kbd> + <kbd>K</kbd> to jump to any page, copy the email, download the resume, switch theme or replay the boot screen.
@@ -83,7 +83,7 @@ All text, numbers and links live in **[`src/data.js`](src/data.js)**, so you rar
 | Certificates (add `url` to show a **Verify** link) | `CERTIFICATIONS` |
 | Timeline and route map on the Journey page | `JOURNEY`, `JOURNEY_MAP` |
 | Skill groups and their LED meter levels | `SKILLS` |
-| Projects, repo and demo links, cover images, case studies, system-design notes | `PROJECTS` |
+| Projects: repo and demo links, cover images (`img`, optional `phone` screenshot), highlight numbers (`stats`), case studies, system-design notes | `PROJECTS` |
 | Coding profiles (saved numbers and profile links) | `PLATFORMS` |
 | "What I'm doing" cards | `DOING` |
 | Navbar tabs | `NAV` |
@@ -101,10 +101,15 @@ All text, numbers and links live in **[`src/data.js`](src/data.js)**, so you rar
 [`netlify/functions/stats.mjs`](netlify/functions/stats.mjs) answers `GET /api/stats`. On the server it fetches:
 
 - **LeetCode:** problems solved by difficulty, contest rating, max streak and the daily submission calendar (GraphQL)
-- **GeeksforGeeks:** problems solved, coding score, institute rank
-- **Code360:** problems solved by difficulty
+- **GeeksforGeeks:** problems solved, coding score, institute rank, and submissions per day for this year and last
+- **GitHub:** contributions per day, read from the public contribution graph (`github.com/users/<name>/contributions`, no token needed)
+- **Code360:** problems solved by difficulty, and submissions per day (streak-freeze days aren't counted as activity)
+- **HackerRank (both accounts, added together):** challenges solved, best star rating per skill, passed certificates and submissions per day
+- **HackerEarth:** problems solved, submissions, points, best leaderboard rank and submissions per day
+- **NeetCode:** solved by difficulty, streaks, percentile and activity per day (the same public call the NeetCode profile page makes)
+- **InterviewBit:** problems solved, score, university rank, current streak and submissions per day (the profile must be set to public)
 
-The response is cached on Netlify's CDN for 6 hours. If a source is down, that card falls back to the numbers saved in `PLATFORMS`, so the page never breaks. NeetCode has no public data and is updated by hand. To track a different account, change `USERS` at the top of the function.
+The response is cached on Netlify's CDN for 6 hours. If a source is down, that card falls back to the numbers saved in `PLATFORMS`, so the page never breaks. To track a different account, change `USERS` at the top of the function. If a calendar fails to load, that platform's map is simply left out.
 
 ## GP Assistant (chatbot)
 

@@ -80,7 +80,7 @@ export default function App() {
   const onTouchStart = (e) => {
     const t = e.touches[0];
     // ignore gestures that start on things that scroll sideways or take input
-    if (e.touches.length > 1 || e.target.closest("input, textarea, .heatgrid, .skill-marquee, .mapbox, .flip")) return (touch.current = null);
+    if (e.touches.length > 1 || e.target.closest("input, textarea, .heatgrid, .skill-marquee, .mapbox, .flip, .sc-stage, .sc-strip, .heat")) return (touch.current = null);
     touch.current = { x: t.clientX, y: t.clientY, at: Date.now() };
   };
   const onTouchEnd = (e) => {
