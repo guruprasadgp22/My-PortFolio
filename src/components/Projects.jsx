@@ -39,14 +39,17 @@ function Stage({ p, dir, onPrev, onNext, onOpen }) {
         </span>
         <span className="sc-cam" aria-hidden="true" />
       </motion.button>
-      <span className="sc-phone" aria-hidden="true">
-        <span className="sc-screen">
-          <AnimatePresence initial={false} custom={dir} mode="popLayout">
-            <motion.img key={p.t} src={p.phone || p.img} className={p.phone ? "real" : undefined} alt="" custom={dir} variants={PHONE} initial="enter" animate="show" exit="exit" draggable="false" />
-          </AnimatePresence>
+      {/* phone: null in data.js hides the phone (no mobile screenshot yet) */}
+      {p.phone !== null && (
+        <span className="sc-phone" aria-hidden="true">
+          <span className="sc-screen">
+            <AnimatePresence initial={false} custom={dir} mode="popLayout">
+              <motion.img key={p.t} src={p.phone || p.img} className={p.phone ? "real" : undefined} alt="" custom={dir} variants={PHONE} initial="enter" animate="show" exit="exit" draggable="false" />
+            </AnimatePresence>
+          </span>
+          <span className="sc-notch" />
         </span>
-        <span className="sc-notch" />
-      </span>
+      )}
       <button className="sc-arrow prev" onClick={onPrev} aria-label="Previous project"><Icon name="next" size={20} /></button>
       <button className="sc-arrow next" onClick={onNext} aria-label="Next project"><Icon name="next" size={20} /></button>
     </div>

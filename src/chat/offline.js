@@ -90,11 +90,11 @@ export function matchJD(jd) {
 
 // Answers for the suggested questions and other common ones. Returns { text, from } or null.
 export function faq(q) {
-  const sony = EXPERIENCE[0], fw = PROJECTS[0];
+  const sony = EXPERIENCE[0], fw = PROJECTS.find((p) => /flightwise/i.test(p.t)) || PROJECTS[0];
   if (has(q, "sony", "sap", "iam")) return { text: `At Sony India Software Centre (${sony.when}), ${NAME} was a ${sony.role} in SAP Identity and Access Management.\n- ${sony.flow ? `Handled the full user lifecycle: ${sony.flow.join(" → ")}` : sony.pts[0]}\n- ${sony.pts[1]}\n- ${sony.pts[2]}`, from: ["experience"] };
   if (has(q, "flightwise", "flight")) return { text: `**${fw.t}**: ${fw.d}\n\nStack: ${fw.stack.join(", ")}.`, from: ["projects"] };
   if (has(q, "join", "notice", "availab", "start", "relocat")) return { text: `${NAME}'s status is **${ME.availability}**, based in ${ME.location}. For an exact joining date or notice period, email ${ME.email}.`, from: ["about", "contact"] };
-  if (has(q, "hire", "why should", "strength", "fit")) return { text: `A few reasons:\n- A year of enterprise experience at Sony India (SAP IAM, RBAC, audits)\n- Full-stack Java and Python: ${ME.topSkills.slice(0, 6).join(", ")}\n- Builds real systems, like ${fw.t} on Spring Boot microservices with Kafka, Redis and RAG\n- ${solved.toLocaleString("en-IN")}+ DSA problems solved across LeetCode, GFG, NeetCode and Code360`, from: ["experience", "projects", "coding"] };
+  if (has(q, "hire", "why should", "strength", "fit")) return { text: `A few reasons:\n- A year of enterprise experience at Sony India (SAP IAM, RBAC, audits)\n- Full-stack Java and Python: ${ME.topSkills.slice(0, 6).join(", ")}\n- Builds real systems, like ${fw.t}, a flight booking platform on Spring Boot microservices\n- ${solved.toLocaleString("en-IN")}+ DSA problems solved across LeetCode, GFG, NeetCode and Code360`, from: ["experience", "projects", "coding"] };
   if (has(q, "experience", "intern", "work", "job", "kodnest", "dlithe")) return { text: EXPERIENCE.map((x) => `- **${x.role}**, ${x.org.split(" · ")[0]} (${x.when})`).join("\n"), from: ["experience"] };
   if (has(q, "project")) return { text: PROJECTS.map((p) => `- **${p.t}**: ${p.stack.slice(0, 4).join(", ")}`).join("\n"), from: ["projects"] };
   if (has(q, "educat", "degree", "college", "cgpa", "puc", "sslc", "mite")) return { text: EDUCATION.map((e) => `- ${e.t}, ${e.p.split(",")[0]}: ${e.score}`).join("\n"), from: ["education"] };

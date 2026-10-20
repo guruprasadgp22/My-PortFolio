@@ -527,6 +527,14 @@ textarea.form-input{min-height:100px;height:120px;max-height:200px;resize:vertic
 .pd-sec{margin-top:26px}
 .pd-sec .h5{margin-bottom:12px}
 .pd-outcome{color:var(--mute);max-width:70ch}
+/* screenshot strip in a case study: snaps one shot at a time, each opens full size */
+.pd-shots-n{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:0;text-transform:none;color:var(--mute);margin-left:8px}
+.pd-shots{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;padding-bottom:8px;scrollbar-width:thin}
+.pd-shots li{flex:0 0 min(78%,520px);scroll-snap-align:start;display:grid;gap:6px}
+.pd-shots a{display:block;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--screen);aspect-ratio:2/1}
+.pd-shots img{display:block;width:100%;height:100%;object-fit:cover;object-position:top;transition:transform .4s var(--ease)}
+.pd-shots a:hover img{transform:scale(1.03)}
+.pd-shots span{font-size:12.5px;color:var(--mute)}
 .pd-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
 .pd-actions .form-btn{width:auto;margin:0}
 .arch{display:grid;gap:0}

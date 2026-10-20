@@ -165,6 +165,23 @@ export default function ProjectDetail({ p, onClose }) {
             </motion.section>
           )}
 
+          {p.shots?.length > 0 && (
+            <motion.section className="pd-sec" {...fade(0.38)}>
+              <h4 className="h5">Screenshots <small className="pd-shots-n">{p.shots.length} · swipe or scroll sideways</small></h4>
+              {/* tap a screenshot to open it full size */}
+              <ul className="pd-shots">
+                {p.shots.map((s) => (
+                  <li key={s.src}>
+                    <a href={s.src} target="_blank" rel="noopener noreferrer">
+                      <img src={s.src} alt={s.cap} loading="lazy" decoding="async" draggable="false" />
+                    </a>
+                    <span>{s.cap}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.section>
+          )}
+
           <motion.div className="pd-actions" {...fade(0.4)}>
             {p.url ? (
               <a className="form-btn" href={p.url} target="_blank" rel="noopener noreferrer">

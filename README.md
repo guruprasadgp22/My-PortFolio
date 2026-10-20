@@ -34,7 +34,7 @@ Personal portfolio of **Guruprasad**, a full stack developer (Java · Spring Boo
 - **GP Assistant (AI chatbot):** a floating "Ask GP" button opens a chat that answers recruiters' questions from the portfolio's own content, cites the section each answer came from, and says "I don't know" instead of guessing. A **Match a job** tab scores a pasted job description against the profile (matched and missing skills, most relevant projects, and a pitch to paste into notes). See [GP Assistant](#gp-assistant-chatbot).
 - **Live coding stats:** LeetCode, GeeksforGeeks and Code360 numbers load automatically, plus a **contributions carousel**: slides sit side by side and snap one at a time. Swipe, trackpad-scroll, use the ‹ › buttons or arrow keys, or tap the toggles for **All, LeetCode, GFG, GitHub, Code360, HackerRank, NeetCode, HackerEarth and InterviewBit**. Each platform slide covers the last 12 months (on phones the grid shows the most recent months that fit, while the stats still cover the full year) in that platform's colour, with month labels, day-by-day hover details, active days and longest and current streaks. **All** adds everything together and shows a side-by-side stats table for every platform (see [Live coding stats](#live-coding-stats)).
 - **Case studies** for the main projects: the problem, an architecture diagram, what was hard, and where it stands.
-- **Interactive system design:** in the FlightWise AI case study, tap any box (gateway, Eureka, services, Kafka, Redis, PostgreSQL) to see what it does and why it was chosen.
+- **Interactive system design:** in the FlightWise AI case study, tap any box (gateway, Eureka, each service, PostgreSQL, Docker) to see what it does and why it was chosen.
 - **Command palette:** press <kbd>⌘</kbd>/<kbd>Ctrl</kbd> + <kbd>K</kbd> to jump to any page, copy the email, download the resume, switch theme or replay the boot screen.
 - **Recruiter quick view:** a one-screen summary of target roles, top skills, experience and contact buttons.
 - **Light and dark themes:** the new theme spreads out in a circle from the toggle button and is remembered between visits.
@@ -83,7 +83,7 @@ All text, numbers and links live in **[`src/data.js`](src/data.js)**, so you rar
 | Certificates (add `url` to show a **Verify** link) | `CERTIFICATIONS` |
 | Timeline and route map on the Journey page | `JOURNEY`, `JOURNEY_MAP` |
 | Skill groups and their LED meter levels | `SKILLS` |
-| Projects: repo and demo links, cover images (`img`, optional `phone` screenshot), highlight numbers (`stats`), case studies, system-design notes | `PROJECTS` |
+| Projects: repo and demo links, cover images (`img`, optional `phone` screenshot), highlight numbers (`stats`), case-study screenshot strip (`shots`), case studies, system-design notes | `PROJECTS` |
 | Coding profiles (saved numbers and profile links) | `PLATFORMS` |
 | "What I'm doing" cards | `DOING` |
 | Navbar tabs | `NAV` |

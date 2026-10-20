@@ -15,7 +15,7 @@ export default `
 - TODO: work mode, e.g. "On-site, hybrid or remote".
 
 ## Interview notes (why I built things the way I did)
-- FlightWise AI: the system-design reasoning for every part (gateway, Eureka, services, Kafka, Redis, PostgreSQL, RAG) is in the project data, so the assistant can already explain those choices.
+- FlightWise AI: the system-design reasoning for every part (gateway, Eureka, each service, PostgreSQL, Docker) is in the project data, so the assistant can already explain those choices.
 - TODO: add the hardest bug you fixed in FlightWise AI and how you found it.
 - TODO: anything else you'd like to be asked about (e.g. what you'd improve next).
 
