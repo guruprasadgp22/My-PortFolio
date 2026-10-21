@@ -9,10 +9,10 @@ export default function Navbar({ page, go }) {
   return (
     <nav className="navbar" aria-label="Pages">
       <ul className="navbar-list">
-        {NAV.map(([id, label, icon, short]) => {
+        {NAV.map(([id, label, icon, short], k) => {
           const active = page === id;
           return (
-            <li key={id}>
+            <li key={id} style={{ "--i": k }}>
               <a
                 href={`#${id}`}
                 className={`navbar-link ${active ? "active" : ""}`}

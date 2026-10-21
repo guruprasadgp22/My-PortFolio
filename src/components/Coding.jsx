@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { SPRING, haptic } from "../hooks/spring";
-import { PLATFORMS } from "../data";
+import { livePlatforms } from "../platforms";
 import { REDUCED, revealInRow } from "../hooks/motion";
 import useInView from "../hooks/useInView";
 import useTheme from "../hooks/theme";
@@ -409,80 +409,39 @@ function Heatmap({ stats }) {
   );
 }
 
-// Overlay live numbers on the platform cards from data.js; any source that failed keeps its saved values.
-export function withLive(p, s) {
-  if (!s) return p;
-  if (p.n === "LeetCode" && s.leetcode) {
-    const l = s.leetcode;
-    return {
-      ...p,
-      val: l.solved,
-      lbl: `problems solved · ${l.easy} E / ${l.medium} M / ${l.hard} H${l.accounts?.length > 1 ? ` · best of ${l.accounts.length} accounts` : ""}`,
-      meta: [["Rating", l.rating ?? "–"], ["Max streak", `${l.streak ?? 0}d`]],
-      accounts: l.accounts?.map((a) => ({ user: a.user, url: a.url, val: a.solved, note: `${a.easy} E / ${a.medium} M / ${a.hard} H` })) ?? p.accounts,
-      live: true,
-    };
-  }
-  if (p.n === "GeeksforGeeks" && s.gfg) {
-    return { ...p, val: s.gfg.solved, meta: [["Score", s.gfg.score], ["Institute", `#${s.gfg.instituteRank}`]], live: true };
-  }
-  if (p.n === "Code360" && s.code360) {
-    return { ...p, val: s.code360.solved, meta: [["Moderate", s.code360.Moderate ?? 0], ["Hard", s.code360.Hard ?? 0]], live: true };
-  }
-  if (p.n === "HackerRank" && s.hackerrank) {
-    const h = s.hackerrank;
-    const [skill, stars] = Object.entries(h.stars || {}).sort((a, b) => b[1] - a[1])[0] || [];
-    return {
-      ...p,
-      val: h.solved,
-      lbl: `challenges solved${h.accounts.length > 1 ? ` · best of ${h.accounts.length} accounts` : ""}`,
-      accounts: h.accounts.map((a) => ({
-        user: a.user, url: a.url, val: a.solved,
-        note: [a.best && `${a.best.skill === "Sql" ? "SQL" : a.best.skill} ${a.best.stars}★`, a.certs && `${a.certs} certificate${a.certs === 1 ? "" : "s"}`].filter(Boolean).join(" · ") || "no badges yet",
-      })),
-      meta: [...(skill ? [[skill === "Sql" ? "SQL" : skill, `${stars}★`]] : []), ["Certificates", h.certs?.length ?? 0]],
-      live: true,
-    };
-  }
-  if (p.n === "HackerEarth" && s.hackerearth) {
-    const h = s.hackerearth;
-    return {
-      ...p,
-      val: h.solved ?? p.val,
-      lbl: `problems solved${h.submitted ? ` · ${h.submitted} submissions` : ""}`,
-      meta: [["Score", h.score ?? "–"], ...(h.rank ? [["Rank", `Top ${h.rank.top}%`]] : [])],
-      live: true,
-    };
-  }
-  if (p.n === "InterviewBit" && s.interviewbit) {
-    const b = s.interviewbit;
-    return {
-      ...p,
-      val: b.solved,
-      lbl: `problems solved · score ${b.score.toLocaleString("en-IN")}`,
-      meta: [...(b.universityRank ? [["University rank", `#${b.universityRank}`]] : []), ["Streak", `${b.streak ?? 0}d`]],
-      live: true,
-    };
-  }
-  if (p.n === "NeetCode" && s.neetcode) {
-    const n = s.neetcode;
-    return {
-      ...p,
-      val: n.solved,
-      lbl: `problems solved · ${n.easy} E / ${n.medium} M / ${n.hard} H`,
-      meta: [["Max streak", `${n.maxStreak ?? 0}d`], ...(n.top != null ? [["Rank", `Top ${n.top}%`]] : [])],
-      live: true,
-    };
-  }
-  return p;
+// One platform card. A platform with several profiles isn't one big link: each profile gets its own row and link.
+function Plat({ p, k }) {
+  return (
+    <Reveal as={p.accounts ? "div" : "a"} delay={k * 80} className={`plat ${p.accounts ? "multi" : ""}`} {...(!p.accounts && { href: p.url, target: "_blank", rel: "noopener noreferrer" })} style={{ "--c": p.c }}>
+      <span className="pn">{p.n}{p.live && <i className="live-dot" title="Live" />}</span>
+      <span className="val"><Odometer value={p.val} suffix="+" /></span>
+      <span className="lbl">{p.lbl}</span>
+      {p.staleAt && <span className="stale-note">Couldn't refresh · showing {p.staleAt}</span>}
+      <span className="meta">
+        {p.meta.map(([a, b]) => <span key={a}>{a} <b>{b}</b></span>)}
+      </span>
+      {p.accounts && (
+        <ul className="plat-accts" aria-label={`${p.n} profiles`}>
+          {p.accounts.map((a) => (
+            <li key={a.user}>
+              <a href={a.url} target="_blank" rel="noopener noreferrer">
+                <span className="who">@{a.user}<small>{a.note}</small></span>
+                <b>{a.val.toLocaleString("en-IN")}</b>
+                <span className="go" aria-hidden="true">↗</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Reveal>
+  );
 }
-
-// Every platform with live numbers where available. One with no number yet (val: null in data.js) is left out.
-export const livePlatforms = (stats) => PLATFORMS.map((p) => withLive(p, stats)).filter((p) => p.val != null);
 
 export default function Coding() {
   const stats = useStats();
   const platforms = livePlatforms(stats);
+  const [more, setMore] = useState(false);
+  const lead = platforms.filter((p) => !p.more), rest = platforms.filter((p) => p.more);
   const total = platforms.reduce((s, p) => s + p.val, 0);
   const updated = stats?.updated && new Date(stats.updated);
 
@@ -493,33 +452,27 @@ export default function Coding() {
         <b><Odometer value={total} suffix="+" /></b> problems solved across {platforms.length} platforms, and counting.
       </p>
       <div className="cp">
-        {platforms.map((p, k) => (
-          // a platform with several profiles isn't one big link: each profile gets its own row and link
-          <Reveal as={p.accounts ? "div" : "a"} delay={k * 80} key={p.n} className={`plat ${p.accounts ? "multi" : ""}`} {...(!p.accounts && { href: p.url, target: "_blank", rel: "noopener noreferrer" })} style={{ "--c": p.c }}>
-            <span className="pn">{p.n}{p.live && <i className="live-dot" title="Live" />}</span>
-            <span className="val"><Odometer value={p.val} suffix="+" /></span>
-            <span className="lbl">{p.lbl}</span>
-            <span className="meta">
-              {p.meta.map(([a, b]) => <span key={a}>{a} <b>{b}</b></span>)}
-            </span>
-            {p.accounts && (
-              <ul className="plat-accts" aria-label={`${p.n} profiles`}>
-                {p.accounts.map((a) => (
-                  <li key={a.user}>
-                    <a href={a.url} target="_blank" rel="noopener noreferrer">
-                      <span className="who">@{a.user}<small>{a.note}</small></span>
-                      <b>{a.val.toLocaleString("en-IN")}</b>
-                      <span className="go" aria-hidden="true">↗</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Reveal>
-        ))}
+        {lead.map((p, k) => <Plat p={p} k={k} key={p.n} />)}
       </div>
+      {rest.length > 0 && (
+        <div className="cp-more">
+          <button className="cp-more-btn" onClick={() => setMore(!more)} aria-expanded={more} aria-controls="cp-more">
+            <span>More platforms <small>{rest.map((p) => p.n).join(" · ")}</small></span>
+            <b>{rest.reduce((n, p) => n + p.val, 0).toLocaleString("en-IN")}+</b>
+            <Icon name="chevron" size={16} />
+          </button>
+          <AnimatePresence initial={false}>
+            {more && (
+              <motion.div id="cp-more" className="cp-more-body" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: REDUCED ? 0 : 0.35, ease: [0.2, 0.8, 0.2, 1] }}>
+                <div className="cp">{rest.map((p, k) => <Plat p={p} k={k} key={p.n} />)}</div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
       <h3 className="h3 heat-h">Contributions</h3>
-      <Reveal><Heatmap stats={stats} /></Reveal>
+      {/* grey placeholder until the first stats arrive (instant on repeat visits, which use the saved copy) */}
+      <Reveal>{stats ? <Heatmap stats={stats} /> : <div className="heat-skel" aria-busy="true" aria-label="Loading contribution maps" />}</Reveal>
       <p className="note">
         {updated
           ? `// Live from LeetCode, GFG, GitHub, Code360, HackerRank, HackerEarth, NeetCode and InterviewBit · refreshed ${updated.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}`

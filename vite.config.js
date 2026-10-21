@@ -53,5 +53,6 @@ export default defineConfig(({ mode }) => {
   // expose the chatbot's server-side settings from .env to the local functions (never to the browser bundle)
   const env = loadEnv(mode, process.cwd(), "");
   for (const k of ["ANTHROPIC_API_KEY", "CHAT_MODEL", "ANTHROPIC_BASE_URL"]) if (env[k] && !process.env[k]) process.env[k] = env[k];
-  return { plugins: [react(), localFunctions()] };
+  // build date, shown as "Last updated" in the footer (each Netlify deploy is a fresh build)
+  return { plugins: [react(), localFunctions()], define: { __BUILD_DATE__: JSON.stringify(new Date().toISOString()) } };
 });

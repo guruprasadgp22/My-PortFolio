@@ -3,9 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="Guruprasad, full stack developer in Bengaluru (Java, Spring Boot, Python, React). Ex-Sony India intern. Projects, experience, skills and live coding stats." />
+    <meta name="description" content="Guruprasad, full stack developer in Bengaluru (Java, Spring Boot, Python, React). Ex-Sony India apprentice, available to join immediately. Projects, experience, skills and live coding stats." />
     <meta name="theme-color" content="#0c0a12" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- the profile photo is the first thing people look at: fetch it straight away -->
+    <link rel="preload" as="image" href="/me.webp" type="image/webp" fetchpriority="high" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!-- fonts load without blocking the first paint; text shows in fallback fonts for a moment, then swaps -->
@@ -18,6 +20,11 @@
         try { t = localStorage.getItem("theme"); } catch (e) {}
         if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
         document.documentElement.dataset.theme = t;
+        // play the short intro (components/Intro.jsx) on every page load, unless the device asks for reduced motion
+        if (!matchMedia("(prefers-reduced-motion: reduce)").matches) document.documentElement.classList.add("intro");
+        // part of the visitor's day, for the background glow: morning, day, evening or night
+        var h = new Date().getHours();
+        document.documentElement.dataset.daypart = h < 5 || h >= 21 ? "night" : h < 11 ? "morning" : h < 17 ? "day" : "evening";
       })();
     </script>
     <title>Guruprasad · Full Stack Developer (Java, Spring Boot, React)</title>
@@ -27,17 +34,46 @@
     <meta property="og:site_name" content="Guruprasad · Portfolio" />
     <meta property="og:url" content="https://guruprasadgp.netlify.app/" />
     <meta property="og:title" content="Guruprasad · Full Stack Developer (Java, Spring Boot, React)" />
-    <meta property="og:description" content="Software developer from Bengaluru. Ex-Sony India intern. 8 projects, including a live Job Board (Spring Boot, React, PostgreSQL) and FlightWise AI (Spring Boot microservices, React). 1,400+ DSA problems solved." />
+    <meta property="og:description" content="Software developer from Bengaluru, available to join immediately. Ex-Sony India apprentice. 8 projects, including a live Job Board (Spring Boot, React, PostgreSQL) and FlightWise AI (Spring Boot microservices, React). 1,400+ DSA problems solved." />
     <meta property="og:image" content="https://guruprasadgp.netlify.app/og.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Guruprasad, Full Stack Developer: Java, Spring Boot" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Guruprasad · Full Stack Developer (Java, Spring Boot, React)" />
-    <meta name="twitter:description" content="Ex-Sony India intern. Spring Boot microservices, React, 1,300+ DSA problems solved." />
+    <meta name="twitter:description" content="Ex-Sony India apprentice, available immediately. Spring Boot, React, a live Job Board app, 1,400+ DSA problems solved." />
     <meta name="twitter:image" content="https://guruprasadgp.netlify.app/og.jpg" />
+    <!-- structured data, so search engines show the right name, title and profiles for "Guruprasad" searches -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Guruprasad",
+        "alternateName": "Guruprasad P",
+        "url": "https://guruprasadgp.netlify.app/",
+        "image": "https://guruprasadgp.netlify.app/me.jpg",
+        "jobTitle": "Software Developer (Java, Spring Boot, React)",
+        "description": "Full stack developer in Bengaluru, available to join immediately. Former Software Developer Apprentice at Sony India Software Centre.",
+        "email": "mailto:guruprasad6200@gmail.com",
+        "address": { "@type": "PostalAddress", "addressLocality": "Bengaluru", "addressRegion": "Karnataka", "addressCountry": "IN" },
+        "alumniOf": { "@type": "CollegeOrUniversity", "name": "Mangalore Institute of Technology and Engineering" },
+        "knowsAbout": ["Java", "Spring Boot", "Spring Security", "REST APIs", "Microservices", "React", "PostgreSQL", "Docker", "Python"],
+        "knowsLanguage": ["en", "kn", "tcy"],
+        "sameAs": [
+          "https://github.com/guruprasadgp22",
+          "https://www.linkedin.com/in/guruprasadgp22/",
+          "https://leetcode.com/u/guruprasadgp22/",
+          "https://www.geeksforgeeks.org/profile/guruprasadgp22"
+        ]
+      }
+    </script>
   </head>
   <body>
+    <!-- registers the contact form with Netlify Forms at deploy time (the visible form is in Contact.jsx).
+         "company" is the honeypot: Netlify drops any submission that fills it in. -->
+    <form name="contact" data-netlify="true" netlify-honeypot="company" hidden>
+      <input name="name" /><input name="email" /><textarea name="message"></textarea><input name="company" />
+    </form>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

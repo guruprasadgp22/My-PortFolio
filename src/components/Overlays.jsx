@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { EDUCATION, EXPERIENCE, ME, NAV } from "../data";
-import { livePlatforms } from "./Coding";
+import { totalSolved } from "../platforms";
 import { SPRING } from "../hooks/spring";
 import { startScroll, stopScroll } from "../hooks/useSmoothScroll";
 import { toggleTheme } from "../hooks/theme";
@@ -10,8 +10,10 @@ import useStats from "../hooks/useStats";
 import Icon from "./Icons";
 import { replayBoot } from "./Boot";
 import { openChat } from "./Chat";
+import { resumeFor } from "../hooks/visitor";
+import confetti from "../hooks/confetti";
 
-const resume = ME.socials.find((s) => s.label === "Resume")?.url;
+const resume = resumeFor();
 const social = (label) => ME.socials.find((s) => s.label === label)?.url;
 // Actions that re-render the whole page (changing tab or theme) would interrupt the overlay's exit animation
 // and leave its backdrop stuck on screen, so close first and run them once it's gone.
@@ -20,6 +22,8 @@ const AFTER_EXIT = 220;
 // Pages and other parts of the site can open these with: dispatchEvent(new Event("open-palette" | "open-quickview"))
 export const openPalette = () => dispatchEvent(new Event("open-palette"));
 export const openQuickView = () => dispatchEvent(new Event("open-quickview"));
+export const openShortcuts = () => dispatchEvent(new Event("open-shortcuts"));
+const SUDO = "sudo hire guruprasad";
 
 function useLock(on) {
   useEffect(() => {
@@ -67,7 +71,8 @@ function Palette({ go, onClose }) {
       ...NAV.map(([id, label, icon]) => ({ k: `Go to ${label}`, icon, run: () => go(id) })),
       { k: "Recruiter quick view", icon: "zap", run: openQuickView, keep: true }, // swaps the palette for the quick view
       { k: "Ask GP Assistant (AI chat, job matcher)", icon: "sparkle", run: openChat },
-      { k: "Copy email address", icon: "copy", run: () => navigator.clipboard?.writeText(ME.email).then(() => setCopied(true)), keep: true },
+      { k: "Copy email address", icon: "copy", run: () => navigator.clipboard?.writeText(ME.email).then(() => (setCopied(true), confetti())), keep: true },
+      { k: "Keyboard shortcuts", icon: "zap", run: openShortcuts, keep: true },
       resume && { k: "Download resume", icon: "download", run: () => open(resume, "_blank") },
       { k: "Toggle light / dark theme", icon: "sun", run: () => toggleTheme() },
       social("GitHub") && { k: "Open GitHub", icon: "github", run: () => open(social("GitHub"), "_blank") },
@@ -81,6 +86,10 @@ function Palette({ go, onClose }) {
 
   useEffect(() => input.current?.focus(), []);
   useEffect(() => setI(0), [q]);
+  // easter egg: typing "sudo hire guruprasad" swaps the palette for the quick view, permission granted
+  useEffect(() => {
+    if (q.trim().toLowerCase().replace(/\s+/g, " ") === SUDO) dispatchEvent(new CustomEvent("open-quickview", { detail: { sudo: true } }));
+  }, [q]);
 
   const run = (it) => {
     if (!it) return;
@@ -118,10 +127,10 @@ function Palette({ go, onClose }) {
 }
 
 // One-screen summary for busy recruiters.
-function QuickView({ go, onClose }) {
+function QuickView({ go, onClose, sudo }) {
   const stats = useStats();
   // same total as the Coding page: every platform, live where possible
-  const solved = livePlatforms(stats).reduce((n, p) => n + p.val, 0);
+  const solved = totalSolved(stats);
   const degree = EDUCATION[0];
   return (
     <Modal onClose={onClose} className="quick" label="Recruiter quick view">
@@ -134,6 +143,8 @@ function QuickView({ go, onClose }) {
         <button className="pd-close qv-close" onClick={onClose} aria-label="Close quick view"><Icon name="x" size={18} /></button>
       </div>
       <div className="qv-body" data-lenis-prevent>
+        {sudo && <p className="qv-sudo" role="status">[sudo] Permission granted. Welcome, root recruiter. Here's everything you need ✓</p>}
+        {ME.hiring?.length > 0 && <p className="hire-strip qv-hire">{ME.hiring.map((h) => <span key={h}>{h}</span>)}</p>}
         <section>
           <h4 className="h5">Looking for</h4>
           <div className="stack">{ME.lookingFor.map((r) => <span className="tag qv-role" key={r}>{r}</span>)}</div>
@@ -165,8 +176,34 @@ function QuickView({ go, onClose }) {
   );
 }
 
+// "?" lists the keyboard shortcuts.
+function Shortcuts({ onClose }) {
+  const rows = [
+    [["1", "–", String(NAV.length)], "Open a tab"],
+    [["←", "→"], "Previous / next project"],
+    [["/"], "Search and quick actions"],
+    [["⌘", "K"], "Search (also Ctrl + K)"],
+    [["?"], "Show these shortcuts"],
+    [["Esc"], "Close a window"],
+  ];
+  return (
+    <Modal onClose={onClose} className="keys" label="Keyboard shortcuts">
+      <h3>Keyboard shortcuts</h3>
+      <dl className="keys-list">
+        {rows.map(([keys, what]) => (
+          <div key={what}>
+            <dt>{keys.map((k) => (k === "–" ? <span key={k}>–</span> : <kbd key={k}>{k}</kbd>))}</dt>
+            <dd>{what}</dd>
+          </div>
+        ))}
+      </dl>
+    </Modal>
+  );
+}
+
 export default function Overlays({ go }) {
-  const [which, setWhich] = useState(null); // "palette" | "quick" | null
+  const [which, setWhich] = useState(null); // "palette" | "quick" | "keys" | null
+  const [sudo, setSudo] = useState(false);
   useLock(!!which);
 
   useEffect(() => {
@@ -177,14 +214,17 @@ export default function Overlays({ go }) {
       }
     };
     const pal = () => setWhich("palette");
-    const qv = () => setWhich("quick");
+    const qv = (e) => (setSudo(!!e.detail?.sudo), setWhich("quick"));
+    const keys = () => setWhich("keys");
     addEventListener("keydown", key);
     addEventListener("open-palette", pal);
     addEventListener("open-quickview", qv);
+    addEventListener("open-shortcuts", keys);
     return () => {
       removeEventListener("keydown", key);
       removeEventListener("open-palette", pal);
       removeEventListener("open-quickview", qv);
+      removeEventListener("open-shortcuts", keys);
     };
   }, []);
 
@@ -192,7 +232,8 @@ export default function Overlays({ go }) {
   return (
     <AnimatePresence>
       {which === "palette" && <Palette key="p" go={go} onClose={close} />}
-      {which === "quick" && <QuickView key="q" go={go} onClose={close} />}
+      {which === "quick" && <QuickView key="q" go={go} onClose={close} sudo={sudo} />}
+      {which === "keys" && <Shortcuts key="k" onClose={close} />}
     </AnimatePresence>
   );
 }

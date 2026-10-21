@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>How my Job Board matches resumes to jobs · Guruprasad</title>
+<meta name="description" content="How Job Board (Java 21, Spring Boot, PostgreSQL) pulls skills out of a resume, scores every job 0–100, syncs six job sources every 6 hours and deletes closed postings safely." />
+<meta name="author" content="Guruprasad" />
+<link rel="canonical" href="https://guruprasadgp.netlify.app/writing/job-board-matching/" />
+<meta name="theme-color" content="#0c0a12" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="How my Job Board matches resumes to jobs" />
+<meta property="og:description" content="Skill extraction, a 0–100 match score, syncing six job sources every 6 hours and deleting closed jobs without losing open ones." />
+<meta property="og:url" content="https://guruprasadgp.netlify.app/writing/job-board-matching/" />
+<meta property="og:image" content="https://guruprasadgp.netlify.app/projects/job-board.jpg" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Manrope:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "How my Job Board matches resumes to jobs",
+  "datePublished": "2026-10-21",
+  "author": { "@type": "Person", "name": "Guruprasad", "url": "https://guruprasadgp.netlify.app/" },
+  "image": "https://guruprasadgp.netlify.app/projects/job-board.jpg",
+  "about": ["Spring Boot", "Java", "Resume matching", "PostgreSQL"]
+}
+</script>
+<style>
+:root{--bg:#0c0a12;--card:#15121d;--line:#2a2436;--fg:#efe9f6;--mute:#a59cb4;--ember:#ff6a3d;--ember-2:#ffb547;--signal:#3de0ff;--ok:#3ddc84;--code:#1b1726}
+@media (prefers-color-scheme:light){:root{--bg:#faf6ef;--card:#fff;--line:#e6dccb;--fg:#1d1724;--mute:#6b6178;--ember:#d9480f;--ember-2:#b45309;--signal:#0369a1;--ok:#15803d;--code:#f4eee3}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:16.5px/1.7 Manrope,system-ui,sans-serif}
+.wrap{max-width:720px;margin:0 auto;padding:28px 16px 80px}
+a{color:var(--signal)}
+.back{font-family:"JetBrains Mono",monospace;font-size:13px;text-decoration:none}
+.kicker{margin:34px 0 6px;font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ember-2)}
+h1{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(30px,6vw,44px);line-height:1.1;letter-spacing:-.02em;margin:0 0 14px}
+h2{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:24px;line-height:1.25;margin:44px 0 10px}
+.meta{color:var(--mute);font-size:14px}
+.lede{font-size:18px;color:var(--fg)}
+code{font-family:"JetBrains Mono",monospace;font-size:.86em;background:var(--code);border:1px solid var(--line);padding:1px 6px;border-radius:6px}
+pre{background:var(--code);border:1px solid var(--line);border-radius:12px;padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.6}
+pre code{background:none;border:0;padding:0;font-size:inherit}
+.flow{display:grid;gap:8px;margin:18px 0;padding:0;list-style:none;counter-reset:s}
+.flow li{counter-increment:s;padding:12px 14px 12px 50px;position:relative;background:var(--card);border:1px solid var(--line);border-radius:12px}
+.flow li::before{content:counter(s);position:absolute;left:14px;top:12px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font:700 12px "JetBrains Mono",monospace;color:#0c0a12;background:var(--ember-2)}
+.flow b{display:block}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:14px 0}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:600;color:var(--mute);text-transform:uppercase;letter-spacing:.05em}
+td.n{font-family:"JetBrains Mono",monospace;white-space:nowrap;text-align:right}
+tr.total td{font-weight:700;border-bottom:0;color:var(--ok)}
+.note{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--ember);border-radius:10px;padding:12px 16px;margin:18px 0;font-size:15px}
+.chips span{display:inline-block;font-family:"JetBrains Mono",monospace;font-size:12.5px;padding:2px 9px;border-radius:999px;margin:2px 4px 2px 0;border:1px solid var(--line)}
+.chips .y{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 50%,transparent)}
+.chips .x{color:var(--mute)}
+.end{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px 18px;font-size:15px}
+@media (max-width:520px){th,td{padding:7px 6px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <a class="back" href="/#projects">← Guruprasad · Projects</a>
+
+  <p class="kicker">Write-up · Job Board</p>
+  <h1>How my Job Board matches resumes to jobs</h1>
+  <p class="meta">By Guruprasad · October 2026 · 6 min read · <a href="https://github.com/guruprasadgp22/Job-Board">Code on GitHub</a> · <a href="https://job-board-6ev5.onrender.com/">Live app</a></p>
+
+  <p class="lede">Job Board pulls jobs from six sources, reads your resume, and ranks every job by how well you fit it, showing which of its skills you have and which you're missing. This post walks through how that works in the Spring Boot backend: pulling skills out of text, turning them into a 0–100 score, keeping jobs fresh on a free server that sleeps, and deleting closed jobs without ever deleting an open one by mistake.</p>
+
+  <h2>The pipeline</h2>
+  <ol class="flow">
+    <li><b>Read the resume</b>Upload a PDF, DOCX or plain text (PDFBox reads PDFs). The text goes through the skill catalog, and the skills found become your resume skills.</li>
+    <li><b>Fetch jobs</b>Remotive, RemoteOK, Arbeitnow and The Muse, plus LinkedIn, Indeed, Naukri and Glassdoor through the JSearch API, and Adzuna. Your desired role and top skills are the search terms.</li>
+    <li><b>Score each job</b><code>RelevanceScorer</code> gives every job a score from 0 to 100, with matched and missing skills.</li>
+    <li><b>Store the good ones</b>Jobs above your minimum score are saved in PostgreSQL for you.</li>
+    <li><b>Clean up</b>Closed, expired and stale jobs are deleted, and remembered so the next sync doesn't add them back.</li>
+  </ol>
+
+  <h2>1. Pulling skills out of text</h2>
+  <p>Resumes and job ads name the same thing in different ways: <code>reactjs</code>, <code>React.js</code>, <code>React</code>. So the heart of matching is <code>SkillCatalog</code>: 165 skills, each with the spellings people actually use.</p>
+<pre><code>"Spring Boot|springboot|spring-boot",
+"React|reactjs|react.js",
+"PostgreSQL|postgres|postgresql",
+"Kubernetes|k8s",
+"REST API|rest apis|restful|rest api|restful apis|restful services|rest services",</code></pre>
+  <p>Three details made this reliable:</p>
+  <ul>
+    <li><b>Whole words only.</b> A plain <code>contains</code> would find "java" inside "javascript". Every alias becomes a regex with lookarounds that also work for names with symbols, like <code>c++</code>, <code>.net</code> and <code>node.js</code>:
+<pre><code>Pattern.compile("(?&lt;![a-z0-9+#.])" + Pattern.quote(alias) + "(?![a-z0-9+#])");</code></pre>
+    </li>
+    <li><b>Implied skills.</b> If your resume says Spring Boot, a job asking for "Spring" shouldn't count it as missing. An <code>IMPLIES</code> map adds those (Spring Boot ⇒ Spring, PostgreSQL ⇒ SQL, Hibernate ⇒ JPA).</li>
+    <li><b>No double counting the other way.</b> "Spring Boot" in a job ad also contains the word "Spring". If "Spring" only ever appeared as part of "Spring Boot", it's dropped, so the job isn't credited with two skills for one phrase.</li>
+  </ul>
+  <p>Ambiguous one-letter names (C, R, Go) are deliberately left out of the catalog; they'd match far too much ordinary text.</p>
+
+  <h2>2. Turning a match into a score</h2>
+  <p>A score is built from up to two parts, then adjusted:</p>
+  <ul>
+    <li><b>Keyword score.</b> Each of your keywords earns 3 points if it's in the job title, 2 in the tags, 1 in the description, out of a maximum of 3 per keyword. If none appear at all, the job is skipped, so an unrelated job isn't stored just because it mentions "Git".</li>
+    <li><b>Resume score.</b> The share of the job's skills that are on your resume.</li>
+    <li>With both, the score is their average. Then: +10 if the title contains your desired role (+5 if only its key words do), +10 for your preferred location, −20 for senior or lead titles when you have under 4 years of experience, and −15 for intern or fresher titles when you have 3+ years.</li>
+  </ul>
+
+  <p>Here's a real run of the scorer. The resume has <span class="chips"><span>Java</span><span>Spring Boot</span><span>PostgreSQL</span><span>Docker</span><span>React</span></span>, the keywords are "java, spring boot", the desired role is "Java Developer", the location is Bengaluru, with 0 years of experience. The job:</p>
+<pre><code>Title:       Java Backend Developer        Location: Bengaluru, Karnataka
+Description: We build REST APIs in Java with Spring Boot on PostgreSQL.
+             Services run in Docker and talk through Kafka.</code></pre>
+  <p>Skills found in the job: <span class="chips"><span class="y">✓ Java</span><span class="y">✓ Spring Boot</span><span class="y">✓ PostgreSQL</span><span class="y">✓ Docker</span><span class="x">REST API</span><span class="x">Kafka</span></span></p>
+  <table>
+    <thead><tr><th>Step</th><th>Working</th><th class="n">Score</th></tr></thead>
+    <tbody>
+      <tr><td>Keyword score</td><td>java in title (3) + spring boot in description (1) = 4 of 6</td><td class="n">67</td></tr>
+      <tr><td>Resume score</td><td>4 of the job's 6 skills are on the resume</td><td class="n">67</td></tr>
+      <tr><td>Average</td><td>(67 + 67) / 2</td><td class="n">67</td></tr>
+      <tr><td>Desired role</td><td>"Java Developer" isn't in the title, but its key word "Java" is</td><td class="n">+5</td></tr>
+      <tr><td>Location</td><td>Bengaluru matches</td><td class="n">+10</td></tr>
+      <tr class="total"><td>Match</td><td></td><td class="n">82</td></tr>
+    </tbody>
+  </table>
+  <p>The same job titled <i>Senior</i> Java Backend Developer scores 62: the −20 seniority adjustment for someone with under 4 years of experience.</p>
+
+  <div class="note"><b>The two-skill problem.</b> My first version divided matched skills by the job's skills. A job that only said "Java and Spring Boot" scored 100% for anyone with those two, ranking above detailed jobs that were genuinely a better fit. The fix: divide by at least five skills.
+<pre><code>resumeScore = Math.round(100f * matched.size() / Math.max(jobSkills.size(), MIN_SKILLS));</code></pre>
+  That job now scores 40, which is honest: it told us very little.</div>
+
+  <p>Showing <b>✓ matched</b> and <b>missing</b> skills on every job matters as much as the number. A score alone can't be argued with; a list of what's missing tells you what to learn, or why a job ranked low.</p>
+
+  <h2>3. Keeping jobs fresh on a server that sleeps</h2>
+  <p>The app runs free on Render, which puts a service to sleep after 15 minutes without traffic, so an in-app <code>@Scheduled</code> job can't be relied on: there's nothing awake to run it. Instead, a GitHub Actions workflow runs every 6 hours. It wakes the app by polling <code>/actuator/health</code>, then calls <code>POST /api/refresh</code> with a secret header, which syncs jobs for every user and then runs cleanup.</p>
+  <p>Inside a sync:</p>
+  <ul>
+    <li><b>One fetch per search.</b> Results are cached per source and search, so users who search the same thing share a single API call. That protects the free JSearch quota, which also has a minimum gap between identical searches.</li>
+    <li><b>One bad source doesn't stop the rest.</b> If a source fails, it's recorded as failed for that run and the others carry on.</li>
+    <li><b>No duplicates.</b> Jobs are de-duplicated by source and external id; a job that's still listed just gets its "last seen" time updated.</li>
+    <li><b>Re-score without re-fetching.</b> When you upload a new resume, your stored jobs are re-scored from their saved text, with no API calls.</li>
+    <li>A lock makes sure two syncs never run at once.</li>
+  </ul>
+
+  <h2>4. Deleting closed jobs without losing open ones</h2>
+  <p>A job board full of closed jobs is useless, but deleting an open job by mistake is worse: it may have your notes and application status on it. So cleanup is deliberately lopsided:</p>
+  <ul>
+    <li><b>Delete</b> when the job's page returns 404 or 410, or says something like "no longer accepting applications", "this job has expired" or "position has been filled" (36 phrases, including site-specific ones).</li>
+    <li><b>Keep, and check again later</b> when the site blocks the checker (403, 429) or times out. "I couldn't tell" never means "closed".</li>
+    <li>Also delete jobs past their application deadline, and jobs you never acted on that are older than 30 days.</li>
+    <li>A job missing from a source's results for 5 days is removed only if that source lists every job and answered in the last day, so an outage can't look like every job vanished. Jobs you've applied to get a link check first instead.</li>
+    <li>Deleted jobs are remembered, so the next sync doesn't bring them back.</li>
+  </ul>
+  <p>Up to 60 links are re-checked per run, which keeps each run short on a small free instance.</p>
+
+  <h2>How it's tested</h2>
+  <p>The rules above are pinned down by unit tests in <a href="https://github.com/guruprasadgp22/Job-Board/blob/main/backend/src/test/java/com/guru/jobboard/RelevanceAndLinkTests.java"><code>RelevanceAndLinkTests</code></a>: a title match beats a description match, "java" doesn't match "JavaScript", excluded words and remote-only skip a job, matched and missing skills come out right, typed skills normalise (<code>reactjs</code> → React, <code>k8s</code> → Kubernetes), the role bonus and seniority adjustments apply, and closed pages are detected.</p>
+
+  <h2>What I'd do differently at scale</h2>
+  <ul>
+    <li><b>Matching is lexical.</b> "Built REST endpoints" doesn't count as REST API unless an alias says so. Embeddings would catch meaning, at the cost of an external model and less explainable scores.</li>
+    <li><b>Skills aren't weighted.</b> Java in "Requirements" counts the same as Kafka in "Nice to have". Splitting a job ad into sections would fix that.</li>
+    <li><b>Syncing is one loop.</b> With many users, I'd move fetching onto a queue with one worker per source.</li>
+  </ul>
+
+  <div class="end">
+    <a href="https://github.com/guruprasadgp22/Job-Board/blob/main/backend/src/main/java/com/guru/jobboard/service/RelevanceScorer.java">Read RelevanceScorer.java</a>
+    <a href="https://github.com/guruprasadgp22/Job-Board/blob/main/backend/src/main/java/com/guru/jobboard/service/SkillCatalog.java">Read SkillCatalog.java</a>
+    <a href="https://job-board-6ev5.onrender.com/">Try the live app</a>
+    <a href="/#contact">Get in touch</a>
+  </div>
+</main>
+</body>
+</html>

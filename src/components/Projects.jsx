@@ -1,13 +1,65 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ME, PROJECTS } from "../data";
+import { ME } from "../data";
+import { projectsFor } from "../hooks/visitor";
 import { REDUCED, revealInRow } from "../hooks/motion";
 import { SPRING, haptic } from "../hooks/spring";
 import Icon from "./Icons";
 import Glitch from "./Glitch";
 import ProjectDetail from "./ProjectDetail";
+import LiveNote from "./LiveNote";
+import CopyButton from "./CopyButton";
+import pic from "../hooks/img";
 
+// The showcase has the main projects; smaller internship and course projects are listed under it.
+// ?role=ai or ?role=python in the link puts the AI project first.
+const PROJECTS = projectsFor().filter((p) => !p.training);
+const TRAINING = projectsFor().filter((p) => p.training);
 const N = PROJECTS.length;
+
+// Shareable addresses: #projects/job-board opens the showcase on that project.
+export const slug = (t) => t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+const fromHash = () => location.hash.slice(1).split("/")[1] || "";
+const linkTo = (p) => `${location.origin}${location.pathname}${location.search}#projects/${slug(p.t)}`;
+
+// Free hosts sleep when idle. Start waking them as soon as Projects opens, so the Live button is quick by the time
+// someone clicks it. no-cors: we only need the request to arrive, not to read the answer.
+let woken = false;
+const wakeDemos = () => {
+  if (woken) return;
+  woken = true;
+  PROJECTS.forEach((p) => p.wake && fetch(p.wake, { mode: "no-cors", cache: "no-store" }).catch(() => {}));
+};
+
+// Smaller projects from internships and courses: one compact card each, with whatever links exist.
+function Training() {
+  if (!TRAINING.length) return null;
+  return (
+    <section className="tp">
+      <h3 className="h3">Training projects</h3>
+      <p className="tp-sub">Smaller apps from my internships and courses.</p>
+      <ul className="tp-list">
+        {TRAINING.map((p) => (
+          <li className="tp-card" id={`p-${slug(p.t)}`} key={p.t} style={{ "--h": p.hue }}>
+            <div className="tp-top">
+              <b>{p.t}</b>
+              {p.from && <small>{p.from}</small>}
+            </div>
+            <p>{p.d}</p>
+            <div className="tp-ft">
+              <span className="tp-stack">{p.stack.slice(0, 4).join(" · ")}</span>
+              <span className="tp-links">
+                {p.demo && <a href={p.demo} target="_blank" rel="noopener noreferrer"><Icon name="arrow" size={14} />Live</a>}
+                {p.url && <a href={p.url} target="_blank" rel="noopener noreferrer"><Icon name="github" size={14} />Code</a>}
+                {!p.url && !p.demo && <span className="tp-none">code on request</span>}
+              </span>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
 const pad = (n) => String(n).padStart(2, "0");
 
 // Screens slide in from the side you're heading to; the phone trails a little behind for depth.
@@ -34,7 +86,7 @@ function Stage({ p, dir, onPrev, onNext, onOpen }) {
       <motion.button className="sc-tablet" layoutId={`card-${p.t}`} transition={SPRING} onClick={onOpen} aria-label={`Open ${p.t} ${p.caseStudy ? "case study" : "details"}`}>
         <span className="sc-screen">
           <AnimatePresence initial={false} custom={dir} mode="popLayout">
-            <motion.img key={p.t} src={p.img} alt={`${p.t} on a tablet`} custom={dir} variants={TABLET} initial="enter" animate="show" exit="exit" draggable="false" />
+            <motion.img key={p.t} {...pic(p.img, "(min-width: 1250px) 620px, (min-width: 768px) 70vw, 90vw")} alt={`${p.t} on a tablet`} custom={dir} variants={TABLET} initial="enter" animate="show" exit="exit" draggable="false" />
           </AnimatePresence>
         </span>
         <span className="sc-cam" aria-hidden="true" />
@@ -44,7 +96,7 @@ function Stage({ p, dir, onPrev, onNext, onOpen }) {
         <span className="sc-phone" aria-hidden="true">
           <span className="sc-screen">
             <AnimatePresence initial={false} custom={dir} mode="popLayout">
-              <motion.img key={p.t} src={p.phone || p.img} className={p.phone ? "real" : undefined} alt="" custom={dir} variants={PHONE} initial="enter" animate="show" exit="exit" draggable="false" />
+              <motion.img key={p.t} {...pic(p.phone || p.img, "220px")} className={p.phone ? "real" : undefined} alt="" custom={dir} variants={PHONE} initial="enter" animate="show" exit="exit" draggable="false" />
             </AnimatePresence>
           </span>
           <span className="sc-notch" />
@@ -62,11 +114,14 @@ function Stage({ p, dir, onPrev, onNext, onOpen }) {
   Arrow keys, the arrow buttons and swiping on the mockup all move between projects.
 */
 export default function Projects() {
-  const [[i, dir], setI] = useState([0, 1]);
+  const [[i, dir], setI] = useState(() => [Math.max(0, PROJECTS.findIndex((p) => slug(p.t) === fromHash())), 1]);
   const [sel, setSel] = useState(null);
   const close = useCallback(() => setSel(null), []);
   const strip = useRef(null);
   const p = PROJECTS[i];
+  const iRef = useRef(i);
+  const moved = useRef(false);
+  iRef.current = i;
 
   const go = useCallback((to, d) => {
     haptic(5);
@@ -78,34 +133,63 @@ export default function Projects() {
   const prev = () => go(i - 1, -1);
   const next = () => go(i + 1, 1);
 
-  // keep the active thumbnail in view when the strip scrolls sideways
+  // keep the active thumbnail in view when the strip scrolls sideways, and the address in step with the project
   useEffect(() => {
     revealInRow(strip.current, strip.current?.querySelector(`[data-i="${i}"]`));
+    // skip the first run, so an incoming link to a training project keeps its address until it's been followed
+    if (moved.current && location.hash.startsWith("#projects")) history.replaceState(null, "", `#projects/${slug(PROJECTS[i].t)}`);
+    moved.current = true;
   }, [i]);
 
-  // warm the cache so switching projects never waits on an image
+  // following a project link while already on this tab: jump to it (a training project scrolls to its card)
   useEffect(() => {
-    PROJECTS.forEach((x) => [x.img, x.phone].filter(Boolean).forEach((src) => (new Image().src = src)));
+    const follow = () => {
+      const k = PROJECTS.findIndex((x) => slug(x.t) === fromHash());
+      if (k > -1) return setI(([cur]) => (k === cur ? [cur, 1] : [k, k > cur ? 1 : -1]));
+      const card = fromHash() && document.getElementById(`p-${fromHash()}`);
+      if (!card) return;
+      document.querySelectorAll(".tp-card.hl").forEach((c) => c.classList.remove("hl"));
+      card.classList.add("hl");
+      setTimeout(() => card.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "center" }), 400);
+    };
+    follow();
+    addEventListener("hashchange", follow);
+    return () => removeEventListener("hashchange", follow);
   }, []);
 
-  const onKey = (e) => {
-    if (e.target.closest("input, textarea")) return;
-    if (e.key === "ArrowRight") (e.preventDefault(), next());
-    if (e.key === "ArrowLeft") (e.preventDefault(), prev());
-  };
+  // ← / → move between projects anywhere on this page (not while typing or with a window open)
+  useEffect(() => {
+    const key = (e) => {
+      if (e.target.closest?.("input, textarea, [contenteditable]") || e.metaKey || e.ctrlKey || e.altKey || document.querySelector('[aria-modal="true"]')) return;
+      if (e.key === "ArrowRight") (e.preventDefault(), go(iRef.current + 1, 1));
+      if (e.key === "ArrowLeft") (e.preventDefault(), go(iRef.current - 1, -1));
+    };
+    addEventListener("keydown", key);
+    return () => removeEventListener("keydown", key);
+  }, [go]);
+
+  // warm the cache so switching projects never waits on an image, and wake any sleeping demo servers
+  useEffect(() => {
+    wakeDemos();
+    PROJECTS.forEach((x) => [x.img, x.phone].filter(Boolean).forEach((src) => {
+      const im = new Image();
+      Object.assign(im, { sizes: "(min-width: 1250px) 620px, 90vw", srcset: pic(src).srcSet || "" });
+      im.src = src;
+    }));
+  }, []);
 
   return (
     <>
       <Glitch text="Projects" />
 
-      <section className="showcase" onKeyDown={onKey} aria-roledescription="carousel" aria-label="Projects">
+      <section className="showcase" aria-roledescription="carousel" aria-label="Projects">
         <Stage p={p} dir={dir} onPrev={prev} onNext={next} onOpen={() => setSel(p)} />
 
         <div className="sc-strip" ref={strip} role="tablist" aria-label="Choose a project">
           {PROJECTS.map((x, k) => (
             <button key={x.t} data-i={k} role="tab" aria-selected={k === i} aria-label={`${k + 1}. ${x.t}`} className={`sc-thumb ${k === i ? "on" : ""}`} onClick={() => go(k)}>
               {k === i && <motion.span className="sc-ring" layoutId="sc-ring" transition={SPRING} />}
-              <img src={x.img} alt="" loading="lazy" draggable="false" />
+              <img {...pic(x.img, "160px")} alt="" loading="lazy" draggable="false" />
               <b>{k + 1}</b>
             </button>
           ))}
@@ -147,13 +231,19 @@ export default function Projects() {
                   <a className="sc-btn" href={`mailto:${ME.email}?subject=${encodeURIComponent(`Walkthrough: ${p.t}`)}`} title="The code isn't public yet"><Icon name="mail" size={16} />Ask for a walkthrough</a>
                 )}
                 <button className={`sc-btn ${p.demo ? "" : "live"}`} onClick={() => setSel(p)}><Icon name="eye" size={16} />{p.caseStudy ? "Case study" : "Details"}</button>
+                {p.apiDocs && <a className="sc-btn" href={p.apiDocs} target="_blank" rel="noopener noreferrer"><Icon name="code" size={16} />API docs</a>}
+                {p.video && <a className="sc-btn" href={p.video} target="_blank" rel="noopener noreferrer"><Icon name="eye" size={16} />60-s demo</a>}
+                <CopyButton className="sc-btn" text={() => linkTo(p)} label="Copy link" done="Link copied" iconSize={16} />
               </div>
+              <LiveNote p={p} />
               <p className="sc-desc">{p.d}</p>
               <div className="stack">{p.stack.map((s) => <span className="tag" key={s}>{s}</span>)}</div>
             </div>
           </motion.div>
         </AnimatePresence>
       </section>
+
+      <Training />
 
       <AnimatePresence>{sel && <ProjectDetail key={sel.t} p={sel} onClose={close} />}</AnimatePresence>
     </>

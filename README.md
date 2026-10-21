@@ -23,7 +23,7 @@ Personal portfolio of **Guruprasad**, a full stack developer (Java · Spring Boo
 
 **Retro touches**
 - A BIOS-style boot screen you can replay from the command palette (it never delays the first visit), and an "old TV" channel change between pages.
-- Page titles that decode with a glitch effect, CRT scanlines and film grain, a split-flap board for exam scores, and LED meters for skills.
+- Page titles that decode with a glitch effect, CRT scanlines and film grain.
 
 **Personal touches**
 - Tech logos orbit the profile photo on two rings, and speed up when you hover over or tap them.
@@ -76,15 +76,15 @@ All text, numbers and links live in **[`src/data.js`](src/data.js)**, so you rar
 
 | To change | Edit in `src/data.js` |
 | --- | --- |
-| Name, roles, email, phone, location, social links, recruiter quick-view details | `ME` |
+| Name, roles, email, phone, location, social links, availability, the hiring-facts line (`hiring`), resume variants (`resumes`) | `ME` |
 | Bio, stats, terminal lines, languages, Tulu phrase, orbiting tech, "two truths and a lie", interest cards | `ABOUT` |
 | Jobs and internships (stacked-card summary, tech and lifecycle flow, full details) | `EXPERIENCE` |
 | Degrees and school results | `EDUCATION` |
 | Certificates (add `url` to show a **Verify** link) | `CERTIFICATIONS` |
 | Timeline and route map on the Journey page | `JOURNEY`, `JOURNEY_MAP` |
-| Skill groups and their LED meter levels | `SKILLS` |
-| Projects: repo and demo links, cover images (`img`, optional `phone` screenshot), highlight numbers (`stats`), case-study screenshot strip (`shots`), case studies, system-design notes | `PROJECTS` |
-| Coding profiles (saved numbers and profile links) | `PLATFORMS` |
+| Skill groups, and where each skill was used (`at`, shown under the chip). No scores. | `SKILLS` |
+| Projects: repo and demo links, cover images (`img`, optional `phone` screenshot), highlight numbers (`stats`), case-study screenshot strip (`shots`), case studies, system-design notes. Also `wake` (sleeping free server: shows a "~30 s" note and pings it early), `apiDocs`, `video`, `demoLogins`, `ci` + `badges`, `read` (files worth opening), `writeup`, and `training: true` for the smaller projects listed under the showcase | `PROJECTS` |
+| Coding profiles (saved numbers and profile links). `more: true` puts a platform in the collapsed "More platforms" row | `PLATFORMS` |
 | "What I'm doing" cards | `DOING` |
 | Navbar tabs | `NAV` |
 
@@ -93,6 +93,26 @@ All text, numbers and links live in **[`src/data.js`](src/data.js)**, so you rar
 - `Guruprasad_P_updated.pdf`: resume. If you rename it, update the `Resume` link in `ME.socials`.
 - `og.jpg`: the 1200×630 preview image shown when the link is shared (LinkedIn, WhatsApp, X).
 - `projects/*.svg`: project cover art. Swap in real screenshots (PNG/JPG) and point the project's `img` at them.
+- `404.html`: the "Out!" page with the batting game, shown for any address that doesn't exist.
+- `sw.js`: the service worker that makes repeat visits instant. Bump `VERSION` in it to clear every visitor's cache.
+
+**Images.** Every JPG has WebP copies (full size, plus 640px wide for big ones) that the site serves instead. After adding or replacing a JPG in `public/`, regenerate them (needs `cwebp`, `brew install webp`):
+
+```bash
+cd public && for f in me.jpg projects/*.jpg projects/*/*.jpg; do cwebp -quiet -q 78 "$f" -o "${f%.jpg}.webp"; [ "$(sips -g pixelWidth "$f" | awk '/pixelWidth/{print $2}')" -gt 700 ] && cwebp -quiet -q 76 -resize 640 0 "$f" -o "${f%.jpg}-640.webp"; done
+```
+
+Then add the image's widths to [`src/images.json`](src/images.json) (for example `"/projects/new.jpg": [1440, 640]`).
+
+**Contact form.** Messages go through Netlify Forms. In the Netlify dashboard, turn on form detection (Site configuration → Forms), then add an email notification so each message reaches your inbox.
+
+**Keyboard shortcuts.** `1`–`8` open the tabs, `←` `→` move between projects, `/` or `⌘K` opens search, `?` lists them all. Typing `sudo hire guruprasad` in search opens the recruiter quick view.
+
+**Seasonal touches.** Diyas appear for a few days around Deepavali. The dates are in `FESTIVALS` in `src/data.js`.
+
+**Personalised links.** Add `?for=Company` to greet a company's team in the sidebar, and `?role=backend | fullstack | ai | python` to put the most relevant projects first and offer the matching resume, e.g. `https://guruprasadgp.netlify.app/?for=LogistiQ&role=backend`.
+
+**Write-ups** are plain HTML pages in `public/writing/` (served as-is, so search engines can index them). The first is [`/writing/job-board-matching/`](public/writing/job-board-matching/index.html).
 
 **Colours and fonts** are CSS variables at the top of [`src/styles/global.css`](src/styles/global.css): `:root` holds the dark theme and `:root[data-theme="light"]` the light one.
 
@@ -139,8 +159,11 @@ The browser talks only to [`netlify/functions/chat.mjs`](netlify/functions/chat.
 ```
 ├── netlify/functions/stats.mjs   Live coding stats (Netlify Function)
 ├── netlify/functions/chat.mjs    GP Assistant: Claude API proxy with limits (Netlify Function)
-├── netlify.toml                  Build command, publish folder, functions folder
-├── public/                       Photo, resume, project covers, favicon
+├── netlify/functions/keep-awake.mjs  Scheduled every 10 min: keeps the Job Board demo on Render from sleeping
+├── netlify.toml                  Build command, publish folder, functions folder, cache headers
+├── lighthouserc.json             Lighthouse budgets (performance, accessibility, best practices, SEO)
+├── .github/workflows/            lighthouse.yml (performance guard on every push), links.yml (weekly broken-link check)
+├── public/                       Photo, resume, project covers, favicon, write-ups (writing/)
 ├── src/
 │   ├── data.js                   All site content
 │   ├── App.jsx                   Layout, page switching, swipe gestures, channel-change transition
@@ -148,18 +171,18 @@ The browser talks only to [`netlify/functions/chat.mjs`](netlify/functions/chat.
 │   ├── socials.js                Social link helpers
 │   ├── chat/                     knowledge.js (what the bot knows), notes.js (your extra notes), offline.js (fallback answers, job matcher)
 │   ├── styles/global.css         Theme tokens, layout, breakpoints, animations
-│   ├── hooks/                    spring.js, theme.js, useStats.js, useSmoothScroll.js, useInView.js, motion.js
+│   ├── hooks/                    spring.js, theme.js, useStats.js, useSmoothScroll.js, useInView.js, motion.js, visitor.js (?for= / ?role= links)
 │   └── components/
 │       ├── Sidebar.jsx, Avatar.jsx, Navbar.jsx, Overlays.jsx, Boot.jsx, Chat.jsx   Shell, overlays and chatbot
 │       ├── About, Experience, Education, Journey, Skills, Projects, Coding, Contact (.jsx)   Pages
-│       └── ProjectDetail, Timeline, Glitch, SplitFlap, LedMeter, Odometer, Reveal, ScrollWords,
+│       └── ProjectDetail, LiveNote, Timeline, Glitch, Odometer, Reveal, ScrollWords,
 │           TechOrbit, TwoTruths, JourneyMap, Icons (.jsx)   Building blocks
 └── vite.config.js                React plugin and local /api/stats
 ```
 
 ## Deployment
 
-The site is hosted on Netlify and linked to this repository. Every push to `main` builds (`npm run build`), publishes `dist/` and deploys both functions. The only environment variable is the optional `ANTHROPIC_API_KEY` for the chatbot.
+The site is hosted on Netlify and linked to this repository. Every push to `main` builds (`npm run build`), publishes `dist/` and deploys the functions (`keep-awake` runs on its own schedule). The only environment variable is the optional `ANTHROPIC_API_KEY` for the chatbot.
 
 To host your own copy, create a site on Netlify from this repo. `netlify.toml` already has the right settings.
 

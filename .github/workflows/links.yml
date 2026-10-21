@@ -1,0 +1,41 @@
+# Checks every link on the site once a week (and on demand). If a project, certificate or profile link
+# breaks, it opens a GitHub issue listing the broken links, so you hear about it before a recruiter does.
+name: Link check
+
+on:
+  schedule:
+    - cron: "30 3 * * 1" # Mondays, 9:00 am IST
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check links
+        id: lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          # data.js holds every project, certificate and profile link; the HTML pages hold the rest
+          args: >-
+            --no-progress
+            --max-retries 3
+            --timeout 30
+            --accept 200..=299,403,429,999
+            --exclude "^https://(www\.)?linkedin\.com"
+            --exclude "localhost"
+            --root-dir ${{ github.workspace }}/public
+            src/data.js src/socials.js index.html public/writing/**/*.html public/404.html
+          output: lychee-report.md
+          fail: false
+      - name: Open an issue if anything is broken
+        if: steps.lychee.outputs.exit_code != 0
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: "Broken links on the portfolio"
+          content-filepath: lychee-report.md
+          labels: broken-links

@@ -16,9 +16,14 @@ export const ME = {
   phone: "+91 76248 14091", // shown in the sidebar contacts. Set to "" to hide it.
   website: "https://guruprasadgp.netlify.app/",
   location: "Bengaluru, Karnataka",
-  // Recruiter quick view. TODO: set availability to something specific, e.g. "Immediate joiner" or "Notice: 15 days".
+  timeZone: "Asia/Kolkata", // for the live local time on the Contact page
+  replyTime: "I usually reply within 24 hours", // TODO: keep this true, or change it
+  // Recruiter quick view and the chatbot use these.
   lookingFor: ["Software Engineer", "Java Developer", "Backend Developer", "Full Stack Developer", "Python Developer"],
-  availability: "Open to work",
+  availability: "Available to join immediately",
+  // The three things recruiters filter on first, shown as one line under your name and in the quick view.
+  // TODO: check the location / work-mode line says what you actually want.
+  hiring: ["Available immediately", "Bengaluru / Remote", "SDE-1 · Java Backend"],
   topSkills: ["Java", "Spring Boot", "Python", "React.js", "PostgreSQL", "REST APIs", "Docker", "Microservices"],
   socials: [
     { label: "GitHub", url: "https://github.com/guruprasadgp22" },
@@ -26,6 +31,9 @@ export const ME = {
     // Add more with the same shape, e.g. { label: "Instagram", url: "..." } or { label: "X", url: "..." }
     { label: "Resume", url: "/Guruprasad_P_updated.pdf" }, // the PDF in the public/ folder
   ],
+  // Resume variants. "backend" is offered when a link has ?role=backend or "Match a job" finds a backend role.
+  // TODO: put a Java Backend version of your resume in public/ and set backend to its path, e.g. "/Guruprasad_Java_Backend.pdf".
+  resumes: { default: "/Guruprasad_P_updated.pdf", backend: "" },
 };
 
 export const ABOUT = {
@@ -35,16 +43,17 @@ export const ABOUT = {
   bio2:
     "At Sony India Software Centre I worked in SAP Identity and Access Management: user lifecycle, role-based access control, authentication, authorization and security compliance. Before that I built full-stack apps with Java, Python, Spring Boot, Hibernate and React.js at KodNest, and a Car Rental Management System at DLithe. I'm a quick learner who likes hard problems, and I'm looking for roles as a Software Engineer, Java, Backend, Full Stack or Python Developer.",
   facts: [
-    { value: 3, suffix: "", label: "internships" },
+    // live = counted from the rest of the site (companies, projects, solved); value is only the fallback
+    { value: 3, suffix: "", label: "companies worked with", live: "companies" },
     { value: 1, suffix: " yr", label: "at Sony India" },
-    { value: 8, suffix: "", label: "projects built" },
-    { value: 1100, suffix: "+", label: "problems solved" },
+    { value: 8, suffix: "", label: "projects built", live: "projects" },
+    { value: 1433, suffix: "+", label: "problems solved", live: "solved" },
   ],
   terminal: [
     ["whoami", "guruprasad — software developer (Java · Python · Spring Boot · React)"],
-    ["cat focus.txt", "Spring Boot · Microservices · React.js · PostgreSQL · RAG"],
-    ["echo $CURRENTLY_BUILDING", "FlightWise AI — flight booking on Spring Boot microservices & React"],
-    ["cat status", "open to SDE and full-stack roles ✔"],
+    ["cat focus.txt", "Java · Spring Boot · Microservices · React.js · PostgreSQL"],
+    ["echo $LATEST_PROJECT", "Job Board — resume-matched jobs on Spring Boot & React, live on Render"],
+    ["cat status", "available to join immediately ✔"],
   ],
   // Languages from LinkedIn. lvl is LinkedIn's 1–5 proficiency scale (5 = native or bilingual).
   languages: [
@@ -55,7 +64,7 @@ export const ABOUT = {
   // Tech that circles your photo on the About page. Inner ring first, outer ring second. c = brand colour.
   orbit: [
     [{ n: "Java", c: "#f89820" }, { n: "Spring Boot", c: "#6db33f" }, { n: "React", c: "#61dafb" }, { n: "Python", c: "#ffd43b" }],
-    [{ n: "Kafka", c: "#e8e8e8" }, { n: "Docker", c: "#2496ed" }, { n: "PostgreSQL", c: "#699eca" }, { n: "Redis", c: "#ff4438" }, { n: "Hibernate", c: "#bcae79" }, { n: "MySQL", c: "#00a0c4" }],
+    [{ n: "Spring Security", c: "#6db33f" }, { n: "Docker", c: "#2496ed" }, { n: "PostgreSQL", c: "#699eca" }, { n: "PyTorch", c: "#ee4c2c" }, { n: "Hibernate", c: "#bcae79" }, { n: "MySQL", c: "#00a0c4" }],
   ],
   // "Ask me to say hello in Tulu" on the About page.
   // TODO: you're the native speaker, so check the phrase and the way it's spelled out.
@@ -70,7 +79,7 @@ export const ABOUT = {
   // TODO: these are not on your resume. Edit the text so it sounds like you.
   interests: [
     { icon: "🏏", title: "Cricket", tag: "teamwork", back: "Weekend matches with friends. Reading the game is a lot like reading a codebase." },
-    { icon: "⌨", title: "Problem Solving", tag: "dsa", back: "Regular DSA practice on LeetCode, GFG, NeetCode and Code 360 keeps my thinking sharp." },
+    { icon: "⌨", title: "Problem Solving", tag: "dsa", back: "Daily DSA practice, mostly on LeetCode, GeeksforGeeks and NeetCode. Live numbers are on the Coding page." },
     { icon: "♫", title: "Music", tag: "focus", back: "Music on while I code. It helps me get into deep focus." },
     { icon: "✈", title: "Travel", tag: "explore", back: "Exploring new places around Karnataka whenever I get the chance." },
   ],
@@ -87,10 +96,10 @@ export const JOURNEY = [
   { yr: "May 2024", t: "Engineer, unlocked", d: "Finished my B.E. with a 7.26 CGPA. Four years, endless assignments, one degree, no regrets.", tags: ["Graduated", "7.26 CGPA"] },
   { yr: "May 2024", t: "An offer letter from TCS", d: "Got an offer from TCS! Life had other plans and I couldn't join, but it told me I was on the right track.", tags: ["TCS", "Offer letter"] },
   { yr: "Oct 2024", t: "Back to coding school at KodNest", d: "Joined KodNest to level up in full stack Java and Python. More code, more coffee, more 'aha!' moments.", tags: ["Java", "Python", "Full Stack"] },
-  { yr: "May 2025", t: "Sony is calling", d: "Got an internship offer from Sony India. Yes, that Sony! Cue the happy dance.", tags: ["Offer", "Sony"] },
-  { yr: "Jun 2025", t: "Hello, real IT world", d: "Joined Sony as a Software Developer Intern. Learned how a real IT company works: big systems, real users, real deadlines, and SAP access management.", tags: ["Sony", "SAP IAM", "RBAC"] },
-  { yr: "Jun 2026", t: "Sony chapter complete", d: "Finished my internship on 2 June 2026, with a backpack full of industry lessons and a lot more confidence.", tags: ["Completed", "Industry ready"] },
-  { yr: "Now", t: "Leveling up, every single day", d: "Sharpening DSA, polishing my communication, building projects like FlightWise AI and learning something new daily. Next level loading…", tags: ["DSA", "Communication", "Projects", "Open to work"] },
+  { yr: "May 2025", t: "Sony is calling", d: "Got an apprenticeship offer from Sony India. Yes, that Sony! Cue the happy dance.", tags: ["Offer", "Sony"] },
+  { yr: "Jun 2025", t: "Hello, real IT world", d: "Joined Sony as a Software Developer Apprentice. Learned how a real IT company works: big systems, real users, real deadlines, and SAP access management.", tags: ["Sony", "SAP IAM", "RBAC"] },
+  { yr: "Jun 2026", t: "Sony chapter complete", d: "Finished my apprenticeship on 2 June 2026, with a backpack full of industry lessons and a lot more confidence.", tags: ["Completed", "Industry ready"] },
+  { yr: "Now", t: "Leveling up, every single day", d: "Sharpening DSA, polishing my communication, building projects like FlightWise AI and learning something new daily. Next level loading…", tags: ["DSA", "Communication", "Projects", "Available now"] },
 ];
 
 // Stops on the animated map at the top of the Journey page, oldest first. lat/lon are the real places
@@ -107,7 +116,7 @@ export const JOURNEY_MAP = [
 export const EXPERIENCE = [
   {
     when: "Jun 2025 – Jun 2026",
-    role: "Software Developer Intern",
+    role: "Software Developer Apprentice", // exact title from the resume and offer letter
     org: "Sony India Software Centre Pvt. Ltd. · Bengaluru, Karnataka",
     sum: "SAP Identity and Access Management in a production enterprise environment: who gets access to what, and keeping it safe.",
     tech: ["SAP IAM", "RBAC", "Access reviews", "Audits", "Ticketing & SLAs"],
@@ -164,7 +173,7 @@ export const EXPERIENCE = [
 export const PROJECTS = [
   {
     t: "Job Board",
-    stats: [["6", "job sources, synced every 6 hours"], ["~200", "skills recognised in a resume"]],
+    stats: [["6", "job sources, synced every 6 hours"], ["165", "skills recognised in a resume"]],
     img: "/projects/job-board.jpg",
     phone: "/projects/job-board-phone.jpg",
     cat: "Full-stack",
@@ -173,6 +182,26 @@ export const PROJECTS = [
     hue: 220,
     url: "https://github.com/guruprasadgp22/Job-Board",
     demo: "https://job-board-6ev5.onrender.com/",
+    // Free Render plan: the server sleeps when idle. Shows a "may take ~30 s" note, and the site pings it to wake it early.
+    wake: "https://job-board-6ev5.onrender.com/actuator/health",
+    apiDocs: "https://job-board-6ev5.onrender.com/swagger-ui.html",
+    writeup: "/writing/job-board-matching/",
+    // TODO: record a 60-second walkthrough (Loom or unlisted YouTube) and paste its link here.
+    video: "",
+    // TODO: create two demo accounts on the live site and fill these in, so recruiters can look around without signing up.
+    demoLogins: [
+      // { as: "Job seeker", email: "seeker@demo.dev", password: "…" },
+      // { as: "Employer", email: "employer@demo.dev", password: "…" },
+    ],
+    // Engineering facts shown as badges. ci = the GitHub Actions workflow behind the build-status badge.
+    ci: "https://github.com/guruprasadgp22/Job-Board/actions/workflows/ci.yml",
+    badges: ["13 unit tests", "Docker", "Java 21", "Swagger / OpenAPI"],
+    // Three files worth opening before an interview.
+    read: [
+      { f: "RelevanceScorer.java", what: "Service logic: how each job gets its 0–100 match score", url: "https://github.com/guruprasadgp22/Job-Board/blob/main/backend/src/main/java/com/guru/jobboard/service/RelevanceScorer.java" },
+      { f: "JwtAuthFilter.java", what: "Security: the filter that checks the JWT on every request", url: "https://github.com/guruprasadgp22/Job-Board/blob/main/backend/src/main/java/com/guru/jobboard/security/JwtAuthFilter.java" },
+      { f: "RelevanceAndLinkTests.java", what: "Tests: scoring rules and closed-job detection", url: "https://github.com/guruprasadgp22/Job-Board/blob/main/backend/src/test/java/com/guru/jobboard/RelevanceAndLinkTests.java" },
+    ],
     caseStudy: {
       when: "October 2026",
       problem:
@@ -185,7 +214,7 @@ export const PROJECTS = [
           "Email and password accounts with BCrypt-hashed passwords; every request carries a JWT. Job seekers and employers get separate, role-protected endpoints.",
           "Stateless tokens keep each user's jobs, resume and applications private without server sessions."],
          ["Resume parser", "PDFBox · skill catalog",
-          "Reads PDF, DOCX or pasted resumes and pulls out skills using a catalog of about 200 technologies and their spellings (reactjs → React, k8s → Kubernetes).",
+          "Reads PDF, DOCX or pasted resumes and pulls out skills using a catalog of 165 technologies and their spellings (reactjs → React, k8s → Kubernetes).",
           "Normalised skill names make matching reliable when resumes and job ads word things differently."]],
         [["Job sync", "6 sources",
           "Pulls jobs from Remotive, RemoteOK, Arbeitnow and The Muse, plus LinkedIn, Indeed, Naukri and Glassdoor through the JSearch API and Adzuna, using your desired role and top skills as search terms.",
@@ -352,9 +381,12 @@ export const PROJECTS = [
       outcome: "Working end to end locally: sign in, upload a panoramic X-ray, get marked findings in about two seconds, and print or save the report. The Docker and Render setup is ready, but there's no live demo yet. It's a screening aid, not a medical diagnosis.",
     },
   },
-  // From your LinkedIn summary. TODO: add the real tech stack for the last five and a link for each.
+  // training: true = smaller internship / course projects, listed under "Training projects" below the showcase.
+  // from = where it was built. TODO: push the code for the ones with url: "" and paste the repo links.
   {
     t: "Car Rental Management System",
+    training: true,
+    from: "DLithe internship",
     stats: [["DLithe", "internship project"], ["6", "technologies"]],
     img: "/projects/car-rental.svg",
     cat: "Full-stack",
@@ -365,6 +397,8 @@ export const PROJECTS = [
   },
   {
     t: "Full-Stack E-Commerce Application",
+    training: true,
+    from: "Practice project",
     stats: [["Full-stack", "auth, REST API and CRUD"]],
     img: "/projects/ecommerce.svg",
     cat: "Full-stack",
@@ -375,6 +409,8 @@ export const PROJECTS = [
   },
   {
     t: "Currency Converter",
+    training: true,
+    from: "KodNest internship",
     stats: [["KodNest", "internship project"], ["REST", "API integration"]],
     img: "/projects/currency.svg",
     cat: "Full-stack",
@@ -385,6 +421,8 @@ export const PROJECTS = [
   },
   {
     t: "QuickNote",
+    training: true,
+    from: "KodNest internship",
     stats: [["Live", "demo on Vercel"], ["KodNest", "internship project"]],
     img: "/projects/quicknote.svg",
     cat: "Web app",
@@ -396,6 +434,8 @@ export const PROJECTS = [
   },
   {
     t: "To-Do List",
+    training: true,
+    from: "KodNest internship",
     stats: [["KodNest", "internship project"], ["CRUD", "with a database"]],
     img: "/projects/todo.svg",
     cat: "Web app",
@@ -406,17 +446,18 @@ export const PROJECTS = [
   },
 ];
 
-// From your resume and LinkedIn summary. lv = how confident you are with the group (0–100), shown as an LED meter.
-// TODO: the lv values are estimates. Set them to what feels right.
+// Grouped skills, no scores. at = where you used it (shown under the chip), so every skill can be backed up in an interview.
+// Only list what you've actually used. Removed for now (not in any project yet): Kubernetes, Kafka, Redis, LangChain4j, RAG,
+// automation testing. Add one back once a project uses it.
 export const SKILLS = [
-  { h: "Languages", lv: 85, s: ["Java", "Python", "JavaScript", "SQL", "C++"] },
-  { h: "Backend", lv: 85, s: ["Spring Framework", "Spring Boot", "Spring Security", "JWT", "Hibernate", "JDBC", "Django", "RESTful APIs", "Microservices"] },
-  { h: "Frontend", lv: 80, s: ["React.js", "HTML5", "CSS3", "JavaScript", "Tailwind CSS", "Material UI"] },
-  { h: "Databases", lv: 80, s: ["PostgreSQL", "MySQL", "MongoDB", "Oracle SQL", "Redis", "Firebase"] },
-  { h: "Cloud & DevOps", lv: 75, s: ["Docker", "Kubernetes", "CI/CD", "Apache Kafka", "Linux/Unix"] },
-  { h: "AI / ML", lv: 70, s: ["PyTorch", "YOLOv5", "OpenCV", "LangChain4j", "RAG"] },
-  { h: "Tools", lv: 85, s: ["Git", "GitHub", "Maven", "Postman", "IntelliJ IDEA", "VS Code"] },
-  { h: "CS, Testing & Soft Skills", lv: 80, s: ["OOP", "Collections Framework", "Database Design", "Manual Testing", "Automation Testing", "Agile", "Leadership", "Time Management"] },
+  { h: "Languages", s: ["Java", "Python", "JavaScript", "SQL", "C++"], at: { Java: "Job Board, FlightWise AI", Python: "Dental detection", JavaScript: "Job Board, FlightWise AI", SQL: "Job Board, FlightWise AI" } },
+  { h: "Backend", s: ["Spring Boot", "Spring Security", "JWT", "Spring Cloud Gateway", "Eureka", "Hibernate / JPA", "JDBC", "RESTful APIs", "Microservices", "Flask", "Django"], at: { "Spring Boot": "Job Board, FlightWise AI", "Spring Security": "Job Board", JWT: "Job Board, FlightWise AI", "Spring Cloud Gateway": "FlightWise AI", Eureka: "FlightWise AI", "Hibernate / JPA": "Job Board, KodNest", JDBC: "KodNest", "RESTful APIs": "Job Board, FlightWise AI", Microservices: "FlightWise AI", Flask: "Dental detection", Django: "KodNest" } },
+  { h: "Frontend", s: ["React.js", "HTML5", "CSS3", "Tailwind CSS", "Material UI", "Vite"], at: { "React.js": "Job Board, FlightWise AI", "Tailwind CSS": "FlightWise AI", "Material UI": "FlightWise AI", Vite: "Job Board, FlightWise AI" } },
+  { h: "Databases", s: ["PostgreSQL", "MySQL", "MongoDB", "Oracle SQL", "Firebase"], at: { PostgreSQL: "Job Board, FlightWise AI", MySQL: "KodNest", MongoDB: "KodNest", "Oracle SQL": "KodNest", Firebase: "Dental detection" } },
+  { h: "DevOps", s: ["Docker", "GitHub Actions", "Linux/Unix"], at: { Docker: "Job Board, FlightWise AI, Dental", "GitHub Actions": "Job Board" } },
+  { h: "AI / ML", s: ["PyTorch", "YOLOv5", "ONNX Runtime", "OpenCV"], at: { PyTorch: "Dental detection", YOLOv5: "Dental detection", "ONNX Runtime": "Dental detection", OpenCV: "Dental detection" } },
+  { h: "Tools", s: ["Git", "GitHub", "Maven", "Postman", "IntelliJ IDEA", "VS Code", "Swagger / OpenAPI"], at: { Maven: "Job Board, FlightWise AI", "Swagger / OpenAPI": "Job Board" } },
+  { h: "CS fundamentals & practices", s: ["Data Structures & Algorithms", "OOP", "Collections Framework", "Database Design", "Unit Testing", "Manual Testing", "Agile"], at: { "Data Structures & Algorithms": "LeetCode, GFG, NeetCode", "Unit Testing": "Job Board (JUnit)", "Database Design": "Job Board, FlightWise AI", "Manual Testing": "KodNest" } },
 ];
 
 // Certifications from your resume and LinkedIn (newest first). by / when / url are optional.
@@ -443,23 +484,24 @@ export const PLATFORMS = [
       { user: "guruprasad6200", url: "https://leetcode.com/u/guruprasad6200/", val: 354, note: "133 E / 174 M / 47 H" },
     ],
   },
+  // more: true = shown under "More platforms" (collapsed) so the strongest profiles lead.
   { n: "GeeksforGeeks", c: "#2f8d46", val: 652, lbl: "problems solved", meta: [["Score", "1965"], ["Institute", "#1"]], url: "https://www.geeksforgeeks.org/profile/guruprasadgp22" },
   { n: "NeetCode", c: "#ff5fa2", val: 235, lbl: "problems solved · 114 E / 115 M / 6 H", meta: [["Max streak", "135d"], ["Rank", "Top 1.2%"]], url: "https://neetcode.io/user/PrimalPikachu220" },
-  { n: "Code360", c: "#f05b5b", val: 4, lbl: "problems · Naukri Code 360", meta: [["Moderate", "1"], ["Hard", "1"]], url: "https://www.naukri.com/code360/profile/guruprasadgp" },
+  { n: "Code360", more: true, c: "#f05b5b", val: 4, lbl: "problems · Naukri Code 360", meta: [["Moderate", "1"], ["Hard", "1"]], url: "https://www.naukri.com/code360/profile/guruprasadgp" },
   {
-    n: "HackerRank", c: "#c6e55c", val: 50, lbl: "challenges solved · best of 2 accounts", meta: [["Java", "4★"], ["Certificates", "3"]],
+    n: "HackerRank", more: true, c: "#c6e55c", val: 50, lbl: "challenges solved · best of 2 accounts", meta: [["Java", "4★"], ["Certificates", "3"]],
     url: "https://www.hackerrank.com/profile/guruprasad6200",
     accounts: [
       { user: "guruprasad6200", url: "https://www.hackerrank.com/profile/guruprasad6200", val: 50, note: "Python 3★ · 3 certificates" },
       { user: "gp130143", url: "https://www.hackerrank.com/profile/gp130143", val: 43, note: "Java 4★" },
     ],
   },
-  { n: "HackerEarth", c: "#7b83ff", val: 9, lbl: "problems solved · 35 submissions", meta: [["Score", "160"], ["Rank", "Top 20%"]], url: "https://www.hackerearth.com/@guruprasadgp/" },
+  { n: "HackerEarth", more: true, c: "#7b83ff", val: 9, lbl: "problems solved · 35 submissions", meta: [["Score", "160"], ["Rank", "Top 20%"]], url: "https://www.hackerearth.com/@guruprasadgp/" },
   // Loads live while the InterviewBit profile is public. Set val to null to hide the card.
-  { n: "InterviewBit", c: "#14b8a6", val: 6, lbl: "problems solved · score 1,228", meta: [["University rank", "#7"], ["Streak", "1d"]], url: "https://www.interviewbit.com/profile/guruprasad-gp_339/" },
+  { n: "InterviewBit", more: true, c: "#14b8a6", val: 6, lbl: "problems solved · score 1,228", meta: [["University rank", "#7"], ["Streak", "1d"]], url: "https://www.interviewbit.com/profile/guruprasad-gp_339/" },
 ];
 
-// score is optional: shown on a split-flap board
+// score is optional: shown as plain text under the qualification
 export const EDUCATION = [
   {
     yr: "Dec 2020 – May 2024",
@@ -483,10 +525,16 @@ export const EDUCATION = [
 
 // "What I'm doing" cards on the About page. icon: code | server | brain | git
 export const DOING = [
-  { icon: "server", t: "Backend & APIs", d: "Spring Boot microservices, REST APIs, JWT auth and event-driven systems with Kafka, Redis and PostgreSQL." },
-  { icon: "code", t: "Frontend development", d: "Responsive React.js interfaces styled with Material UI and Tailwind CSS." },
-  { icon: "brain", t: "AI & ML", d: "Computer vision with PyTorch and YOLOv5, and AI-powered search with LangChain4j and RAG." },
-  { icon: "git", t: "DevOps & tooling", d: "Docker, Kubernetes and CI/CD pipelines, with Git, Maven and Linux in daily use." },
+  { icon: "server", t: "Backend & APIs", d: "Spring Boot REST APIs and microservices with Spring Security, JWT, JPA and PostgreSQL (Job Board, FlightWise AI)." },
+  { icon: "code", t: "Frontend development", d: "Responsive React.js interfaces with Vite, Material UI and Tailwind CSS." },
+  { icon: "brain", t: "AI & ML", d: "Computer vision with PyTorch and YOLOv5, served through ONNX Runtime (Dental detection)." },
+  { icon: "git", t: "DevOps & tooling", d: "Docker images, GitHub Actions for builds and scheduled jobs, with Git, Maven and Linux in daily use." },
+];
+
+// Seasonal touches, shown only between from and to (dates in India time). Keep it to a few days a year.
+export const FESTIVALS = [
+  { kind: "diwali", name: "Happy Deepavali!", from: "2026-11-06", to: "2026-11-10" },
+  { kind: "diwali", name: "Happy Deepavali!", from: "2027-10-27", to: "2027-10-31" },
 ];
 
 // Tabs in the navbar: [page id, label, icon, short label for the phone tab bar]

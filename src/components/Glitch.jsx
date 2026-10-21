@@ -29,8 +29,10 @@ export default function Glitch({ text }) {
   };
 
   useEffect(() => {
-    run();
-    return () => cancelAnimationFrame(raf.current);
+    // on the first visit, wait for the intro curtain to lift so the decode is actually seen
+    const wait = document.documentElement.classList.contains("intro") ? 1300 : 0;
+    const t = setTimeout(run, wait);
+    return () => (clearTimeout(t), cancelAnimationFrame(raf.current));
   }, [text]);
 
   return (

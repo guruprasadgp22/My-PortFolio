@@ -10,9 +10,10 @@ export const PRONOUNS = "";
 
 export default `
 ## Availability and preferences
-- TODO: notice period / joining date, e.g. "Available to join immediately".
-- TODO: preferred locations, e.g. "Bengaluru, open to relocating anywhere in India".
-- TODO: work mode, e.g. "On-site, hybrid or remote".
+- Available to join immediately. No notice period: the Sony apprenticeship ended on 2 June 2026.
+- Job title at Sony: Software Developer Apprentice (as on the offer letter and resume).
+- Target role: SDE-1 / Java Backend Developer; also open to Full Stack and Python roles.
+- Location: based in Bengaluru, open to remote. TODO: say whether you'd relocate and which work modes (on-site, hybrid, remote) you prefer.
 
 ## Interview notes (why I built things the way I did)
 - FlightWise AI: the system-design reasoning for every part (gateway, Eureka, each service, PostgreSQL, Docker) is in the project data, so the assistant can already explain those choices.

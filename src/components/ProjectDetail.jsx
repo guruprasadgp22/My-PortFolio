@@ -5,6 +5,8 @@ import { SPRING, SOFT, haptic } from "../hooks/spring";
 import { startScroll, stopScroll } from "../hooks/useSmoothScroll";
 import Icon from "./Icons";
 import { ME } from "../data";
+import LiveNote from "./LiveNote";
+import pic from "../hooks/img";
 
 // Layered architecture diagram: each row is a tier, nodes inside a row sit side by side.
 // Nodes written as [name, sub, does, why] are tappable and open a panel explaining that part of the system.
@@ -125,7 +127,7 @@ export default function ProjectDetail({ p, onClose }) {
         <div className="pd-grab" onPointerDown={(e) => drag.start(e)}>
           <span className="pd-handle" aria-hidden="true" />
           <motion.figure className="pd-media" layoutId={`media-${p.t}`} transition={SPRING}>
-            {p.img && <img src={p.img} alt={`${p.t} preview`} draggable="false" />}
+            {p.img && <img {...pic(p.img, "(min-width: 768px) 760px, 100vw")} alt={`${p.t} preview`} draggable="false" />}
           </motion.figure>
           <button className="pd-close" ref={closeBtn} onClick={onClose} aria-label="Close project">
             <Icon name="x" size={18} />
@@ -165,6 +167,48 @@ export default function ProjectDetail({ p, onClose }) {
             </motion.section>
           )}
 
+          {(p.ci || p.badges?.length > 0) && (
+            <motion.section className="pd-sec" {...fade(0.37)}>
+              <h4 className="h5">Engineering</h4>
+              <div className="pd-badges">
+                {/* live build status from GitHub Actions; hidden if the workflow can't be reached */}
+                {p.ci && (
+                  <a href={p.ci} target="_blank" rel="noopener noreferrer" className="pd-ci">
+                    <img src={`${p.ci}/badge.svg`} alt="Build status" height="20" onError={(e) => (e.currentTarget.parentElement.style.display = "none")} />
+                  </a>
+                )}
+                {p.badges?.map((b) => <span className="tag" key={b}>{b}</span>)}
+              </div>
+            </motion.section>
+          )}
+
+          {p.read?.length > 0 && (
+            <motion.section className="pd-sec" {...fade(0.37)}>
+              <h4 className="h5">Code worth reading</h4>
+              <ul className="pd-read">
+                {p.read.map((r) => (
+                  <li key={r.f}>
+                    <a href={r.url} target="_blank" rel="noopener noreferrer">
+                      <code>{r.f}</code>
+                      <span>{r.what}</span>
+                      <Icon name="arrow" size={14} />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </motion.section>
+          )}
+
+          {p.writeup && (
+            <motion.section className="pd-sec" {...fade(0.37)}>
+              <a className="pd-writeup" href={p.writeup} target="_blank" rel="noopener noreferrer">
+                <Icon name="book" size={18} />
+                <span><small>Write-up</small><b>How {p.t} matches resumes to jobs</b></span>
+                <Icon name="arrow" size={16} />
+              </a>
+            </motion.section>
+          )}
+
           {p.shots?.length > 0 && (
             <motion.section className="pd-sec" {...fade(0.38)}>
               <h4 className="h5">Screenshots <small className="pd-shots-n">{p.shots.length} · swipe or scroll sideways</small></h4>
@@ -173,7 +217,7 @@ export default function ProjectDetail({ p, onClose }) {
                 {p.shots.map((s) => (
                   <li key={s.src}>
                     <a href={s.src} target="_blank" rel="noopener noreferrer">
-                      <img src={s.src} alt={s.cap} loading="lazy" decoding="async" draggable="false" />
+                      <img {...pic(s.src, "320px")} alt={s.cap} loading="lazy" decoding="async" draggable="false" />
                     </a>
                     <span>{s.cap}</span>
                   </li>
@@ -198,7 +242,18 @@ export default function ProjectDetail({ p, onClose }) {
                 <Icon name="arrow" /><span>Live demo</span>
               </a>
             )}
+            {p.apiDocs && (
+              <a className="form-btn ghost" href={p.apiDocs} target="_blank" rel="noopener noreferrer">
+                <Icon name="code" /><span>API docs</span>
+              </a>
+            )}
+            {p.video && (
+              <a className="form-btn ghost" href={p.video} target="_blank" rel="noopener noreferrer">
+                <Icon name="eye" /><span>60-second demo</span>
+              </a>
+            )}
           </motion.div>
+          <LiveNote p={p} />
         </div>
       </motion.article>
     </div>,

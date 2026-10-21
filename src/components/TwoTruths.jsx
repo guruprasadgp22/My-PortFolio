@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ABOUT } from "../data";
 import { SPRING, haptic } from "../hooks/spring";
+import confetti from "../hooks/confetti";
 
 // "Two truths and a lie": pick the statement you think is false, then every card reveals the answer.
 export default function TwoTruths() {
@@ -9,9 +10,10 @@ export default function TwoTruths() {
   const done = pick !== null;
   const right = done && ABOUT.truths[pick].lie;
 
-  const choose = (i) => {
+  const choose = (i, e) => {
     if (done) return;
     haptic(ABOUT.truths[i].lie ? 8 : 14);
+    if (ABOUT.truths[i].lie) confetti(e.currentTarget); // spotted the lie
     setPick(i);
   };
 
@@ -23,7 +25,7 @@ export default function TwoTruths() {
           <li key={t.s}>
             <motion.button
               className={`ttl-card ${done ? (t.lie ? "lie" : "truth") : ""} ${pick === i ? "picked" : ""}`}
-              onClick={() => choose(i)}
+              onClick={(e) => choose(i, e)}
               disabled={done}
               whileTap={done ? undefined : { scale: 0.97 }}
               animate={done && pick === i && !t.lie ? { x: [0, -8, 8, -5, 5, 0] } : { x: 0 }}

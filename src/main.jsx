@@ -16,6 +16,12 @@ document.addEventListener(
   { passive: true }
 );
 
+// Service worker (public/sw.js): repeat visits open instantly, even offline. Production only, so local
+// development always shows your latest edits.
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
+}
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <App />

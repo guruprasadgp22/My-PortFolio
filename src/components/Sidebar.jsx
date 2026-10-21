@@ -9,6 +9,7 @@ import { startScroll, stopScroll } from "../hooks/useSmoothScroll";
 import Avatar from "./Avatar";
 import { openPalette, openQuickView } from "./Overlays";
 import { iconFor, handle, softBreaks } from "../socials";
+import { VISITOR } from "../hooks/visitor";
 
 const Wrap = ({ text }) => softBreaks(text).map((x) => (typeof x === "string" ? x : <wbr key={x.wbr} />));
 
@@ -129,6 +130,13 @@ export default function Sidebar() {
           </button>
         </div>
       </div>
+
+      {/* ?for=Company in the link greets that company's team */}
+      {VISITOR.company && <p className="hello-co">👋 Hi, {VISITOR.company} team. Thanks for taking a look!</p>}
+      {/* the three things recruiters filter on first: availability, location, role */}
+      {ME.hiring?.length > 0 && (
+        <p className="hire-strip" aria-label="Hiring facts">{ME.hiring.map((h) => <span key={h}>{h}</span>)}</p>
+      )}
 
       <div className="sidebar-info-more">
         <div className="separator" />

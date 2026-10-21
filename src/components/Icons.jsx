@@ -33,6 +33,7 @@ const P = {
   search: <><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></>,
   zap: <path d="M13 2 4 14h7l-1 8 9-12h-7Z" />,
   download: <path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14" />,
+  check: <path d="m5 12.5 4.5 4.5L19 7" />,
   copy: <><rect x="9" y="9" width="12" height="12" rx="2" /><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" /></>,
 };
 

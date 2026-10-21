@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { ABOUT, DOING } from "../data";
+import { ABOUT, DOING, EXPERIENCE, PROJECTS } from "../data";
 import { REDUCED } from "../hooks/motion";
 import useInView from "../hooks/useInView";
+import useStats from "../hooks/useStats";
+import { livePlatforms } from "../platforms";
 import Odometer from "./Odometer";
 import Icon from "./Icons";
 import Glitch from "./Glitch";
@@ -104,6 +106,15 @@ function Tulu() {
 }
 
 export default function About() {
+  // Numbers marked live: "…" in data.js are counted from the same data as the Experience, Projects and Coding
+  // pages (and the quick view), so they can never disagree.
+  const stats = useStats();
+  const cards = livePlatforms(stats);
+  const live = {
+    solved: cards.reduce((n, p) => n + p.val, 0),
+    projects: PROJECTS.length,
+    companies: new Set(EXPERIENCE.map((x) => x.org.split(" · ")[0])).size,
+  };
   return (
     <>
       <Glitch text="About me" />
@@ -138,7 +149,7 @@ export default function About() {
         <ul className="facts">
           {ABOUT.facts.map((f, k) => (
             <Reveal as="li" className="fact" key={f.label} delay={k * 70}>
-              <b><Odometer value={f.value} suffix={f.suffix} /></b>
+              <b><Odometer value={(f.live && live[f.live]) || f.value} suffix={f.suffix} /></b>
               <span>{f.label}</span>
             </Reveal>
           ))}

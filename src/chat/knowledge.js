@@ -20,6 +20,7 @@ Headline: ${ME.headline}
 Summary: ${ME.lede}
 Location: ${ME.location}
 Status: ${ME.availability}
+Hiring facts: ${(ME.hiring || []).join(" · ")}
 Looking for: ${ME.lookingFor.join(", ")}
 Top skills: ${ME.topSkills.join(", ")}
 Bio: ${ABOUT.bio} ${ABOUT.bio2}
@@ -42,7 +43,8 @@ Certifications:
 ${CERTIFICATIONS.map((c) => `- ${c.t}${c.by ? `, ${c.by}` : ""}${c.when ? ` (${c.when})` : ""}`).join("\n")}
 
 # Skills (section: skills)
-${SKILLS.map((g) => `- ${g.h}: ${g.s.join(", ")}`).join("\n")}
+${SKILLS.map((g) => `- ${g.h}: ${g.s.map((s) => (g.at?.[s] ? `${s} (used in ${g.at[s]})` : s)).join(", ")}`).join("\n")}
+Not used in any project yet, so not claimed: Kafka, Redis, Kubernetes, CI/CD pipelines beyond GitHub Actions, LangChain4j / RAG, automation testing.
 
 # Projects (section: projects)
 ${PROJECTS.map((p) => {
@@ -51,7 +53,7 @@ ${PROJECTS.map((p) => {
   return `## ${p.t} [${p.cat}]
 ${p.d}
 Stack: ${p.stack.join(", ")}
-${p.url ? `Code: ${p.url}` : "Code: not public yet (a walkthrough is available on request)"}${p.demo ? `\nLive demo: ${p.demo}` : ""}${cs ? `
+${p.training ? `Training project (${p.from})\n` : ""}${p.url ? `Code: ${p.url}` : "Code: not public yet (a walkthrough is available on request)"}${p.demo ? `\nLive demo: ${p.demo}${p.wake ? " (free server: the first load can take ~30 seconds)" : ""}` : ""}${p.apiDocs ? `\nAPI docs: ${p.apiDocs}` : ""}${p.writeup ? `\nWrite-up: ${ME.website.replace(/\/$/, "")}${p.writeup}` : ""}${p.read ? `\nCode worth reading: ${p.read.map((r) => `${r.f} (${r.what}) ${r.url}`).join("; ")}` : ""}${cs ? `
 When: ${cs.when}
 Problem: ${cs.problem}
 ${arch ? `Architecture:\n${arch}` : ""}

@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Out! Page not found · Guruprasad</title>
+<meta name="robots" content="noindex" />
+<meta name="theme-color" content="#0c0a12" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<style>
+:root{--bg:#0c0a12;--card:#15121d;--line:#2a2436;--fg:#efe9f6;--mute:#a59cb4;--ember:#ff6a3d;--ember-2:#ffb547;--ok:#3ddc84;--pitch:#3b5a2e;--crease:#e9e2cf}
+@media (prefers-color-scheme:light){:root{--bg:#faf6ef;--card:#fff;--line:#e6dccb;--fg:#1d1724;--mute:#6b6178;--ember:#d9480f;--ember-2:#b45309;--ok:#15803d;--pitch:#7da35f;--crease:#fffdf6}}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif;padding:24px 16px}
+main{width:100%;max-width:560px;text-align:center}
+.code{font:700 13px ui-monospace,Menlo,monospace;letter-spacing:.14em;color:var(--ember-2);text-transform:uppercase}
+h1{font-size:clamp(34px,8vw,52px);line-height:1.05;margin:6px 0 8px;letter-spacing:-.02em}
+p{color:var(--mute);margin:0 0 18px}
+.game{position:relative;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;margin:0 auto 18px;user-select:none;-webkit-user-select:none;touch-action:manipulation;cursor:pointer}
+canvas{display:block;width:100%;height:auto;border-radius:12px}
+.hud{display:flex;justify-content:space-between;font:600 13px ui-monospace,Menlo,monospace;color:var(--mute);padding:8px 4px 0}
+.hud b{color:var(--fg)}
+.call{position:absolute;left:0;right:0;top:34%;font:800 clamp(26px,7vw,40px) system-ui,sans-serif;letter-spacing:.02em;pointer-events:none;opacity:0;transform:scale(.6);transition:opacity .2s,transform .25s cubic-bezier(.34,1.56,.64,1)}
+.call.on{opacity:1;transform:none}
+.hint{font-size:13.5px}
+kbd{font:12px ui-monospace,Menlo,monospace;padding:1px 6px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px}
+a.home{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:14px;background:linear-gradient(135deg,var(--ember),var(--ember-2));color:#0c0a12;font-weight:700;text-decoration:none}
+a.home:focus-visible{outline:2px solid var(--fg);outline-offset:3px}
+</style>
+</head>
+<body>
+<main>
+  <p class="code">404 · page not found</p>
+  <h1>Out! 🏏</h1>
+  <p>This page doesn't exist. It may have moved, or the link has a typo. Fancy a quick knock before you head back?</p>
+
+  <div class="game" id="game" role="application" aria-label="Batting game. Press space or tap to swing when the ball reaches the bat.">
+    <canvas id="cv" width="520" height="220"></canvas>
+    <div class="call" id="call" aria-live="polite"></div>
+    <div class="hud"><span>Runs <b id="runs">0</b></span><span>Balls <b id="balls">0</b>/6</span><span>Best <b id="best">0</b></span></div>
+  </div>
+  <p class="hint">Press <kbd>Space</kbd> or tap to swing when the ball reaches the bat. Six balls an over.</p>
+
+  <a class="home" href="/">← Back to the portfolio</a>
+</main>
+<script>
+(function () {
+  var cv = document.getElementById("cv"), ctx = cv.getContext("2d");
+  var W = cv.width, H = cv.height, d = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width = W * d; cv.height = H * d; ctx.scale(d, d);
+  var css = getComputedStyle(document.documentElement);
+  var col = function (n) { return css.getPropertyValue(n).trim(); };
+  var still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var $ = function (id) { return document.getElementById(id); };
+  var best = 0; try { best = +localStorage.getItem("cricket-best") || 0; } catch (e) {}
+  $("best").textContent = best;
+
+  var BAT_X = 90, GROUND = H - 40;
+  var ball, swing = 0, runs = 0, balls = 0, state = "wait", callTimer, nextTimer;
+
+  function bowl() {
+    var speed = 3.6 + Math.random() * 2.2 + balls * 0.25;
+    ball = { x: W - 30, y: GROUND - 70, vx: -speed, vy: 0.4 + Math.random() * 0.5, hit: false, done: false };
+    state = "bowling";
+  }
+  function call(text, color) {
+    var c = $("call"); c.textContent = text; c.style.color = color; c.classList.add("on");
+    clearTimeout(callTimer); callTimer = setTimeout(function () { c.classList.remove("on"); }, 900);
+  }
+  function endBall(r, text, color) {
+    ball.done = true; balls++; runs += r;
+    $("runs").textContent = runs; $("balls").textContent = balls;
+    call(text, color);
+    if (balls >= 6) {
+      if (runs > best) { best = runs; try { localStorage.setItem("cricket-best", best); } catch (e) {} $("best").textContent = best; }
+      state = "over";
+      nextTimer = setTimeout(function () { call(runs + " off the over! Tap to go again", col("--fg")); }, 1000);
+    } else nextTimer = setTimeout(bowl, 1100);
+  }
+  function hitSwing() {
+    if (state === "over") { runs = 0; balls = 0; $("runs").textContent = 0; $("balls").textContent = 0; bowl(); return; }
+    if (state === "wait") { bowl(); return; }
+    if (swing > 0 || !ball || ball.done || ball.hit) return;
+    swing = 1;
+    var dx = ball.x - BAT_X;
+    if (dx > -8 && dx < 34) {
+      // timing decides the shot: dead centre is a six
+      var q = Math.abs(dx - 12);
+      var r = q < 6 ? 6 : q < 13 ? 4 : q < 19 ? 2 : 1;
+      ball.hit = true; ball.vx = 6 + r * 1.1; ball.vy = -(2 + r * 0.9);
+      endBall(r, r === 6 ? "SIX!" : r === 4 ? "FOUR!" : r + (r === 1 ? " run" : " runs"), r >= 4 ? col("--ok") : col("--ember-2"));
+    }
+  }
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = col("--pitch"); ctx.fillRect(0, GROUND - 6, W, 46);
+    ctx.fillStyle = col("--crease"); ctx.fillRect(BAT_X + 30, GROUND - 6, 3, 46); ctx.fillRect(W - 60, GROUND - 6, 3, 46);
+    // stumps
+    ctx.fillStyle = col("--crease");
+    for (var i = 0; i < 3; i++) ctx.fillRect(BAT_X - 34 + i * 7, GROUND - 58, 4, 52);
+    ctx.fillRect(BAT_X - 35, GROUND - 60, 22, 3);
+    // batter's bat, rotating on a swing
+    ctx.save(); ctx.translate(BAT_X, GROUND - 40);
+    ctx.rotate(-0.9 + (swing > 0 ? Math.sin(swing * Math.PI) * 1.9 : 0));
+    ctx.fillStyle = col("--ember-2"); ctx.fillRect(-4, 0, 9, 50);
+    ctx.fillStyle = col("--mute"); ctx.fillRect(-2, -16, 5, 18);
+    ctx.restore();
+    if (ball && !(ball.done && !ball.hit && ball.x < -10)) {
+      ctx.beginPath(); ctx.arc(ball.x, ball.y, 6, 0, 7); ctx.fillStyle = "#c8102e"; ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,.7)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(ball.x, ball.y, 6, 0.3, 2.8); ctx.stroke();
+    }
+    if (state === "wait") {
+      ctx.fillStyle = col("--mute"); ctx.font = "600 14px system-ui,sans-serif"; ctx.textAlign = "center";
+      ctx.fillText("Tap or press Space to face the first ball", W / 2, 40);
+    }
+  }
+  function step() {
+    if (swing > 0) { swing += 0.12; if (swing >= 1) swing = 0; }
+    if (ball && state === "bowling") {
+      ball.x += ball.vx; ball.y += ball.vy;
+      if (!ball.hit && ball.y > GROUND - 14) { ball.y = GROUND - 14; ball.vy = -ball.vy * 0.55; } // pitches, then bounces
+      if (ball.hit) ball.vy += 0.12;
+      if (!ball.hit && !ball.done && ball.x < BAT_X - 30) endBall(0, "OUT! Bowled", col("--ember"));
+    }
+    draw();
+    requestAnimationFrame(step);
+  }
+  addEventListener("keydown", function (e) { if (e.code === "Space" || e.key === " ") { e.preventDefault(); hitSwing(); } });
+  $("game").addEventListener("pointerdown", function (e) { e.preventDefault(); hitSwing(); });
+  if (still) { draw(); $("game").style.display = "none"; document.querySelector(".hint").style.display = "none"; }
+  else requestAnimationFrame(step);
+})();
+</script>
+</body>
+</html>

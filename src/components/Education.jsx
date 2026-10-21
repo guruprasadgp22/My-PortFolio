@@ -1,10 +1,9 @@
 import { CERTIFICATIONS, EDUCATION } from "../data";
 import Glitch from "./Glitch";
 import Reveal from "./Reveal";
-import SplitFlap from "./SplitFlap";
 import Icon from "./Icons";
 
-// Each qualification is a "ticket" card; the score lands on a split-flap board.
+// Each qualification is a "ticket" card, with its score as plain text on the stub.
 export default function Education() {
   return (
     <>
@@ -21,7 +20,7 @@ export default function Education() {
             {e.score && (
               <div className="edu-score">
                 <span className="edu-score-label">Final score</span>
-                <SplitFlap text={e.score} />
+                <span className="edu-score-val">{e.score}</span>
               </div>
             )}
             <span className="edu-stamp" aria-hidden="true">{e.yr.match(/\d{4}/g)?.pop()}</span>
