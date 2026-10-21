@@ -61,7 +61,7 @@ Status: ${cs.outcome}` : ""}`;
 }).join("\n\n")}
 
 # Coding practice (section: coding)
-${PLATFORMS.filter((p) => p.val != null).map((p) => `- ${p.n}: ${p.val} ${p.lbl}${p.meta?.length ? ` (${p.meta.map(([k, v]) => `${k} ${v}`).join(", ")})` : ""} · ${(p.accounts || [p.url]).join(" and ")}`).join("\n")}
+${PLATFORMS.filter((p) => p.val != null).map((p) => `- ${p.n}: ${p.val} ${p.lbl}${p.meta?.length ? ` (${p.meta.map(([k, v]) => `${k} ${v}`).join(", ")})` : ""} · ${p.accounts ? p.accounts.map((a) => `${a.user}: ${a.val} (${a.note}) ${a.url}`).join("; ") : p.url}`).join("\n")}
 (These are the last saved numbers; the Coding page shows live ones.)
 
 # Journey, oldest first (section: journey)

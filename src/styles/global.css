@@ -385,6 +385,15 @@ button{cursor:pointer;background:none;border:0;padding:0}
 .plat .lbl{color:var(--mute);font-size:13px}
 .plat .meta{display:flex;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:12px;color:var(--mute);border-top:1px dashed var(--line);padding-top:10px;margin-top:12px;font-variant-numeric:tabular-nums}
 .plat .meta b{color:var(--fg);font-weight:600}
+/* one row per profile on platforms with several accounts */
+.plat.multi:hover{transform:none}
+.plat-accts{position:relative;z-index:1;display:grid;gap:6px;margin-top:12px}
+.plat-accts a{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:color-mix(in srgb,var(--fg) 4%,transparent);transition:border-color .2s,background .2s,transform .2s var(--ease)}
+.plat-accts a:hover{border-color:var(--c);background:color-mix(in srgb,var(--c) 10%,transparent);transform:translateX(3px)}
+.plat-accts .who{display:grid;min-width:0;font-family:var(--mono);font-size:12.5px;color:var(--fg);overflow-wrap:anywhere}
+.plat-accts small{font-size:11px;color:var(--mute)}
+.plat-accts b{font-family:var(--display);font-size:17px;font-weight:800;font-variant-numeric:tabular-nums}
+.plat-accts .go{color:var(--c);font-size:13px}
 .heat{position:relative;margin-top:20px;border:1px solid var(--line);border-radius:16px;padding:18px;background:var(--grad-card)}
 .heat .hd{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-family:var(--mono);font-size:12px;color:var(--mute);margin-bottom:14px}
 .heatgrid{overflow-x:auto}
@@ -1023,3 +1032,8 @@ kbd{font-family:var(--mono);font-size:10.5px;padding:2px 6px;border-radius:6px;b
   .sc-thumb:hover{transform:none}
 }
 @media (prefers-reduced-motion:reduce){.sc-thumb,.sc-btn,.sc-arrow{transition:none}}
+/* one contributions map per account (LeetCode, HackerRank) */
+.heat-acct+.heat-acct{margin-top:18px;padding-top:16px;border-top:1px dashed var(--line)}
+.heat-acct-hd{display:inline-flex;align-items:center;gap:6px;margin:0 0 10px;font-family:var(--mono);font-size:13px;font-weight:700;color:var(--c,var(--signal))}
+.heat-acct-hd:hover{text-decoration:underline}
+:root[data-theme="light"] .heat-acct-hd{color:color-mix(in srgb,var(--c) 60%,#000)}

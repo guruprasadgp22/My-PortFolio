@@ -2,11 +2,11 @@
 // InterviewBit and the GitHub contribution graph, fetched server-side
 // (their APIs block browser requests) and cached on Netlify's CDN for 6 hours.
 const USERS = {
-  leetcode: "guruprasadgp22",
+  leetcode: ["guruprasadgp22", "guruprasad6200"], // every account is shown on its own; totals use the highest, not the sum
   gfg: "guruprasadgp22",
   code360: "guruprasadgp",
   github: "guruprasadgp22",
-  hackerrank: ["guruprasad6200", "gp130143"], // both accounts are added together
+  hackerrank: ["guruprasad6200", "gp130143"], // every account is shown on its own; totals use the highest, not the sum
   hackerearth: "guruprasadgp",
   neetcode: "PrimalPikachu220",
   interviewbit: "guruprasad-gp_339",
@@ -20,7 +20,8 @@ async function getJson(url, init = {}) {
   return res.json();
 }
 
-async function leetcode() {
+// One LeetCode account: solved by difficulty, contest rating, best streak and the daily calendar.
+async function leetcodeAccount(user) {
   const year = new Date().getUTCFullYear();
   const query = `query($u:String!,$y:Int,$p:Int){
     matchedUser(username:$u){
@@ -33,17 +34,38 @@ async function leetcode() {
   const { data } = await getJson("https://leetcode.com/graphql", {
     method: "POST",
     headers: { "Content-Type": "application/json", Referer: "https://leetcode.com" },
-    body: JSON.stringify({ query, variables: { u: USERS.leetcode, y: year, p: year - 1 } }),
+    body: JSON.stringify({ query, variables: { u: user, y: year, p: year - 1 } }),
   });
   const u = data.matchedUser;
+  if (!u) throw new Error(`leetcode ${user}: not found`);
   const n = Object.fromEntries(u.submitStatsGlobal.acSubmissionNum.map((d) => [d.difficulty, d.count]));
   // Merge both years' calendars: { unixSeconds: submissions }
   const calendar = { ...JSON.parse(u.prev?.submissionCalendar || "{}"), ...JSON.parse(u.cur?.submissionCalendar || "{}") };
   return {
+    user, url: `https://leetcode.com/u/${user}/`,
     solved: n.All, easy: n.Easy, medium: n.Medium, hard: n.Hard,
     rating: data.userContestRanking?.rating ? Math.round(data.userContestRanking.rating) : null,
     streak: u.cur?.streak ?? null,
     calendar,
+  };
+}
+
+// All LeetCode accounts. Accounts are never added together (that would count a problem solved on both twice):
+// the totals are the account with the most problems solved, and each day of the calendar takes the busier account.
+async function leetcode() {
+  const accounts = (await Promise.allSettled(USERS.leetcode.map(leetcodeAccount))).filter((r) => r.status === "fulfilled").map((r) => r.value);
+  if (!accounts.length) throw new Error("leetcode: no accounts loaded");
+  const top = accounts.reduce((a, b) => ((b.solved || 0) > (a.solved || 0) ? b : a));
+  const calendar = {};
+  for (const a of accounts) for (const [ts, c] of Object.entries(a.calendar)) calendar[ts] = Math.max(calendar[ts] || 0, c);
+  const ratings = accounts.map((a) => a.rating).filter(Boolean);
+  return {
+    solved: top.solved, easy: top.easy, medium: top.medium, hard: top.hard, top: top.user,
+    rating: ratings.length ? Math.max(...ratings) : null,
+    streak: Math.max(0, ...accounts.map((a) => a.streak || 0)),
+    calendar,
+    // each account keeps its own calendar too, so the contributions map can show one grid per account
+    accounts,
   };
 }
 
@@ -131,6 +153,7 @@ async function hackerrankAccount(u) {
   ]);
   if (badges.status !== "fulfilled" && history.status !== "fulfilled") throw new Error(`hackerrank ${u}: no data`);
   return {
+    user: u,
     badges: badges.value?.models || [],
     days: history.value && typeof history.value === "object" ? history.value : {},
     certs: (certs.value?.data || [])
@@ -142,16 +165,25 @@ async function hackerrankAccount(u) {
 async function hackerrank() {
   const accounts = (await Promise.allSettled(USERS.hackerrank.map(hackerrankAccount))).filter((r) => r.status === "fulfilled").map((r) => r.value);
   if (!accounts.length) throw new Error("hackerrank: no accounts loaded");
+  // accounts are never added together: the total is the highest account, each day takes the busier account
   const stars = {};
-  let solved = 0;
-  for (const a of accounts)
-    for (const b of a.badges) {
-      solved += b.solved || 0;
-      if (b.stars) stars[b.badge_name] = Math.max(stars[b.badge_name] || 0, b.stars);
-    }
+  for (const a of accounts) for (const b of a.badges) if (b.stars) stars[b.badge_name] = Math.max(stars[b.badge_name] || 0, b.stars);
+  const solvedOf = (a) => a.badges.reduce((t, b) => t + (b.solved || 0), 0);
+  const solved = Math.max(...accounts.map(solvedOf));
   const days = {};
-  for (const a of accounts) for (const [d, n] of Object.entries(a.days)) days[d] = (days[d] || 0) + (+n || 0);
-  return { solved, stars, certs: accounts.flatMap((a) => a.certs), accounts: accounts.length, days: Object.keys(days).length ? days : null };
+  for (const a of accounts) for (const [d, n] of Object.entries(a.days)) days[d] = Math.max(days[d] || 0, +n || 0);
+  // each account on its own: challenges solved, its best skill badge and passed certificates
+  const each = accounts.map((a) => {
+    const best = a.badges.filter((b) => b.stars).sort((x, y) => y.stars - x.stars)[0];
+    return {
+      user: a.user, url: `https://www.hackerrank.com/profile/${a.user}`,
+      solved: solvedOf(a),
+      best: best ? { skill: best.badge_name, stars: best.stars } : null,
+      certs: a.certs.length,
+      days: a.days,
+    };
+  });
+  return { solved, stars, certs: accounts.flatMap((a) => a.certs), accounts: each, days: Object.keys(days).length ? days : null };
 }
 
 // HackerEarth: problems solved, points and leaderboard rank, plus submissions per day.

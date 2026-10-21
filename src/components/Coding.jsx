@@ -33,15 +33,17 @@ const fromIso = (days) => {
 
 // The platforms the contributions map can toggle between. c = the brand colour the squares are tinted with.
 const SOURCES = [
-  { id: "leetcode", label: "LeetCode", short: "LeetCode", c: "#ffa116", unit: "submissions", get: (s) => s?.leetcode?.calendar && fromUnix(s.leetcode.calendar), url: "https://leetcode.com/u/guruprasadgp22/" },
+  { id: "leetcode", label: "LeetCode", short: "LeetCode", c: "#ffa116", unit: "submissions", get: (s) => s?.leetcode?.calendar && fromUnix(s.leetcode.calendar), accounts: (s) => s?.leetcode?.accounts?.map((a) => ({ user: a.user, url: a.url, days: fromUnix(a.calendar) })), url: "https://leetcode.com/u/guruprasadgp22/", url2: "https://leetcode.com/u/guruprasad6200/" },
   { id: "gfg", label: "GeeksforGeeks", short: "GFG", c: "#2fbf5a", unit: "submissions", get: (s) => s?.gfg?.days && fromIso(s.gfg.days), url: "https://www.geeksforgeeks.org/profile/guruprasadgp22" },
   { id: "github", label: "GitHub", short: "GitHub", c: "#3de0ff", unit: "contributions", get: (s) => s?.github?.days && fromIso(s.github.days), url: "https://github.com/guruprasadgp22" },
   { id: "code360", label: "Code360", short: "Code360", c: "#f05b5b", unit: "submissions", get: (s) => s?.code360?.days && fromIso(s.code360.days), url: "https://www.naukri.com/code360/profile/guruprasadgp" },
-  { id: "hackerrank", label: "HackerRank", short: "HackerRank", c: "#c6e55c", unit: "submissions", get: (s) => s?.hackerrank?.days && fromIso(s.hackerrank.days), url: "https://www.hackerrank.com/profile/guruprasad6200", url2: "https://www.hackerrank.com/profile/gp130143" },
+  { id: "hackerrank", label: "HackerRank", short: "HackerRank", c: "#c6e55c", unit: "submissions", get: (s) => s?.hackerrank?.days && fromIso(s.hackerrank.days), accounts: (s) => s?.hackerrank?.accounts?.map((a) => ({ user: a.user, url: a.url, days: fromIso(a.days) })), url: "https://www.hackerrank.com/profile/guruprasad6200", url2: "https://www.hackerrank.com/profile/gp130143" },
   { id: "neetcode", label: "NeetCode", short: "NeetCode", c: "#ff5fa2", unit: "submissions", get: (s) => s?.neetcode?.days && fromIso(s.neetcode.days), url: "https://neetcode.io/user/PrimalPikachu220" },
   { id: "hackerearth", label: "HackerEarth", short: "HackerEarth", c: "#7b83ff", unit: "submissions", get: (s) => s?.hackerearth?.days && fromIso(s.hackerearth.days), url: "https://www.hackerearth.com/@guruprasadgp/" },
   { id: "interviewbit", label: "InterviewBit", short: "InterviewBit", c: "#14b8a6", unit: "submissions", get: (s) => s?.interviewbit?.days && fromIso(s.interviewbit.days), url: "https://www.interviewbit.com/profile/guruprasad-gp_339/" },
 ];
+// "guruprasadgp22" from "https://leetcode.com/u/guruprasadgp22/"
+const handleOf = (url) => url.replace(/\/+$/, "").split("/").pop().replace(/^@/, "");
 // "All" adds every platform's activity together, day by day.
 const ALL = { id: "all", label: "All platforms", short: "All", c: "#ff6a3d", unit: "activities" };
 const mergeDays = (maps) => {
@@ -209,19 +211,24 @@ function Grid({ g, src, fit, animate, label }) {
 }
 
 // Everything for one view (All, or one platform): stats, the per-platform table on "All", and the grid.
+// The four headline numbers for one calendar.
+const Stats = ({ g, src }) => (
+  <dl className="heat-stats">
+    <div><dt>{src.unit}</dt><dd>{g.total.toLocaleString("en-IN")}</dd></div>
+    <div><dt>active days</dt><dd>{g.active}</dd></div>
+    <div><dt>longest streak</dt><dd>{g.best}d</dd></div>
+    <div><dt>current streak</dt><dd>{g.cur}d</dd></div>
+  </dl>
+);
+
 function Slide({ view, per, fit, animate, live, onChoose }) {
-  const { src, g } = view;
+  const { src, g, accts } = view;
   const isAll = src === ALL;
   const months = Math.round(fit.weeks / 4.35);
   const label = live ? `${src.label}: ${g.total.toLocaleString("en-IN")} ${src.unit} on ${g.active} days in the last year` : "Sample activity heatmap";
   return (
     <div className="heat-slide" style={{ "--c": src.c }} role="tabpanel" aria-label={src.label}>
-      <dl className="heat-stats">
-        <div><dt>{src.unit}</dt><dd>{g.total.toLocaleString("en-IN")}</dd></div>
-        <div><dt>active days</dt><dd>{g.active}</dd></div>
-        <div><dt>longest streak</dt><dd>{g.best}d</dd></div>
-        <div><dt>current streak</dt><dd>{g.cur}d</dd></div>
-      </dl>
+      {!accts && <Stats g={g} src={src} />}
       {isAll && live && (
         <div className="heat-table-wrap">
           <table className="heat-table">
@@ -252,13 +259,27 @@ function Slide({ view, per, fit, animate, live, onChoose }) {
           </table>
         </div>
       )}
-      {live && !g.active && (
-        <p className="heat-empty">No {src.label} activity in the last 12 months{g.lastActive ? ` · last active ${g.lastActive}` : ""}</p>
+      {accts ? (
+        // a platform with several profiles: one map per account, each with its own numbers
+        accts.map((a) => (
+          <section className="heat-acct" key={a.user} aria-label={`@${a.user}`}>
+            <a className="heat-acct-hd" href={a.url} target="_blank" rel="noopener noreferrer">@{a.user} <span aria-hidden="true">↗</span></a>
+            <Stats g={a.g} src={src} />
+            {!a.g.active && <p className="heat-empty">No activity on this account in the last 12 months{a.g.lastActive ? ` · last active ${a.g.lastActive}` : ""}</p>}
+            <Grid g={a.g} src={src} fit={fit} animate={animate} label={`${src.label} @${a.user}: ${a.g.total.toLocaleString("en-IN")} ${src.unit} on ${a.g.active} days in the last year`} />
+          </section>
+        ))
+      ) : (
+        <>
+          {live && !g.active && (
+            <p className="heat-empty">No {src.label} activity in the last 12 months{g.lastActive ? ` · last active ${g.lastActive}` : ""}</p>
+          )}
+          <Grid g={g} src={src} fit={fit} animate={animate} label={label} />
+        </>
       )}
-      <Grid g={g} src={src} fit={fit} animate={animate} label={label} />
       <div className="heat-ft">
         <span>
-          {isAll ? "All platforms added together · " : ""}
+          {isAll ? "All platforms added together · " : accts ? `${accts.length} accounts, each on its own · ` : ""}
           {fit.weeks < WEEKS ? `last ${months} months shown · stats cover 12 months` : "last 12 months"}
         </span>
         <span className="legend">less {[0.08, 0.3, 0.55, 0.8, 1].map((t) => <i key={t} style={{ background: `color-mix(in srgb, ${src.c} ${t * 100}%, var(--heat-0))` }} />)} more</span>
@@ -284,7 +305,8 @@ function Heatmap({ stats }) {
   // every platform's calendar and its stats, worked out once per stats load
   const per = useMemo(() => SOURCES.map((src) => {
     const days = src.get(stats);
-    return { src, days, g: days ? grid(days) : null };
+    const accts = days && src.accounts?.(stats)?.map((a) => ({ ...a, g: grid(a.days) }));
+    return { src, days, g: days ? grid(days) : null, accts: accts?.length > 1 ? accts : null };
   }), [stats]);
   const live = per.some((x) => x.g);
   const views = useMemo(() => {
@@ -352,8 +374,8 @@ function Heatmap({ stats }) {
         <span className="heat-nav">
           {cur.url && (
             <span className="heat-link">
-              <a href={cur.url} target="_blank" rel="noopener noreferrer">{cur.url2 ? "Profile 1 ↗" : "View profile ↗"}</a>
-              {cur.url2 && <> · <a href={cur.url2} target="_blank" rel="noopener noreferrer">Profile 2 ↗</a></>}
+              <a href={cur.url} target="_blank" rel="noopener noreferrer">{cur.url2 ? `@${handleOf(cur.url)} ↗` : "View profile ↗"}</a>
+              {cur.url2 && <> · <a href={cur.url2} target="_blank" rel="noopener noreferrer">@{handleOf(cur.url2)} ↗</a></>}
             </span>
           )}
           <span className="heat-arrows">
@@ -392,7 +414,14 @@ export function withLive(p, s) {
   if (!s) return p;
   if (p.n === "LeetCode" && s.leetcode) {
     const l = s.leetcode;
-    return { ...p, val: l.solved, lbl: `problems solved · ${l.easy} E / ${l.medium} M / ${l.hard} H`, meta: [["Rating", l.rating ?? "–"], ["Max streak", `${l.streak ?? 0}d`]], live: true };
+    return {
+      ...p,
+      val: l.solved,
+      lbl: `problems solved · ${l.easy} E / ${l.medium} M / ${l.hard} H${l.accounts?.length > 1 ? ` · best of ${l.accounts.length} accounts` : ""}`,
+      meta: [["Rating", l.rating ?? "–"], ["Max streak", `${l.streak ?? 0}d`]],
+      accounts: l.accounts?.map((a) => ({ user: a.user, url: a.url, val: a.solved, note: `${a.easy} E / ${a.medium} M / ${a.hard} H` })) ?? p.accounts,
+      live: true,
+    };
   }
   if (p.n === "GeeksforGeeks" && s.gfg) {
     return { ...p, val: s.gfg.solved, meta: [["Score", s.gfg.score], ["Institute", `#${s.gfg.instituteRank}`]], live: true };
@@ -406,7 +435,11 @@ export function withLive(p, s) {
     return {
       ...p,
       val: h.solved,
-      lbl: `challenges solved · ${h.accounts} account${h.accounts === 1 ? "" : "s"}`,
+      lbl: `challenges solved${h.accounts.length > 1 ? ` · best of ${h.accounts.length} accounts` : ""}`,
+      accounts: h.accounts.map((a) => ({
+        user: a.user, url: a.url, val: a.solved,
+        note: [a.best && `${a.best.skill === "Sql" ? "SQL" : a.best.skill} ${a.best.stars}★`, a.certs && `${a.certs} certificate${a.certs === 1 ? "" : "s"}`].filter(Boolean).join(" · ") || "no badges yet",
+      })),
       meta: [...(skill ? [[skill === "Sql" ? "SQL" : skill, `${stars}★`]] : []), ["Certificates", h.certs?.length ?? 0]],
       live: true,
     };
@@ -461,13 +494,27 @@ export default function Coding() {
       </p>
       <div className="cp">
         {platforms.map((p, k) => (
-          <Reveal as="a" delay={k * 80} key={p.n} className="plat" href={p.url} target="_blank" rel="noopener noreferrer" style={{ "--c": p.c }}>
+          // a platform with several profiles isn't one big link: each profile gets its own row and link
+          <Reveal as={p.accounts ? "div" : "a"} delay={k * 80} key={p.n} className={`plat ${p.accounts ? "multi" : ""}`} {...(!p.accounts && { href: p.url, target: "_blank", rel: "noopener noreferrer" })} style={{ "--c": p.c }}>
             <span className="pn">{p.n}{p.live && <i className="live-dot" title="Live" />}</span>
             <span className="val"><Odometer value={p.val} suffix="+" /></span>
             <span className="lbl">{p.lbl}</span>
             <span className="meta">
               {p.meta.map(([a, b]) => <span key={a}>{a} <b>{b}</b></span>)}
             </span>
+            {p.accounts && (
+              <ul className="plat-accts" aria-label={`${p.n} profiles`}>
+                {p.accounts.map((a) => (
+                  <li key={a.user}>
+                    <a href={a.url} target="_blank" rel="noopener noreferrer">
+                      <span className="who">@{a.user}<small>{a.note}</small></span>
+                      <b>{a.val.toLocaleString("en-IN")}</b>
+                      <span className="go" aria-hidden="true">↗</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
           </Reveal>
         ))}
       </div>

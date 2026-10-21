@@ -100,11 +100,12 @@ All text, numbers and links live in **[`src/data.js`](src/data.js)**, so you rar
 
 [`netlify/functions/stats.mjs`](netlify/functions/stats.mjs) answers `GET /api/stats`. On the server it fetches:
 
-- **LeetCode:** problems solved by difficulty, contest rating, max streak and the daily submission calendar (GraphQL)
+- **LeetCode:** problems solved by difficulty, contest rating, max streak and the daily submission calendar for each account (GraphQL)
 - **GeeksforGeeks:** problems solved, coding score, institute rank, and submissions per day for this year and last
 - **GitHub:** contributions per day, read from the public contribution graph (`github.com/users/<name>/contributions`, no token needed)
 - **Code360:** problems solved by difficulty, and submissions per day (streak-freeze days aren't counted as activity)
-- **HackerRank (both accounts, added together):** challenges solved, best star rating per skill, passed certificates and submissions per day
+- **LeetCode and HackerRank (two accounts each):** the card's number is the highest account (never the sum, so nothing is counted twice) with a row per profile showing its own numbers and link; on their map slides each day takes the busier account. Add or remove profiles in `USERS` at the top of the function and `accounts` in `PLATFORMS`.
+- **HackerRank:** challenges solved, best star rating per skill, passed certificates and submissions per day
 - **HackerEarth:** problems solved, submissions, points, best leaderboard rank and submissions per day
 - **NeetCode:** solved by difficulty, streaks, percentile and activity per day (the same public call the NeetCode profile page makes)
 - **InterviewBit:** problems solved, score, university rank, current streak and submissions per day (the profile must be set to public)

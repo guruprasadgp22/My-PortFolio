@@ -433,15 +433,26 @@ export const CERTIFICATIONS = [
 
 // LeetCode, GFG and Code360 numbers pulled from the public profiles on 17 Oct 2026.
 export const PLATFORMS = [
-  { n: "LeetCode", c: "#ffa116", val: 444, lbl: "problems solved · 194 E / 201 M / 49 H", meta: [["Rating", "1311"], ["Max streak", "109d"]], url: "https://leetcode.com/u/guruprasadgp22/" },
+  // Platforms with more than one profile list each under accounts (its own number and link). The card's number is
+  // the highest account, never the sum, so a problem solved on both accounts isn't counted twice.
+  {
+    n: "LeetCode", c: "#ffa116", val: 455, lbl: "problems solved · 200 E / 204 M / 51 H · best of 2 accounts", meta: [["Rating", "1311"], ["Max streak", "109d"]],
+    url: "https://leetcode.com/u/guruprasadgp22/",
+    accounts: [
+      { user: "guruprasadgp22", url: "https://leetcode.com/u/guruprasadgp22/", val: 455, note: "200 E / 204 M / 51 H" },
+      { user: "guruprasad6200", url: "https://leetcode.com/u/guruprasad6200/", val: 354, note: "133 E / 174 M / 47 H" },
+    ],
+  },
   { n: "GeeksforGeeks", c: "#2f8d46", val: 652, lbl: "problems solved", meta: [["Score", "1965"], ["Institute", "#1"]], url: "https://www.geeksforgeeks.org/profile/guruprasadgp22" },
   { n: "NeetCode", c: "#ff5fa2", val: 235, lbl: "problems solved · 114 E / 115 M / 6 H", meta: [["Max streak", "135d"], ["Rank", "Top 1.2%"]], url: "https://neetcode.io/user/PrimalPikachu220" },
   { n: "Code360", c: "#f05b5b", val: 4, lbl: "problems · Naukri Code 360", meta: [["Moderate", "1"], ["Hard", "1"]], url: "https://www.naukri.com/code360/profile/guruprasadgp" },
-  // Two HackerRank accounts, added together. The card links to the first; both are listed under accounts.
   {
-    n: "HackerRank", c: "#c6e55c", val: 93, lbl: "challenges solved · 2 accounts", meta: [["Java", "4★"], ["Certificates", "3"]],
+    n: "HackerRank", c: "#c6e55c", val: 50, lbl: "challenges solved · best of 2 accounts", meta: [["Java", "4★"], ["Certificates", "3"]],
     url: "https://www.hackerrank.com/profile/guruprasad6200",
-    accounts: ["https://www.hackerrank.com/profile/guruprasad6200", "https://www.hackerrank.com/profile/gp130143"],
+    accounts: [
+      { user: "guruprasad6200", url: "https://www.hackerrank.com/profile/guruprasad6200", val: 50, note: "Python 3★ · 3 certificates" },
+      { user: "gp130143", url: "https://www.hackerrank.com/profile/gp130143", val: 43, note: "Java 4★" },
+    ],
   },
   { n: "HackerEarth", c: "#7b83ff", val: 9, lbl: "problems solved · 35 submissions", meta: [["Score", "160"], ["Rank", "Top 20%"]], url: "https://www.hackerearth.com/@guruprasadgp/" },
   // Loads live while the InterviewBit profile is public. Set val to null to hide the card.
