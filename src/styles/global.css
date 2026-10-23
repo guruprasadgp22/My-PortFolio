@@ -1684,3 +1684,10 @@ body::before{display:none} /* the time-of-day glow now lives in the colour pools
   .jt-item.now .jt-card::before{display:none}
   .jt-item.now .jt-card :is(header,.stack,.jt-cta){justify-content:center!important}
 }
+@media (min-width:768px){
+  /* the centre line ends at the rocket: the finale card is near-solid so the line doesn't show through it */
+  .jt-item.now .jt-card{z-index:2;background:linear-gradient(160deg,color-mix(in srgb,#3ddc84 12%,transparent),transparent 60%),color-mix(in srgb,var(--ink-2) 94%,transparent)}
+}
+/* the older timeline (Experience details) as glass cards: give the text room inside the pane */
+.timeline-item{padding:14px 16px;border-radius:16px;border:1px solid var(--glass-rim-2)}
+.timeline-item::after{top:18px}
