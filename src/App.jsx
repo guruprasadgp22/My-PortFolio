@@ -1,7 +1,8 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { NAV } from "./data";
 import { REDUCED } from "./hooks/motion";
 import useSmoothScroll, { jumpTop } from "./hooks/useSmoothScroll";
+import { ScrollRoot, useDesktop } from "./hooks/scrollRoot";
 import Boot from "./components/Boot";
 import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
@@ -31,45 +32,23 @@ const fromHash = () => {
 };
 const typing = (e) => e.target.closest?.("input, textarea, select, [contenteditable]") || e.metaKey || e.ctrlKey || e.altKey;
 const BUILT = new Date(__BUILD_DATE__).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Kolkata" });
-const COVER = 420; // ms the curtain takes to sweep in before the page swaps
-
 /*
   Layout: profile sidebar + one content card that swaps pages (the active page lives in the URL hash).
-  Changing page plays an "old TV channel change": a grainy ember curtain sweeps across, the page swaps
-  underneath, the curtain sweeps away, and a channel OSD flashes in the corner.
+  Changing page is a quick fade (about a quarter of a second), so clicking through every tab never feels heavy.
 */
 export default function App() {
-  useSmoothScroll();
+  // wide screens: the window stays still; the profile and the page card each scroll on their own
+  const desktop = useDesktop();
+  useSmoothScroll(!desktop);
+  const [scroller, setScroller] = useState(null); // the page card, which is the scroll area on wide screens
+  const root = useMemo(() => ({ current: desktop ? scroller : null }), [desktop, scroller]);
   const [page, setPage] = useState(fromHash);
   const pageRef = useRef(page);
   pageRef.current = page;
-  const [phase, setPhase] = useState("idle"); // idle | cover | reveal
-  const [osd, setOsd] = useState(null);
-  const timers = useRef([]);
-
-  const later = (fn, ms) => timers.current.push(setTimeout(fn, ms));
-  const clear = () => {
-    timers.current.forEach(clearTimeout);
-    timers.current = [];
-  };
-
+  // the new page fades in (CSS on .page); with reduced motion it simply appears
   const show = (id) => {
-    clear();
-    if (REDUCED) {
-      setPage(id);
-      jumpTop();
-      return;
-    }
-    setPhase("cover");
-    later(() => {
-      setPage(id);
-      jumpTop();
-      setPhase("reveal");
-      const n = NAV.findIndex(([p]) => p === id) + 1;
-      setOsd({ n, label: NAV[n - 1][1], key: Date.now() });
-    }, COVER);
-    later(() => setPhase("idle"), COVER + 650);
-    later(() => setOsd(null), COVER + 1800);
+    setPage(id);
+    jumpTop();
   };
 
   // fetch the other tabs in the background once the first screen is done
@@ -96,14 +75,11 @@ export default function App() {
     // a hash change inside the same tab (e.g. #projects/job-board → #projects/flightwise-ai) isn't a page change
     const onHash = () => fromHash() !== pageRef.current && show(fromHash());
     addEventListener("hashchange", onHash);
-    return () => {
-      removeEventListener("hashchange", onHash);
-      clear();
-    };
+    return () => removeEventListener("hashchange", onHash);
   }, []);
 
   const go = (id) => {
-    if (id === page && phase === "idle") return;
+    if (id === page) return;
     history.pushState(null, "", `#${id}`);
     show(id);
   };
@@ -113,7 +89,7 @@ export default function App() {
   const onTouchStart = (e) => {
     const t = e.touches[0];
     // ignore gestures that start on things that scroll sideways or take input
-    if (e.touches.length > 1 || e.target.closest("input, textarea, .heatgrid, .skill-marquee, .mapbox, .flip, .sc-stage, .sc-strip, .heat")) return (touch.current = null);
+    if (e.touches.length > 1 || e.target.closest("input, textarea, .heatgrid, .skill-marquee, .mapbox, .flip, .sc-stage, .sc-strip, .sc-picks, .heat")) return (touch.current = null);
     touch.current = { x: t.clientX, y: t.clientY, at: Date.now() };
   };
   const onTouchEnd = (e) => {
@@ -136,34 +112,29 @@ export default function App() {
       <Intro />
       <Boot />
       <Festive />
+      {/* colour pools behind the liquid-glass surfaces */}
+      <div className="ambient" aria-hidden="true"><i /><i /><i /></div>
       <div className="fx-grain" aria-hidden="true" />
       <div className="fx-scan" aria-hidden="true" />
       <main className="shell">
         <Sidebar />
         <div className="main-content" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
           <Navbar page={page} go={go} />
-          <article className="page" key={page} data-page={page} id="content" tabIndex={-1}>
-            <Suspense fallback={<Skeleton />}>
-              <Page />
-            </Suspense>
+          <article className="page" key={page} data-page={page} id="content" tabIndex={-1} ref={setScroller}>
+            <ScrollRoot.Provider value={root}>
+              <Suspense fallback={<Skeleton />}>
+                <Page />
+              </Suspense>
+            </ScrollRoot.Provider>
           </article>
           <footer className="site-foot">
             <span>Last updated {BUILT}</span>
             <button onClick={openShortcuts}>Keyboard shortcuts <kbd>?</kbd></button>
           </footer>
-          <div className={`curtain ${phase}`} aria-hidden="true">
-            <span className="curtain-noise" />
-          </div>
         </div>
       </main>
       <Overlays go={go} />
       <Chat go={go} />
-      {osd && (
-        <div className="osd" key={osd.key} aria-hidden="true">
-          <b>CH {String(osd.n).padStart(2, "0")}</b>
-          <span>{osd.label.toUpperCase()}</span>
-        </div>
-      )}
     </>
   );
 }

@@ -86,20 +86,21 @@ export const ABOUT = {
 };
 
 // Your story, told the fun way. Shown on the Journey page.
+// icon = the emoji on the timeline, ch = starts a new chapter, big = a milestone (highlighted).
 export const JOURNEY = [
-  { yr: "2018", t: "SSLC cleared with 86.4%", d: "Finished 10th standard with 86.4%. Exams over, holidays on. Best feeling ever.", tags: ["SSLC", "86.4%"] },
-  { yr: "2018", t: "Hello, World!", d: "Picked PCMCs for PUC and wrote my first program in C. It came with my first bug, free of cost.", tags: ["PUC", "PCMCs", "C"] },
-  { yr: "2020", t: "PUC done, then COVID said hi", d: "Wrapped up PUC with 71.33%. Then COVID arrived and the whole world pressed the pause button.", tags: ["PUC", "71.33%"] },
-  { yr: "Dec 2020", t: "Officially an engineering student", d: "Joined B.E. in Computer Science at MITE, Mangalore. New laptop, big dreams, zero idea what a semicolon could do to me.", tags: ["B.E. CSE", "MITE"] },
-  { yr: "2021 – 2023", t: "Collecting languages like Pokémon", d: "C led to C++, then Java, JavaScript, Python and more. Gotta code 'em all!", tags: ["C++", "Java", "JavaScript", "Python"] },
-  { yr: "Aug 2023", t: "First internship at DLithe", d: "Built a Car Rental Management System with React, PHP and SQL. Lots of cars on screen, sadly no free rides.", tags: ["React.js", "PHP", "SQL"] },
-  { yr: "May 2024", t: "Engineer, unlocked", d: "Finished my B.E. with a 7.26 CGPA. Four years, endless assignments, one degree, no regrets.", tags: ["Graduated", "7.26 CGPA"] },
-  { yr: "May 2024", t: "An offer letter from TCS", d: "Got an offer from TCS! Life had other plans and I couldn't join, but it told me I was on the right track.", tags: ["TCS", "Offer letter"] },
-  { yr: "Oct 2024", t: "Back to coding school at KodNest", d: "Joined KodNest to level up in full stack Java and Python. More code, more coffee, more 'aha!' moments.", tags: ["Java", "Python", "Full Stack"] },
-  { yr: "May 2025", t: "Sony is calling", d: "Got an apprenticeship offer from Sony India. Yes, that Sony! Cue the happy dance.", tags: ["Offer", "Sony"] },
-  { yr: "Jun 2025", t: "Hello, real IT world", d: "Joined Sony as a Software Developer Apprentice. Learned how a real IT company works: big systems, real users, real deadlines, and SAP access management.", tags: ["Sony", "SAP IAM", "RBAC"] },
-  { yr: "Jun 2026", t: "Sony chapter complete", d: "Finished my apprenticeship on 2 June 2026, with a backpack full of industry lessons and a lot more confidence.", tags: ["Completed", "Industry ready"] },
-  { yr: "Now", t: "Leveling up, every single day", d: "Sharpening DSA, polishing my communication, building projects like FlightWise AI and learning something new daily. Next level loading…", tags: ["DSA", "Communication", "Projects", "Available now"] },
+  { yr: "2018", icon: "🎒", ch: "School days", t: "SSLC cleared with 86.4%", d: "Finished 10th standard with 86.4%. Exams over, holidays on. Best feeling ever.", tags: ["SSLC", "86.4%"] },
+  { yr: "2018", icon: "💻", t: "Hello, World!", d: "Picked PCMCs for PUC and wrote my first program in C. It came with my first bug, free of cost.", tags: ["PUC", "PCMCs", "C"] },
+  { yr: "2020", icon: "😷", t: "PUC done, then COVID said hi", d: "Wrapped up PUC with 71.33%. Then COVID arrived and the whole world pressed the pause button.", tags: ["PUC", "71.33%"] },
+  { yr: "Dec 2020", icon: "🏫", ch: "Engineering", t: "Officially an engineering student", d: "Joined B.E. in Computer Science at MITE, Mangalore. New laptop, big dreams, zero idea what a semicolon could do to me.", tags: ["B.E. CSE", "MITE"] },
+  { yr: "2021 – 2023", icon: "🧩", t: "Collecting languages like Pokémon", d: "C led to C++, then Java, JavaScript, Python and more. Gotta code 'em all!", tags: ["C++", "Java", "JavaScript", "Python"] },
+  { yr: "Aug 2023", icon: "🚗", t: "First internship at DLithe", d: "Built a Car Rental Management System with React, PHP and SQL. Lots of cars on screen, sadly no free rides.", tags: ["React.js", "PHP", "SQL"] },
+  { yr: "May 2024", icon: "🎓", big: true, t: "Engineer, unlocked", d: "Finished my B.E. with a 7.26 CGPA. Four years, endless assignments, one degree, no regrets.", tags: ["Graduated", "7.26 CGPA"] },
+  { yr: "May 2024", icon: "📩", big: true, t: "An offer letter from TCS", d: "Got an offer from TCS! Life had other plans and I couldn't join, but it told me I was on the right track.", tags: ["TCS", "Offer letter"] },
+  { yr: "Oct 2024", icon: "☕", ch: "Levelling up", t: "Back to coding school at KodNest", d: "Joined KodNest to level up in full stack Java and Python. More code, more coffee, more 'aha!' moments.", tags: ["Java", "Python", "Full Stack"] },
+  { yr: "May 2025", icon: "📞", ch: "Industry", big: true, t: "Sony is calling", d: "Got an apprenticeship offer from Sony India. Yes, that Sony! Cue the happy dance.", tags: ["Offer", "Sony"] },
+  { yr: "Jun 2025", icon: "🏢", t: "Hello, real IT world", d: "Joined Sony as a Software Developer Apprentice. Learned how a real IT company works: big systems, real users, real deadlines, and SAP access management.", tags: ["Sony", "SAP IAM", "RBAC"] },
+  { yr: "Jun 2026", icon: "✅", big: true, t: "Sony chapter complete", d: "Finished my apprenticeship on 2 June 2026, with a backpack full of industry lessons and a lot more confidence.", tags: ["Completed", "Industry ready"] },
+  { yr: "Now", icon: "🚀", ch: "Now", t: "Leveling up, every single day", d: "Sharpening DSA, polishing my communication, building projects like FlightWise AI and learning something new daily. Next level loading…", tags: ["DSA", "Communication", "Projects", "Available now"] },
 ];
 
 // Stops on the animated map at the top of the Journey page, oldest first. lat/lon are the real places

@@ -20,12 +20,28 @@ export default function Chat({ go }) {
     return () => removeEventListener("open-chat", on);
   }, []);
 
+  // phones: the button tucks away while you scroll down (so it never sits on top of what you're reading)
+  // and comes back as soon as you scroll up or stop
+  const [tuck, setTuck] = useState(false);
+  useEffect(() => {
+    let last = scrollY, idle;
+    const on = () => {
+      const y = scrollY;
+      if (Math.abs(y - last) > 6) setTuck(y > last && y > 120);
+      last = y;
+      clearTimeout(idle);
+      idle = setTimeout(() => setTuck(false), 900);
+    };
+    addEventListener("scroll", on, { passive: true });
+    return () => (removeEventListener("scroll", on), clearTimeout(idle));
+  }, []);
+
   return (
     <>
       <AnimatePresence>
         {!open && (
           <motion.button
-            className="c-fab"
+            className={`c-fab ${tuck ? "tuck" : ""}`}
             onClick={() => (haptic(), setOpen(true))}
             onPointerEnter={loadPanel}
             aria-label="Ask GP Assistant about Guruprasad"
@@ -35,7 +51,7 @@ export default function Chat({ go }) {
             whileTap={{ scale: 0.92 }}
             transition={{ type: "spring", stiffness: 420, damping: 22, delay: INTRO ? 2.15 : 0.6 }}
           >
-            <span className="c-fab-ava"><img src="/me.jpg" alt="" /><Icon name="sparkle" size={12} /></span>
+            <span className="c-fab-ava" aria-hidden="true"><img src="/me.jpg" alt="" /><Icon name="sparkle" size={12} /></span>
             <span className="c-fab-txt">Ask GP</span>
           </motion.button>
         )}

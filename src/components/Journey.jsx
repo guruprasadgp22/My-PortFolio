@@ -1,24 +1,90 @@
+import { useEffect, useRef } from "react";
 import { JOURNEY } from "../data";
+import { REDUCED } from "../hooks/motion";
 import Glitch from "./Glitch";
 import Reveal from "./Reveal";
-import Timeline from "./Timeline";
+import Icon from "./Icons";
 import JourneyMap from "./JourneyMap";
+import { openQuickView } from "./Overlays";
 
+// "2018", "Dec 2020", "2021 – 2023", "Now" → the years for the summary line
+const years = JOURNEY.map((j) => +(j.yr.match(/\d{4}/)?.[0] || 0)).filter(Boolean);
+const span = `${Math.min(...years)} – today`;
+
+/*
+  The story as a timeline in chapters. On wide screens the cards alternate left and right of a centre line;
+  on phones they sit in one column beside a line on the left. Each stop has its own icon on the line, the
+  line fills in as you scroll and every stop lights up as you pass it. Milestones are highlighted, and the
+  last card ("Now") ends on what's next.
+*/
 export default function Journey() {
+  const list = useRef(null);
+
+  useEffect(() => {
+    let raf;
+    const on = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const el = list.current;
+        if (!el) return;
+        const r = el.getBoundingClientRect();
+        const line = innerHeight * 0.7;
+        el.style.setProperty("--p", REDUCED ? 1 : Math.min(1, Math.max(0, (line - r.top) / r.height)));
+        // a data attribute, not a class: the reveal animation re-renders the class list and would wipe it
+        el.querySelectorAll(".jt-item").forEach((s) => s.toggleAttribute("data-lit", REDUCED || s.getBoundingClientRect().top < line));
+      });
+    };
+    on();
+    // capture: also hears the page card scrolling (the scroll area on wide screens)
+    addEventListener("scroll", on, { passive: true, capture: true });
+    addEventListener("resize", on);
+    return () => {
+      cancelAnimationFrame(raf);
+      removeEventListener("scroll", on, { capture: true });
+      removeEventListener("resize", on);
+    };
+  }, []);
+
+  let side = 0; // alternates left / right; a chapter heading doesn't break the rhythm
   return (
     <>
       <Glitch text="Journey" />
+      <p className="jt-lede">From a first <code>printf</code> in a PUC lab to enterprise systems at Sony: {JOURNEY.length} stops, {span}.</p>
       <JourneyMap />
-      <Timeline icon="route" title="From first line of code to today">
-        {JOURNEY.map((j, k) => (
-          <Reveal as="li" className="timeline-item" key={j.yr + j.t} delay={(k % 3) * 80}>
-            <span className="when">{j.yr}</span>
-            <h4 className="h4 timeline-item-title">{j.t}</h4>
-            <p className="timeline-text">{j.d}</p>
-            <div className="stack">{j.tags.map((t) => <span className="tag" key={t}>{t}</span>)}</div>
-          </Reveal>
-        ))}
-      </Timeline>
+
+      <ol className="jt" ref={list} aria-label="My journey, oldest first">
+        <li className="jt-rail" aria-hidden="true"><i /></li>
+        {JOURNEY.map((j, k) => {
+          const right = side++ % 2 === 1;
+          const now = j.yr === "Now";
+          return [
+            j.ch && (
+              <li className="jt-ch" key={`ch-${j.ch}`} aria-hidden="true">
+                <span>{j.ch}</span>
+              </li>
+            ),
+            <Reveal as="li" key={j.yr + j.t} className={`jt-item ${right ? "right" : "left"} ${j.big ? "big" : ""} ${now ? "now" : ""}`} delay={(k % 2) * 60}>
+              <span className="jt-node" aria-hidden="true">{j.icon || "•"}</span>
+              <article className="jt-card">
+                <header>
+                  <span className="jt-yr">{j.yr}</span>
+                  {j.big && <span className="jt-flag">Milestone</span>}
+                  {now && <span className="jt-flag here">You are here</span>}
+                </header>
+                <h4 className="jt-t">{j.t}</h4>
+                <p className="jt-d">{j.d}</p>
+                <div className="stack">{j.tags.map((t) => <span className="tag" key={t}>{t}</span>)}</div>
+                {now && (
+                  <div className="jt-cta">
+                    <button className="qv-btn" onClick={openQuickView}><Icon name="zap" size={14} /><span>Recruiter quick view</span></button>
+                    <a className="jt-link" href="#contact">Get in touch <Icon name="arrow" size={14} /></a>
+                  </div>
+                )}
+              </article>
+            </Reveal>,
+          ];
+        })}
+      </ol>
     </>
   );
 }

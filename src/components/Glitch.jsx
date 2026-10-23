@@ -3,9 +3,14 @@ import { REDUCED } from "../hooks/motion";
 
 const GLYPHS = "▓▒░█<>/\\[]{}=+*#01";
 
-// Page title that decodes from retro block glyphs with an RGB-split glitch, on mount and on hover.
+const MS = 350; // the whole decode, so the real title is readable almost at once
+const played = new Set(); // titles already decoded this visit: later visits to that tab show it straight away
+
+// Page title that decodes from retro block glyphs with an RGB-split glitch: the first time each tab is opened
+// (and on hover), in about a third of a second.
 export default function Glitch({ text }) {
-  const [out, setOut] = useState(REDUCED ? text : "");
+  const first = !REDUCED && !played.has(text);
+  const [out, setOut] = useState(first ? "" : text);
   const [hot, setHot] = useState(false);
   const raf = useRef(0);
 
@@ -13,13 +18,12 @@ export default function Glitch({ text }) {
     if (REDUCED) return;
     cancelAnimationFrame(raf.current);
     setHot(true);
-    let frame = 0;
-    const total = text.length * 3 + 14;
-    const tick = () => {
-      frame++;
-      const revealed = Math.floor((frame / total) * text.length);
+    const start = performance.now();
+    const tick = (now) => {
+      const k = Math.min(1, ((now ?? performance.now()) - start) / MS);
+      const revealed = Math.floor(k * text.length);
       setOut([...text].map((c, i) => (i < revealed || c === " " ? c : GLYPHS[(Math.random() * GLYPHS.length) | 0])).join(""));
-      if (frame < total) raf.current = requestAnimationFrame(tick);
+      if (k < 1) raf.current = requestAnimationFrame(tick);
       else {
         setOut(text);
         setHot(false);
@@ -29,6 +33,8 @@ export default function Glitch({ text }) {
   };
 
   useEffect(() => {
+    if (!first) return;
+    played.add(text);
     // on the first visit, wait for the intro curtain to lift so the decode is actually seen
     const wait = document.documentElement.classList.contains("intro") ? 1300 : 0;
     const t = setTimeout(run, wait);

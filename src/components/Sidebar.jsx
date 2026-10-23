@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { ME } from "../data";
@@ -15,7 +15,7 @@ const Wrap = ({ text }) => softBreaks(text).map((x) => (typeof x === "string" ? 
 
 const name = ME.first[0] + ME.first.slice(1).toLowerCase() + ME.last.toLowerCase();
 const contacts = [
-  { icon: "mail", title: "Email", text: ME.email, href: `mailto:${ME.email}` },
+  { icon: "mail", title: "Email", text: ME.email, href: `mailto:${ME.email}`, copy: true, whole: true },
   ...(ME.phone ? [{ icon: "phone", title: "Phone", text: ME.phone, href: `tel:${ME.phone.replace(/\s/g, "")}` }] : []),
   { icon: "pin", title: "Location", text: ME.location },
   ...(ME.website ? [{ icon: "link", title: "Website", text: handle(ME.website), href: ME.website, ext: true }] : []),
@@ -23,6 +23,17 @@ const contacts = [
     .filter((s) => s.label !== "Resume")
     .map((s) => ({ icon: iconFor(s.label), title: s.label, text: handle(s.url), href: s.url, ext: true })),
 ];
+
+// Small copy icon beside the email: turns into a ✓ for a moment once copied.
+function CopyIcon({ text }) {
+  const [ok, setOk] = useState(false);
+  return (
+    <button className={`contact-copy ${ok ? "ok" : ""}`} aria-label={ok ? "Email copied" : "Copy email address"} title="Copy email"
+      onClick={() => navigator.clipboard?.writeText(text).then(() => (setOk(true), setTimeout(() => setOk(false), 1600)))}>
+      <Icon name={ok ? "check" : "copy"} size={14} />
+    </button>
+  );
+}
 
 function ContactBlock() {
   return (
@@ -32,9 +43,10 @@ function ContactBlock() {
           <li className="contact-item" key={c.title}>
             <div className="icon-box"><Icon name={c.icon} /></div>
             <div className="contact-info">
-              <p className="contact-title">{c.title}</p>
+              <p className="contact-title">{c.title}{c.copy && <CopyIcon text={c.text} />}</p>
               {c.href ? (
-                <a className="contact-link" href={c.href} {...(c.ext && { target: "_blank", rel: "noopener noreferrer" })}><Wrap text={c.text} /></a>
+                // the email never breaks mid-address: it stays on one line (shortened with … only if it truly can't fit)
+                <a className={`contact-link ${c.whole ? "one-line" : ""}`} href={c.href} title={c.whole ? c.text : undefined} {...(c.ext && { target: "_blank", rel: "noopener noreferrer" })}>{c.whole ? c.text : <Wrap text={c.text} />}</a>
               ) : (
                 <address>{c.text}</address>
               )}
@@ -99,14 +111,42 @@ function ContactsSheet({ onClose }) {
   );
 }
 
+// Phones and tablets: once the profile card has scrolled out of view, a slim bar with the photo, name and
+// quick view slides down from the top, so the big header doesn't have to stay on screen.
+function CompactBar({ watch }) {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const el = watch.current;
+    if (!el || !("IntersectionObserver" in window)) return;
+    const wide = matchMedia("(min-width: 1250px)");
+    const io = new IntersectionObserver(([e]) => setShow(!wide.matches && !e.isIntersecting), { rootMargin: "-40px 0px 0px 0px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [watch]);
+  return createPortal(
+    <AnimatePresence>
+      {show && (
+        <motion.div className="mini-bar" initial={{ y: "-110%" }} animate={{ y: 0 }} exit={{ y: "-110%" }} transition={SPRING}>
+          <img src="/me.webp" alt="" aria-hidden="true" width="34" height="34" />
+          <span className="mini-name">{name}<small>{ME.hiring?.[0] || ME.roles[0]}</small></span>
+          <button className="qv-btn" onClick={openQuickView}><Icon name="zap" size={13} /><span>Quick view</span></button>
+        </motion.div>
+      )}
+    </AnimatePresence>,
+    document.body
+  );
+}
+
 // Profile card. On wide screens the contacts sit inside it; on smaller screens they open in a bottom sheet.
 export default function Sidebar() {
   const [sheet, setSheet] = useState(false);
+  const self = useRef(null);
   const closeSheet = useCallback(() => setSheet(false), []);
   const theme = useTheme();
 
   return (
-    <aside className="sidebar">
+    <aside className="sidebar" ref={self}>
+      <CompactBar watch={self} />
       <div className="sidebar-info">
         <Avatar name={name} />
         <div className="info-content">

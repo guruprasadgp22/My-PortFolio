@@ -2,6 +2,7 @@ import { createRef, useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { EXPERIENCE } from "../data";
 import { REDUCED } from "../hooks/motion";
+import { useScrollRoot } from "../hooks/scrollRoot";
 import Glitch from "./Glitch";
 import Reveal from "./Reveal";
 import Timeline from "./Timeline";
@@ -10,7 +11,8 @@ import Timeline from "./Timeline";
 // it shrinks back and dims a little, like a deck being dealt.
 function StackCard({ x, k, next }) {
   // progress of the NEXT card from entering the screen (0) to reaching the top (1)
-  const { scrollYProgress } = useScroll({ target: next, offset: ["start end", "start start"] });
+  const container = useScrollRoot();
+  const { scrollYProgress } = useScroll({ target: next, container, offset: ["start end", "start start"] });
   const scale = useTransform(scrollYProgress, [0, 1], [1, next && !REDUCED ? 0.92 : 1]);
   const dim = useTransform(scrollYProgress, [0, 1], [0, next && !REDUCED ? 0.45 : 0]);
   return (

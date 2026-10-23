@@ -19,11 +19,12 @@ export default function Timeline({ icon, title, children }) {
       });
     };
     on();
-    addEventListener("scroll", on, { passive: true });
+    // capture: also hears scrolling inside the page card (the scroll area on wide screens)
+    addEventListener("scroll", on, { passive: true, capture: true });
     addEventListener("resize", on);
     return () => {
       cancelAnimationFrame(raf);
-      removeEventListener("scroll", on);
+      removeEventListener("scroll", on, { capture: true });
       removeEventListener("resize", on);
     };
   }, []);

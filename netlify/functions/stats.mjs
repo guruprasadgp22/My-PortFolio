@@ -20,16 +20,23 @@ async function getJson(url, init = {}) {
   return res.json();
 }
 
-// One LeetCode account: solved by difficulty, contest rating, best streak and the daily calendar.
+// One LeetCode account, everything its profile page shows: solved by difficulty (out of how many), problems
+// still being attempted, contest rating / ranking / history, badges, best streak and the daily calendar.
+const LC_ICON = (src) => (src?.startsWith("/") ? `https://leetcode.com${src}` : src);
 async function leetcodeAccount(user) {
   const year = new Date().getUTCFullYear();
   const query = `query($u:String!,$y:Int,$p:Int){
+    allQuestionsCount{difficulty count}
     matchedUser(username:$u){
       submitStatsGlobal{acSubmissionNum{difficulty count}}
+      badges{displayName icon creationDate}
+      activeBadge{displayName}
       cur:userCalendar(year:$y){streak submissionCalendar}
       prev:userCalendar(year:$p){submissionCalendar}
     }
-    userContestRanking(username:$u){rating}
+    userContestRanking(username:$u){rating attendedContestsCount globalRanking totalParticipants topPercentage}
+    userContestRankingHistory(username:$u){attended rating contest{title startTime}}
+    userProfileUserQuestionProgressV2(userSlug:$u){numFailedQuestions{count}}
   }`;
   const { data } = await getJson("https://leetcode.com/graphql", {
     method: "POST",
@@ -41,19 +48,42 @@ async function leetcodeAccount(user) {
   const n = Object.fromEntries(u.submitStatsGlobal.acSubmissionNum.map((d) => [d.difficulty, d.count]));
   // Merge both years' calendars: { unixSeconds: submissions }
   const calendar = { ...JSON.parse(u.prev?.submissionCalendar || "{}"), ...JSON.parse(u.cur?.submissionCalendar || "{}") };
+  const all = Object.fromEntries((data.allQuestionsCount || []).map((d) => [d.difficulty, d.count]));
+  const cr = data.userContestRanking;
   return {
     user, url: `https://leetcode.com/u/${user}/`,
     solved: n.All, easy: n.Easy, medium: n.Medium, hard: n.Hard,
-    rating: data.userContestRanking?.rating ? Math.round(data.userContestRanking.rating) : null,
+    of: { all: all.All, easy: all.Easy, medium: all.Medium, hard: all.Hard },
+    attempting: (data.userProfileUserQuestionProgressV2?.numFailedQuestions || []).reduce((t, d) => t + d.count, 0),
+    rating: cr?.rating ? Math.round(cr.rating) : null,
+    contest: cr?.attendedContestsCount
+      ? {
+          rating: Math.round(cr.rating), ranking: cr.globalRanking, of: cr.totalParticipants, attended: cr.attendedContestsCount, top: cr.topPercentage,
+          history: (data.userContestRankingHistory || []).filter((h) => h.attended).map((h) => ({ t: h.contest.startTime, r: Math.round(h.rating), name: h.contest.title })),
+        }
+      : null,
+    badges: (u.badges || []).map((b) => ({ name: b.displayName, icon: LC_ICON(b.icon), at: b.creationDate })).sort((a, b) => (a.at < b.at ? 1 : -1)),
+    recentBadge: u.activeBadge?.displayName || null,
     streak: u.cur?.streak ?? null,
     calendar,
   };
 }
 
+// LeetCode's contest rating distribution (all users), for the "Top x%" bars. Shared by every account.
+async function leetcodeHistogram() {
+  const { data } = await getJson("https://leetcode.com/graphql", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Referer: "https://leetcode.com" },
+    body: JSON.stringify({ query: "{contestRatingHistogram{userCount ratingStart ratingEnd topPercentage}}" }),
+  });
+  return (data?.contestRatingHistogram || []).map((b) => ({ from: b.ratingStart, to: b.ratingEnd, n: b.userCount, top: +b.topPercentage.toFixed(2) }));
+}
+
 // All LeetCode accounts. Accounts are never added together (that would count a problem solved on both twice):
 // the totals are the account with the most problems solved, and each day of the calendar takes the busier account.
 async function leetcode() {
-  const accounts = (await Promise.allSettled(USERS.leetcode.map(leetcodeAccount))).filter((r) => r.status === "fulfilled").map((r) => r.value);
+  const [results, hist] = await Promise.all([Promise.allSettled(USERS.leetcode.map(leetcodeAccount)), leetcodeHistogram().catch(() => null)]);
+  const accounts = results.filter((r) => r.status === "fulfilled").map((r) => r.value);
   if (!accounts.length) throw new Error("leetcode: no accounts loaded");
   const top = accounts.reduce((a, b) => ((b.solved || 0) > (a.solved || 0) ? b : a));
   const calendar = {};
@@ -64,8 +94,9 @@ async function leetcode() {
     rating: ratings.length ? Math.max(...ratings) : null,
     streak: Math.max(0, ...accounts.map((a) => a.streak || 0)),
     calendar,
-    // each account keeps its own calendar too, so the contributions map can show one grid per account
+    // each account keeps its own calendar and profile too, so the Coding page can show one profile per account
     accounts,
+    histogram: hist,
   };
 }
 
@@ -79,19 +110,32 @@ async function gfgYear(year) {
   return result && typeof result === "object" ? result : {};
 }
 
+// GFG problems solved, grouped by difficulty: { School, Basic, Easy, Medium, Hard } → count
+async function gfgLevels() {
+  const { result } = await getJson("https://practiceapi.geeksforgeeks.org/api/v1/user/problems/submissions/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ handle: USERS.gfg, requestType: "", year: "", month: "" }),
+  });
+  return Object.fromEntries(Object.entries(result || {}).map(([k, v]) => [k, Object.keys(v || {}).length]));
+}
+
 async function gfg() {
   const year = new Date().getUTCFullYear();
-  const [profile, cur, prev] = await Promise.allSettled([
+  const [profile, cur, prev, levels] = await Promise.allSettled([
     getJson(`https://authapi.geeksforgeeks.org/api-get/user-profile-info/?handle=${USERS.gfg}`),
     gfgYear(year),
     gfgYear(year - 1),
+    gfgLevels(),
   ]);
   if (profile.status !== "fulfilled") throw profile.reason;
   const data = profile.value.data;
   // the calendar is a bonus: if it fails, the card still gets its numbers
   const days = { ...(prev.value || {}), ...(cur.value || {}) };
   return {
-    solved: data.total_problems_solved, score: data.score, instituteRank: data.institute_rank, streak: data.pod_solved_longest_streak,
+    solved: data.total_problems_solved, score: data.score, monthlyScore: data.monthly_score ?? null, instituteRank: data.institute_rank,
+    streak: data.pod_solved_longest_streak, currentStreak: data.pod_solved_current_streak ?? null,
+    levels: levels.value && Object.keys(levels.value).length ? levels.value : null,
     days: Object.keys(days).length ? days : null,
   };
 }
@@ -139,7 +183,11 @@ async function code360() {
   if (profile.status !== "fulfilled") throw profile.reason;
   const data = profile.value.data;
   const levels = Object.fromEntries((data.dsa_domain_data?.problem_count_data?.difficulty_data || []).map((d) => [d.level, d.count]));
-  return { solved: data.dsa_domain_data?.problem_count_data?.total_count ?? 0, ...levels, days: days.value && Object.keys(days.value).length ? days.value : null };
+  // topic badges: { achiever: { ptm: ["Hash Table"] … } } → ["Achiever · Hash Table"]
+  const badges = Object.entries(data.dsa_domain_data?.badges_hash || {}).flatMap(([tier, kinds]) =>
+    Object.values(kinds || {}).flat().map((topic) => `${tier[0].toUpperCase()}${tier.slice(1)} · ${topic}`)
+  );
+  return { solved: data.dsa_domain_data?.problem_count_data?.total_count ?? 0, ...levels, badges, days: days.value && Object.keys(days.value).length ? days.value : null };
 }
 
 // HackerRank, all accounts combined: challenges solved (from the skill badges), the best star rating per
@@ -180,6 +228,8 @@ async function hackerrank() {
       solved: solvedOf(a),
       best: best ? { skill: best.badge_name, stars: best.stars } : null,
       certs: a.certs.length,
+      skills: a.badges.filter((b) => b.stars).map((b) => ({ name: b.badge_name === "Sql" ? "SQL" : b.badge_name, stars: b.stars, solved: b.solved || 0 })).sort((x, y) => y.stars - x.stars),
+      certNames: a.certs.filter((c) => c.name).map((c) => (c.level ? `${c.name} (${c.level})` : c.name)),
       days: a.days,
     };
   });
@@ -218,6 +268,10 @@ async function neetcode() {
   const n = (k) => st[k]?.completed ?? 0;
   return {
     solved: n("easy") + n("medium") + n("hard"), easy: n("easy"), medium: n("medium"), hard: n("hard"),
+    of: { easy: st.easy?.total ?? null, medium: st.medium?.total ?? null, hard: st.hard?.total ?? null },
+    // how many users solved how many problems, for the "Top x%" bars
+    buckets: (data.ranking?.buckets || []).map((b) => ({ label: b.label, n: b.count, pct: +b.percentage.toFixed(1), me: !!b.isUserBucket })),
+    activeUsers: data.ranking?.totalActiveUsers ?? null,
     maxStreak: data.maxStreak ?? null, currentStreak: data.currentStreak ?? null,
     top: data.ranking?.percentile != null ? +(100 - data.ranking.percentile).toFixed(1) : null,
     days: data.activityByDate && Object.keys(data.activityByDate).length ? data.activityByDate : null,
@@ -246,6 +300,8 @@ async function interviewbit() {
     globalRank: profile.value?.global_rank ?? null,
     universityRank: profile.value?.university_rank ?? null,
     streak: streak.value?.current_streak ?? null,
+    courses: courses.map((c) => ({ name: c.title, solved: c.solved_problems_count, score: c.total_user_score, of: c.total_score })),
+    topics: (solved.value?.topic_problems_solved || []).filter((t) => t.solved_problems_count).map((t) => ({ name: t.title, solved: t.solved_problems_count, score: t.total_user_score, of: t.total_score })),
     days: Object.keys(days).length ? days : null,
   };
 }

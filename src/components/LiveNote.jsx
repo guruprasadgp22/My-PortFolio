@@ -4,7 +4,12 @@ export default function LiveNote({ p }) {
   const logins = p.demoLogins?.filter((l) => l.email) || [];
   return (
     <>
-      {p.wake && <p className="sc-wake"><i aria-hidden="true" />Free server: the first load can take ~30 seconds while it wakes up. It started waking when you opened this page.</p>}
+      {/* short pill; the full explanation is in its tooltip */}
+      {p.wake && (
+        <p className="sc-wake" title="Free server: the first load can take about 30 seconds while it wakes up. It started waking when you opened this page.">
+          <i aria-hidden="true" />Free server · first load can take ~30 s
+        </p>
+      )}
       {logins.length > 0 && (
         <dl className="sc-logins">
           <dt>Try it without signing up</dt>

@@ -93,10 +93,10 @@ function Stage({ p, dir, onPrev, onNext, onOpen }) {
       </motion.button>
       {/* phone: null in data.js hides the phone (no mobile screenshot yet) */}
       {p.phone !== null && (
-        <span className="sc-phone" aria-hidden="true">
+        <span className="sc-phone">
           <span className="sc-screen">
             <AnimatePresence initial={false} custom={dir} mode="popLayout">
-              <motion.img key={p.t} {...pic(p.phone || p.img, "220px")} className={p.phone ? "real" : undefined} alt="" custom={dir} variants={PHONE} initial="enter" animate="show" exit="exit" draggable="false" />
+              <motion.img key={p.t} {...pic(p.phone || p.img, "220px")} className={p.phone ? "real" : undefined} alt={`${p.t} on a phone`} custom={dir} variants={PHONE} initial="enter" animate="show" exit="exit" draggable="false" />
             </AnimatePresence>
           </span>
           <span className="sc-notch" />
@@ -183,17 +183,20 @@ export default function Projects() {
       <Glitch text="Projects" />
 
       <section className="showcase" aria-roledescription="carousel" aria-label="Projects">
-        <Stage p={p} dir={dir} onPrev={prev} onNext={next} onOpen={() => setSel(p)} />
-
-        <div className="sc-strip" ref={strip} role="tablist" aria-label="Choose a project">
+        {/* every main project up front as a card (image + name), so none hides behind the arrows;
+            on phones they swipe sideways with the next card peeking in */}
+        <div className="sc-picks" ref={strip} role="tablist" aria-label="Choose a project">
           {PROJECTS.map((x, k) => (
-            <button key={x.t} data-i={k} role="tab" aria-selected={k === i} aria-label={`${k + 1}. ${x.t}`} className={`sc-thumb ${k === i ? "on" : ""}`} onClick={() => go(k)}>
+            <button key={x.t} data-i={k} role="tab" aria-selected={k === i} className={`sc-pick ${k === i ? "on" : ""}`} onClick={() => go(k)}>
               {k === i && <motion.span className="sc-ring" layoutId="sc-ring" transition={SPRING} />}
-              <img {...pic(x.img, "160px")} alt="" loading="lazy" draggable="false" />
-              <b>{k + 1}</b>
+              <span className="sc-pick-img"><img {...pic(x.img, "(min-width: 768px) 300px, 70vw")} alt="" loading="lazy" draggable="false" /></span>
+              <span className="sc-pick-t">{x.t}</span>
+              <small>{x.cat}{x.demo ? " · live demo" : ""}</small>
             </button>
           ))}
         </div>
+
+        <Stage p={p} dir={dir} onPrev={prev} onNext={next} onOpen={() => setSel(p)} />
 
         <AnimatePresence mode="wait" initial={false}>
           <motion.div

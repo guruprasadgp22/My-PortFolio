@@ -1,16 +1,19 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { SPRING, haptic } from "../hooks/spring";
 import { livePlatforms } from "../platforms";
-import { REDUCED, revealInRow } from "../hooks/motion";
-import useInView from "../hooks/useInView";
+import { REDUCED } from "../hooks/motion";
+import { startScroll, stopScroll } from "../hooks/useSmoothScroll";
+import { useDragControls } from "framer-motion";
 import useTheme from "../hooks/theme";
 import useStats from "../hooks/useStats";
 import Glitch from "./Glitch";
 import Reveal from "./Reveal";
 import Odometer from "./Odometer";
 import Icon from "./Icons";
+import Profile from "./Profile";
+import { profileOf } from "../profiles";
 
 const WEEKS = 53;
 const DAY_MS = 86400000;
@@ -33,11 +36,11 @@ const fromIso = (days) => {
 
 // The platforms the contributions map can toggle between. c = the brand colour the squares are tinted with.
 const SOURCES = [
-  { id: "leetcode", label: "LeetCode", short: "LeetCode", c: "#ffa116", unit: "submissions", get: (s) => s?.leetcode?.calendar && fromUnix(s.leetcode.calendar), accounts: (s) => s?.leetcode?.accounts?.map((a) => ({ user: a.user, url: a.url, days: fromUnix(a.calendar) })), url: "https://leetcode.com/u/guruprasadgp22/", url2: "https://leetcode.com/u/guruprasad6200/" },
+  { id: "leetcode", label: "LeetCode", short: "LeetCode", c: "#ffa116", unit: "submissions", get: (s) => s?.leetcode?.calendar && fromUnix(s.leetcode.calendar), accounts: (s) => s?.leetcode?.accounts?.map((a) => ({ user: a.user, url: a.url, days: fromUnix(a.calendar), raw: a })), url: "https://leetcode.com/u/guruprasadgp22/", url2: "https://leetcode.com/u/guruprasad6200/" },
   { id: "gfg", label: "GeeksforGeeks", short: "GFG", c: "#2fbf5a", unit: "submissions", get: (s) => s?.gfg?.days && fromIso(s.gfg.days), url: "https://www.geeksforgeeks.org/profile/guruprasadgp22" },
   { id: "github", label: "GitHub", short: "GitHub", c: "#3de0ff", unit: "contributions", get: (s) => s?.github?.days && fromIso(s.github.days), url: "https://github.com/guruprasadgp22" },
   { id: "code360", label: "Code360", short: "Code360", c: "#f05b5b", unit: "submissions", get: (s) => s?.code360?.days && fromIso(s.code360.days), url: "https://www.naukri.com/code360/profile/guruprasadgp" },
-  { id: "hackerrank", label: "HackerRank", short: "HackerRank", c: "#c6e55c", unit: "submissions", get: (s) => s?.hackerrank?.days && fromIso(s.hackerrank.days), accounts: (s) => s?.hackerrank?.accounts?.map((a) => ({ user: a.user, url: a.url, days: fromIso(a.days) })), url: "https://www.hackerrank.com/profile/guruprasad6200", url2: "https://www.hackerrank.com/profile/gp130143" },
+  { id: "hackerrank", label: "HackerRank", short: "HackerRank", c: "#c6e55c", unit: "submissions", get: (s) => s?.hackerrank?.days && fromIso(s.hackerrank.days), accounts: (s) => s?.hackerrank?.accounts?.map((a) => ({ user: a.user, url: a.url, days: fromIso(a.days), raw: a })), url: "https://www.hackerrank.com/profile/guruprasad6200", url2: "https://www.hackerrank.com/profile/gp130143" },
   { id: "neetcode", label: "NeetCode", short: "NeetCode", c: "#ff5fa2", unit: "submissions", get: (s) => s?.neetcode?.days && fromIso(s.neetcode.days), url: "https://neetcode.io/user/PrimalPikachu220" },
   { id: "hackerearth", label: "HackerEarth", short: "HackerEarth", c: "#7b83ff", unit: "submissions", get: (s) => s?.hackerearth?.days && fromIso(s.hackerearth.days), url: "https://www.hackerearth.com/@guruprasadgp/" },
   { id: "interviewbit", label: "InterviewBit", short: "InterviewBit", c: "#14b8a6", unit: "submissions", get: (s) => s?.interviewbit?.days && fromIso(s.interviewbit.days), url: "https://www.interviewbit.com/profile/guruprasad-gp_339/" },
@@ -124,8 +127,8 @@ function Grid({ g, src, fit, animate, label }) {
   useEffect(() => {
     if (!tip) return;
     const hide = () => setTip(null);
-    addEventListener("scroll", hide, { passive: true, once: true });
-    return () => removeEventListener("scroll", hide);
+    addEventListener("scroll", hide, { passive: true, once: true, capture: true }); // any scroller, not just the window
+    return () => removeEventListener("scroll", hide, { capture: true });
   }, [tip]);
   const { cell, weeks } = fit;
   const STEP = cell + GAP;
@@ -210,7 +213,6 @@ function Grid({ g, src, fit, animate, label }) {
   );
 }
 
-// Everything for one view (All, or one platform): stats, the per-platform table on "All", and the grid.
 // The four headline numbers for one calendar.
 const Stats = ({ g, src }) => (
   <dl className="heat-stats">
@@ -221,31 +223,151 @@ const Stats = ({ g, src }) => (
   </dl>
 );
 
-function Slide({ view, per, fit, animate, live, onChoose }) {
-  const { src, g, accts } = view;
-  const isAll = src === ALL;
+// A year of activity: headline numbers, the map, and its legend.
+function Activity({ g, src, fit, label, title, note }) {
   const months = Math.round(fit.weeks / 4.35);
-  const label = live ? `${src.label}: ${g.total.toLocaleString("en-IN")} ${src.unit} on ${g.active} days in the last year` : "Sample activity heatmap";
   return (
-    <div className="heat-slide" style={{ "--c": src.c }} role="tabpanel" aria-label={src.label}>
-      {!accts && <Stats g={g} src={src} />}
-      {isAll && live && (
+    <section className="cd-sec">
+      <h5 className="pf-sub">{title}</h5>
+      <Stats g={g} src={src} />
+      {!g.active && <p className="heat-empty">No activity in the last 12 months{g.lastActive ? ` · last active ${g.lastActive}` : ""}</p>}
+      <Grid g={g} src={src} fit={fit} animate label={label} />
+      <div className="heat-ft">
+        <span>{note ? `${note} · ` : ""}{fit.weeks < WEEKS ? `last ${months} months shown · stats cover 12 months` : "last 12 months"}</span>
+        <span className="legend">less {[0.08, 0.3, 0.55, 0.8, 1].map((t) => <i key={t} style={{ background: `color-mix(in srgb, ${src.c} ${t * 100}%, var(--heat-0))` }} />)} more</span>
+      </div>
+    </section>
+  );
+}
+
+// Platforms in the order the tiles show them; card = the matching entry in PLATFORMS (data.js).
+const ORDER = ["leetcode", "gfg", "neetcode", "hackerrank", "interviewbit", "code360", "hackerearth", "github"];
+const CARD = { leetcode: "LeetCode", gfg: "GeeksforGeeks", neetcode: "NeetCode", hackerrank: "HackerRank", interviewbit: "InterviewBit", code360: "Code360", hackerearth: "HackerEarth" };
+const fromHash = () => location.hash.slice(1).split("/")[1] || null;
+const nf = (n) => Number(n).toLocaleString("en-IN");
+
+// Small stacked bar of easy / medium / hard on a tile, with the numbers written underneath.
+function MiniLevels({ levels }) {
+  const lv = levels?.filter((l) => l.n > 0) || [];
+  const sum = lv.reduce((t, l) => t + l.n, 0);
+  if (!sum) return null;
+  return (
+    <span className="ct-lv">
+      <span className="ct-bar" aria-hidden="true">{lv.map((l) => <i key={l.k} className={`lv-${l.c}`} style={{ flexGrow: l.n }} />)}</span>
+      <small aria-label={lv.map((l) => `${l.k} ${l.n}`).join(", ")}>{lv.map((l) => `${l.k[0]}${l.n}`).join("  ")}</small>
+    </span>
+  );
+}
+
+// Everything about one platform: account switcher, contest / solved / badges profile, and the activity map.
+function Detail({ t, stats, onClose }) {
+  const box = useRef(null);
+  const [fit, setFit] = useState({ cell: 12, weeks: WEEKS });
+  const accts = useMemo(() => t.src.accounts?.(stats) || [], [t.id, stats]);
+  const top = accts.length ? accts.reduce((a, b, i) => ((b.raw?.solved || 0) > (accts[a].raw?.solved || 0) ? i : a), 0) : 0;
+  const [k, setK] = useState(top);
+  const acct = accts[k];
+
+  useEffect(() => {
+    const el = box.current;
+    const ro = new ResizeObserver(() => setFit(fitGrid(el.clientWidth)));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const g = useMemo(() => {
+    const days = acct ? acct.days : t.src.get(stats);
+    return days ? grid(days) : null;
+  }, [acct, t.id, stats]);
+  const profile = t.id === "github" ? null : profileOf(t.id, stats, acct?.raw);
+  const links = accts.length ? accts.map((a) => ({ url: a.url, text: `@${a.user}` })) : t.src.url ? [{ url: t.src.url, text: "View profile" }] : [];
+
+  return (
+    <div className="cd" ref={box} style={{ "--c": t.src.c }}>
+      <header className="cd-hd">
+        <span className="cd-title"><i aria-hidden="true" />{t.src.label}{t.card?.live && <i className="live-dot" title="Live" />}</span>
+        <span className="cd-links">
+          {links.map((l) => <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer">{l.text} ↗</a>)}
+        </span>
+      </header>
+      {t.card?.staleAt && <p className="stale-note">Couldn't refresh · showing {t.card.staleAt}</p>}
+
+      {accts.length > 1 && (
+        <div className="cd-accts" role="tablist" aria-label={`${t.src.label} accounts`}>
+          {accts.map((a, i) => (
+            <button key={a.user} role="tab" aria-selected={i === k} className={i === k ? "on" : ""} onClick={() => (haptic(5), setK(i))}>
+              {i === k && <motion.span className="cd-pill" layoutId={`acct-${t.id}`} transition={SPRING} />}
+              <span>@{a.user}</span>
+              <b>{nf(a.raw?.solved ?? 0)}</b>
+            </button>
+          ))}
+        </div>
+      )}
+
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div key={acct?.user || t.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6, transition: { duration: 0.12 } }} transition={SPRING}>
+          {profile ? (
+            <Profile p={profile} />
+          ) : t.card ? (
+            // live details unavailable: the saved numbers from data.js
+            <div className="pf-card cd-saved">
+              <b>{nf(t.card.val)}+</b> <span>{t.card.lbl}</span>
+              <dl className="pf-facts">{t.card.meta.map(([a, b]) => <div key={a}><dt>{a}</dt><dd>{b}</dd></div>)}</dl>
+            </div>
+          ) : null}
+          {g ? (
+            <Activity
+              g={g} src={t.src} fit={fit}
+              title={`${nf(g.total)} ${t.src.unit} in the past year`}
+              label={`${t.src.label}${acct ? ` @${acct.user}` : ""}: ${nf(g.total)} ${t.src.unit} on ${g.active} days in the last year`}
+              note={accts.length > 1 ? `@${acct.user}` : ""}
+            />
+          ) : (
+            <p className="heat-empty">The activity map couldn't load right now.</p>
+          )}
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// "All platforms": every platform's activity added together, plus a table to jump into any of them.
+function Overview({ tiles, stats, onChoose, onClose }) {
+  const box = useRef(null);
+  const [fit, setFit] = useState({ cell: 12, weeks: WEEKS });
+  useEffect(() => {
+    const el = box.current;
+    const ro = new ResizeObserver(() => setFit(fitGrid(el.clientWidth)));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const per = useMemo(() => tiles.map((t) => {
+    const d = t.src.get(stats);
+    return { t, d, g: d ? grid(d) : null };
+  }), [stats]); // tiles are rebuilt on every render but only change when stats do
+  const loaded = per.filter((x) => x.d);
+  const g = useMemo(() => grid(loaded.length ? mergeDays(loaded.map((x) => x.d)) : sample()), [per]);
+
+  return (
+    <div className="cd" ref={box} style={{ "--c": ALL.c }}>
+      <header className="cd-hd">
+        <span className="cd-title"><i aria-hidden="true" />All platforms{!loaded.length && " (sample)"}</span>
+      </header>
+      {loaded.length > 0 && (
         <div className="heat-table-wrap">
           <table className="heat-table">
             <thead>
-              <tr><th scope="col">Platform</th><th scope="col">Total</th><th scope="col">Active days</th><th scope="col">Longest streak</th><th scope="col">Current streak</th></tr>
+              <tr><th scope="col">Platform</th><th scope="col">Past year</th><th scope="col">Active days</th><th scope="col">Longest streak</th><th scope="col">Current streak</th></tr>
             </thead>
             <tbody>
-              {per.map(({ src: ps, g: pg }) => (
-                <tr key={ps.id} style={{ "--c": ps.c }}>
-                  <th scope="row">
-                    {pg ? <button onClick={() => onChoose(ps.id)}><i aria-hidden="true" />{ps.label}</button> : <span><i aria-hidden="true" />{ps.label}</span>}
-                  </th>
+              {per.map(({ t, g: pg }) => (
+                <tr key={t.id} style={{ "--c": t.src.c }}>
+                  <th scope="row"><button onClick={() => onChoose(t.id)}><i aria-hidden="true" />{t.src.label}</button></th>
                   {pg && !pg.active ? (
                     <td colSpan={4} className="na">no activity in the last 12 months{pg.lastActive ? ` · last active ${pg.lastActive}` : ""}</td>
                   ) : pg ? (
                     <>
-                      <td data-label="total">{pg.total.toLocaleString("en-IN")} <small>{ps.unit}</small></td>
+                      <td data-label="past year">{nf(pg.total)} <small>{t.src.unit}</small></td>
                       <td data-label="active">{pg.active}</td>
                       <td data-label="longest">{pg.best}d</td>
                       <td data-label="current">{pg.cur}d</td>
@@ -259,220 +381,147 @@ function Slide({ view, per, fit, animate, live, onChoose }) {
           </table>
         </div>
       )}
-      {accts ? (
-        // a platform with several profiles: one map per account, each with its own numbers
-        accts.map((a) => (
-          <section className="heat-acct" key={a.user} aria-label={`@${a.user}`}>
-            <a className="heat-acct-hd" href={a.url} target="_blank" rel="noopener noreferrer">@{a.user} <span aria-hidden="true">↗</span></a>
-            <Stats g={a.g} src={src} />
-            {!a.g.active && <p className="heat-empty">No activity on this account in the last 12 months{a.g.lastActive ? ` · last active ${a.g.lastActive}` : ""}</p>}
-            <Grid g={a.g} src={src} fit={fit} animate={animate} label={`${src.label} @${a.user}: ${a.g.total.toLocaleString("en-IN")} ${src.unit} on ${a.g.active} days in the last year`} />
-          </section>
-        ))
-      ) : (
-        <>
-          {live && !g.active && (
-            <p className="heat-empty">No {src.label} activity in the last 12 months{g.lastActive ? ` · last active ${g.lastActive}` : ""}</p>
-          )}
-          <Grid g={g} src={src} fit={fit} animate={animate} label={label} />
-        </>
-      )}
-      <div className="heat-ft">
-        <span>
-          {isAll ? "All platforms added together · " : accts ? `${accts.length} accounts, each on its own · ` : ""}
-          {fit.weeks < WEEKS ? `last ${months} months shown · stats cover 12 months` : "last 12 months"}
-        </span>
-        <span className="legend">less {[0.08, 0.3, 0.55, 0.8, 1].map((t) => <i key={t} style={{ background: `color-mix(in srgb, ${src.c} ${t * 100}%, var(--heat-0))` }} />)} more</span>
-      </div>
+      <Activity g={g} src={ALL} fit={fit} title={`${nf(g.total)} activities in the past year`} label={`All platforms: ${nf(g.total)} activities on ${g.active} days in the last year`} note="All platforms added together" />
     </div>
   );
 }
 
 /*
-  Contributions carousel: All first, then one slide per platform, side by side in a horizontal track that
-  snaps slide by slide. Swipe (or trackpad-scroll) it, use the ‹ › buttons or arrow keys, or tap a toggle;
-  the toggles and the header follow whichever slide is showing.
+  The platform page: a liquid-glass sheet that opens above the Coding page. Frosted, translucent layers over
+  slowly drifting colour (the platform's own), with bright specular edges. On wide screens it grows out of the
+  tile that was tapped; on phones it slides up and can be pulled down to close. Esc, ✕ or the backdrop close it.
 */
-function Heatmap({ stats }) {
-  const wrap = useRef(null);
-  const track = useRef(null);
-  const toggles = useRef(null);
-  const seen = useInView(wrap, 0.3);
-  const [idx, setIdx] = useState(0);
-  const [fit, setFit] = useState({ cell: 12, weeks: WEEKS });
-  const [heights, setHeights] = useState([]);
-
-  // every platform's calendar and its stats, worked out once per stats load
-  const per = useMemo(() => SOURCES.map((src) => {
-    const days = src.get(stats);
-    const accts = days && src.accounts?.(stats)?.map((a) => ({ ...a, g: grid(a.days) }));
-    return { src, days, g: days ? grid(days) : null, accts: accts?.length > 1 ? accts : null };
-  }), [stats]);
-  const live = per.some((x) => x.g);
-  const views = useMemo(() => {
-    const all = { src: ALL, g: live ? grid(mergeDays(per.filter((x) => x.days).map((x) => x.days))) : grid(sample()) };
-    return [all, ...per.filter((x) => x.g)];
-  }, [per, live]);
-  const i = Math.min(idx, views.length - 1);
-  const cur = views[i].src;
-
-  // size the grids to the slide width
+function Sheet({ from, color, label, onClose, children }) {
+  const drag = useDragControls();
+  const closeBtn = useRef(null);
+  const phone = useRef(matchMedia("(max-width: 767px)").matches).current;
   useEffect(() => {
-    const el = track.current;
-    const measure = () => el && setFit(fitGrid(el.clientWidth));
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  // the track takes the height of the slide that's showing, so short slides don't leave a gap
-  useEffect(() => {
-    const slides = [...track.current.children];
-    const read = () => setHeights(slides.map((s) => s.offsetHeight));
-    read();
-    const ro = new ResizeObserver(read);
-    slides.forEach((s) => ro.observe(s));
-    return () => ro.disconnect();
-  }, [views]);
-
-  // follow the scroll position: whichever slide is mostly in view is the active one
-  useEffect(() => {
-    const el = track.current;
-    let raf;
-    const on = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => setIdx(Math.round(el.scrollLeft / Math.max(1, el.clientWidth))));
-    };
-    el.addEventListener("scroll", on, { passive: true });
+    stopScroll();
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    closeBtn.current?.focus({ preventScroll: true });
+    const key = (e) => e.key === "Escape" && onClose();
+    addEventListener("keydown", key);
     return () => {
-      el.removeEventListener("scroll", on);
-      cancelAnimationFrame(raf);
+      removeEventListener("keydown", key);
+      document.body.style.overflow = prev;
+      startScroll();
     };
-  }, []);
+  }, [onClose]);
+  // grow from (and shrink back into) the tile that opened it
+  const origin = from && !phone ? { x: from.x - innerWidth / 2, y: from.y - innerHeight / 2 } : { x: 0, y: 0 };
+  const hidden = REDUCED ? { opacity: 0 } : phone ? { y: "100%" } : { opacity: 0, scale: 0.35, ...origin };
+  const shown = REDUCED ? { opacity: 1 } : phone ? { y: 0 } : { opacity: 1, scale: 1, x: 0, y: 0 };
 
-  useEffect(() => {
-    revealInRow(toggles.current, toggles.current?.querySelector('[aria-selected="true"]'));
-  }, [i]);
-
-  const goTo = (n) => {
-    const el = track.current;
-    const to = Math.max(0, Math.min(views.length - 1, n));
-    haptic(5);
-    el.scrollTo({ left: to * el.clientWidth, behavior: REDUCED ? "auto" : "smooth" });
-  };
-  const choose = (id) => goTo(views.findIndex((v) => v.src.id === id));
-  const onKey = (e) => {
-    if (e.key === "ArrowRight") (e.preventDefault(), goTo(i + 1));
-    if (e.key === "ArrowLeft") (e.preventDefault(), goTo(i - 1));
-  };
-
-  return (
-    <div className="heat" ref={wrap} style={{ "--c": cur.c }}>
-      <div className="hd">
-        <span className="heat-title"><i style={{ background: cur.c }} />{cur.label}{!live && " (sample)"}</span>
-        <span className="heat-nav">
-          {cur.url && (
-            <span className="heat-link">
-              <a href={cur.url} target="_blank" rel="noopener noreferrer">{cur.url2 ? `@${handleOf(cur.url)} ↗` : "View profile ↗"}</a>
-              {cur.url2 && <> · <a href={cur.url2} target="_blank" rel="noopener noreferrer">@{handleOf(cur.url2)} ↗</a></>}
-            </span>
-          )}
-          <span className="heat-arrows">
-            <button onClick={() => goTo(i - 1)} disabled={i === 0} aria-label="Previous platform"><Icon name="next" size={16} /></button>
-            <button onClick={() => goTo(i + 1)} disabled={i === views.length - 1} aria-label="Next platform"><Icon name="next" size={16} /></button>
-          </span>
-        </span>
-      </div>
-      <div className="heat-toggles" ref={toggles} role="tablist" aria-label="Choose a platform">
-        {[ALL, ...SOURCES].map((src) => {
-          const ok = views.some((v) => v.src.id === src.id);
-          const on = cur.id === src.id;
-          return (
-            <button key={src.id} role="tab" aria-selected={on} disabled={!ok} title={ok ? undefined : `${src.label} data couldn't be loaded right now`} className={on ? "on" : ""} style={{ "--c": src.c }} onClick={() => choose(src.id)}>
-              {on && <motion.span className="heat-pill" layoutId="heat-pill" transition={SPRING} />}
-              <i aria-hidden="true" />
-              <span>{src.short}</span>
-            </button>
-          );
-        })}
-      </div>
-      <div className="heat-dots" aria-hidden="true">
-        {views.map((v, k) => <i key={v.src.id} className={k === i ? "on" : ""} style={{ "--c": v.src.c }} />)}
-      </div>
-      <div className="heat-track" ref={track} tabIndex={0} onKeyDown={onKey} aria-label="Contribution maps, swipe or use arrow keys" style={heights[i] ? { height: heights[i] } : undefined}>
-        {views.map((v, k) => (
-          <Slide key={v.src.id} view={v} per={per} fit={fit} live={live} animate={seen && k === i} onChoose={choose} />
-        ))}
-      </div>
-    </div>
+  return createPortal(
+    <div className="lg-root" style={{ "--c": color }}>
+      <motion.div className="lg-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} onClick={onClose}>
+        {/* colour for the glass to bend: three soft blobs drifting behind the sheet */}
+        <span className="lg-blob a" /><span className="lg-blob b" /><span className="lg-blob c" />
+      </motion.div>
+      <motion.article
+        className="lg-sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-label={label}
+        initial={hidden}
+        animate={shown}
+        exit={{ ...hidden, transition: { duration: 0.28, ease: [0.4, 0, 1, 1] } }}
+        transition={{ type: "spring", stiffness: 260, damping: 30 }}
+        drag={phone ? "y" : false}
+        dragControls={drag}
+        dragListener={false}
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={{ top: 0, bottom: 0.7 }}
+        onDragEnd={(_, info) => (info.offset.y > 120 || info.velocity.y > 700) && (haptic(), onClose())}
+      >
+        <span className="lg-shine" aria-hidden="true" />
+        <div className="lg-grab" onPointerDown={(e) => phone && drag.start(e)}><span className="pd-handle" aria-hidden="true" /></div>
+        <button className="lg-close" ref={closeBtn} onClick={onClose} aria-label={`Close ${label}`}><Icon name="x" size={18} /></button>
+        <div className="lg-body" data-lenis-prevent>{children}</div>
+      </motion.article>
+    </div>,
+    document.body
   );
 }
 
-// One platform card. A platform with several profiles isn't one big link: each profile gets its own row and link.
-function Plat({ p, k }) {
-  return (
-    <Reveal as={p.accounts ? "div" : "a"} delay={k * 80} className={`plat ${p.accounts ? "multi" : ""}`} {...(!p.accounts && { href: p.url, target: "_blank", rel: "noopener noreferrer" })} style={{ "--c": p.c }}>
-      <span className="pn">{p.n}{p.live && <i className="live-dot" title="Live" />}</span>
-      <span className="val"><Odometer value={p.val} suffix="+" /></span>
-      <span className="lbl">{p.lbl}</span>
-      {p.staleAt && <span className="stale-note">Couldn't refresh · showing {p.staleAt}</span>}
-      <span className="meta">
-        {p.meta.map(([a, b]) => <span key={a}>{a} <b>{b}</b></span>)}
-      </span>
-      {p.accounts && (
-        <ul className="plat-accts" aria-label={`${p.n} profiles`}>
-          {p.accounts.map((a) => (
-            <li key={a.user}>
-              <a href={a.url} target="_blank" rel="noopener noreferrer">
-                <span className="who">@{a.user}<small>{a.note}</small></span>
-                <b>{a.val.toLocaleString("en-IN")}</b>
-                <span className="go" aria-hidden="true">↗</span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      )}
-    </Reveal>
-  );
-}
-
+/*
+  Coding page, kept compact: one tile per platform with the number of problems solved (and the easy / medium /
+  hard split where the platform gives one). Tap a tile and everything about that platform opens below the
+  tiles: contest rating and history, rank, solved by difficulty, badges, certificates and the activity map.
+  Tap it again (or ✕) to close. #coding/leetcode opens a platform directly, so it can be linked.
+*/
 export default function Coding() {
   const stats = useStats();
   const platforms = livePlatforms(stats);
-  const [more, setMore] = useState(false);
-  const lead = platforms.filter((p) => !p.more), rest = platforms.filter((p) => p.more);
+  const [open, setOpen] = useState(fromHash);
+  const [from, setFrom] = useState(null); // where the tapped tile is, so the sheet can grow out of it
   const total = platforms.reduce((s, p) => s + p.val, 0);
   const updated = stats?.updated && new Date(stats.updated);
+
+  const tiles = ORDER.map((id) => {
+    const src = SOURCES.find((x) => x.id === id);
+    const card = CARD[id] && platforms.find((p) => p.n === CARD[id]);
+    const prof = stats && id !== "github" ? profileOf(id, stats) : null;
+    const levels = id === "leetcode" ? profileOf(id, stats, stats?.leetcode?.accounts?.find((a) => a.user === stats.leetcode.top))?.solved.levels : prof?.solved?.levels;
+    if (id === "github") return { id, src, val: stats?.github?.total ?? null, unit: "contributions this year" };
+    if (!card) return null;
+    return { id, src, card, val: card.val, unit: id === "hackerrank" ? "challenges solved" : "problems solved", levels, accounts: card.accounts?.length };
+  }).filter((t) => t && t.val != null);
+
+  const choose = (id, e) => {
+    haptic(6);
+    const next = open === id ? null : id;
+    const r = e?.currentTarget?.getBoundingClientRect?.();
+    if (r) setFrom({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
+    setOpen(next);
+    history.replaceState(null, "", next ? `#coding/${next}` : "#coding");
+  };
+  const close = useCallback(() => {
+    setOpen(null);
+    history.replaceState(null, "", "#coding");
+  }, []);
+  const current = open === "all" ? "all" : tiles.find((t) => t.id === open);
 
   return (
     <>
       <Glitch text="Coding" />
-      <p className="lead-line">
-        <b><Odometer value={total} suffix="+" /></b> problems solved across {platforms.length} platforms, and counting.
-      </p>
-      <div className="cp">
-        {lead.map((p, k) => <Plat p={p} k={k} key={p.n} />)}
-      </div>
-      {rest.length > 0 && (
-        <div className="cp-more">
-          <button className="cp-more-btn" onClick={() => setMore(!more)} aria-expanded={more} aria-controls="cp-more">
-            <span>More platforms <small>{rest.map((p) => p.n).join(" · ")}</small></span>
-            <b>{rest.reduce((n, p) => n + p.val, 0).toLocaleString("en-IN")}+</b>
-            <Icon name="chevron" size={16} />
-          </button>
-          <AnimatePresence initial={false}>
-            {more && (
-              <motion.div id="cp-more" className="cp-more-body" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: REDUCED ? 0 : 0.35, ease: [0.2, 0.8, 0.2, 1] }}>
-                <div className="cp">{rest.map((p, k) => <Plat p={p} k={k} key={p.n} />)}</div>
-              </motion.div>
+      <button className={`ct-total ${open === "all" ? "on" : ""}`} onClick={(e) => choose("all", e)} aria-haspopup="dialog">
+        <span className="lead-line"><b><Odometer value={total} suffix="+" /></b> problems solved across {platforms.length} platforms</span>
+        <small>{open === "all" ? "Hide" : "See"} all activity <Icon name="chevron" size={14} /></small>
+      </button>
+
+      <ul className="ct-grid" aria-label="Coding platforms">
+        {tiles.map((t, i) => (
+          <Reveal as="li" key={t.id} delay={(i % 4) * 60}>
+            <button className={`ct ${open === t.id ? "on" : ""}`} style={{ "--c": t.src.c }} onClick={(e) => choose(t.id, e)} aria-haspopup="dialog">
+              {open === t.id && <motion.span className="ct-ring" layoutId="ct-ring" transition={SPRING} />}
+              <span className="ct-name"><i aria-hidden="true" />{t.src.short === "GFG" ? "GeeksforGeeks" : t.src.label}{t.card?.live && <i className="live-dot" title="Live" />}</span>
+              <span className="ct-val"><Odometer value={t.val} suffix={t.id === "github" ? "" : "+"} /></span>
+              <span className="ct-unit">{t.unit}{t.accounts > 1 ? ` · best of ${t.accounts}` : ""}</span>
+              <MiniLevels levels={t.levels} />
+              <span className="ct-open" aria-hidden="true">{open === t.id ? "Close" : "Details"} <Icon name="chevron" size={13} /></span>
+            </button>
+          </Reveal>
+        ))}
+      </ul>
+
+      <p className="ct-hint">Tap a platform to open its full profile: contest rating, rank, difficulty split, badges, certificates and activity map.</p>
+
+      <AnimatePresence>
+        {current && (
+          <Sheet key="sheet" from={from} color={current === "all" ? ALL.c : current.src.c} label={current === "all" ? "All platforms" : current.src.label} onClose={close}>
+            {!stats ? (
+              <div className="heat-skel" aria-busy="true" aria-label="Loading" />
+            ) : current === "all" ? (
+              <Overview key="all" tiles={tiles} stats={stats} onChoose={(id) => setOpen(id)} onClose={close} />
+            ) : (
+              <Detail key={current.id} t={current} stats={stats} onClose={close} />
             )}
-          </AnimatePresence>
-        </div>
-      )}
-      <h3 className="h3 heat-h">Contributions</h3>
-      {/* grey placeholder until the first stats arrive (instant on repeat visits, which use the saved copy) */}
-      <Reveal>{stats ? <Heatmap stats={stats} /> : <div className="heat-skel" aria-busy="true" aria-label="Loading contribution maps" />}</Reveal>
+          </Sheet>
+        )}
+      </AnimatePresence>
+
       <p className="note">
         {updated
           ? `// Live from LeetCode, GFG, GitHub, Code360, HackerRank, HackerEarth, NeetCode and InterviewBit · refreshed ${updated.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}`

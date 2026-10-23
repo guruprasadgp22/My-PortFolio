@@ -135,7 +135,7 @@ function QuickView({ go, onClose, sudo }) {
   return (
     <Modal onClose={onClose} className="quick" label="Recruiter quick view">
       <div className="qv-head">
-        <img src="/me.jpg" alt="" className="qv-photo" />
+        <img src="/me.jpg" alt="Guruprasad" className="qv-photo" />
         <div>
           <h3 className="qv-name">Guruprasad</h3>
           <p className="qv-status"><i />{ME.availability} · {ME.location}</p>

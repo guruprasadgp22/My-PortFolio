@@ -282,7 +282,7 @@ export default function Panel({ onClose, go }) {
   const body = (
     <>
       <header className="c-head" onPointerDown={phone ? (e) => !e.target.closest("button") && drag.start(e) : undefined}>
-        <span className="c-ava"><img src="/me.jpg" alt="" /><i className={offline ? "off" : ""} /></span>
+        <span className="c-ava" aria-hidden="true"><img src="/me.jpg" alt="" /><i className={offline ? "off" : ""} /></span>
         <div>
           <b>GP Assistant</b>
           <small>{offline ? "Offline mode · basic answers" : `Answers from ${NAME}'s portfolio`}</small>
