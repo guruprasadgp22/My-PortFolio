@@ -35,7 +35,7 @@ async function leetcodeAccount(user) {
       prev:userCalendar(year:$p){submissionCalendar}
     }
     userContestRanking(username:$u){rating attendedContestsCount globalRanking totalParticipants topPercentage}
-    userContestRankingHistory(username:$u){attended rating contest{title startTime}}
+    userContestRankingHistory(username:$u){attended rating ranking problemsSolved totalProblems contest{title startTime}}
     userProfileUserQuestionProgressV2(userSlug:$u){numFailedQuestions{count}}
   }`;
   const { data } = await getJson("https://leetcode.com/graphql", {
@@ -59,7 +59,8 @@ async function leetcodeAccount(user) {
     contest: cr?.attendedContestsCount
       ? {
           rating: Math.round(cr.rating), ranking: cr.globalRanking, of: cr.totalParticipants, attended: cr.attendedContestsCount, top: cr.topPercentage,
-          history: (data.userContestRankingHistory || []).filter((h) => h.attended).map((h) => ({ t: h.contest.startTime, r: Math.round(h.rating), name: h.contest.title })),
+          // only contests that were actually ranked (registered-but-unranked ones aren't counted by LeetCode either)
+          history: (data.userContestRankingHistory || []).filter((h) => h.attended && h.ranking > 0).map((h) => ({ t: h.contest.startTime, r: Math.round(h.rating), name: h.contest.title, rank: h.ranking || null, solved: h.problemsSolved ?? null, of: h.totalProblems ?? null })),
         }
       : null,
     badges: (u.badges || []).map((b) => ({ name: b.displayName, icon: LC_ICON(b.icon), at: b.creationDate })).sort((a, b) => (a.at < b.at ? 1 : -1)),
@@ -174,6 +175,23 @@ async function code360Days() {
   return days;
 }
 
+// Code360 contest rating: rating after each contest, rating group (Beginner, Specialist…) and the rating
+// distribution of all users. Needs the account's internal id, which user_details returns.
+async function code360Contests(uuid) {
+  const { data } = await getJson(`https://www.naukri.com/code360/api/v3/public_section/user_rating_data?uuid=${uuid}&request_differentiator=1&app_context=publicsection&naukri_request=true`);
+  const history = (data?.user_rating_data || []).map((h) => ({ t: h.date, r: Math.round(h.rating), name: h.name, rank: h.rank ?? null, players: h.total_participants ?? null, solved: h.problems_solved ?? null }));
+  if (!history.length) return null;
+  // the rating after the latest contest, which is the number Code360's own profile shows (1485, not a rounded 1486)
+  const rating = history.at(-1).r;
+  const dist = (data.rating_distribution || []).filter((b) => b.count > 0).map((b) => ({ from: b.min, to: b.max, n: b.count }));
+  return {
+    rating, max: Math.max(...history.map((h) => h.r)), attended: history.length, history,
+    group: data.rating_group?.group || null, icon: data.rating_group?.icon || null,
+    // Code360's own "top x%" isn't in its API, and an estimate from the buckets wouldn't match the site, so it's left out
+    hist: dist,
+  };
+}
+
 async function code360() {
   const base = `https://www.naukri.com/code360/api/v3/public_section/profile`;
   const [profile, days] = await Promise.allSettled([
@@ -182,12 +200,13 @@ async function code360() {
   ]);
   if (profile.status !== "fulfilled") throw profile.reason;
   const data = profile.value.data;
+  const contest = data.has_contest_rating && data.uuid ? await code360Contests(data.uuid).catch(() => null) : null;
   const levels = Object.fromEntries((data.dsa_domain_data?.problem_count_data?.difficulty_data || []).map((d) => [d.level, d.count]));
   // topic badges: { achiever: { ptm: ["Hash Table"] … } } → ["Achiever · Hash Table"]
   const badges = Object.entries(data.dsa_domain_data?.badges_hash || {}).flatMap(([tier, kinds]) =>
     Object.values(kinds || {}).flat().map((topic) => `${tier[0].toUpperCase()}${tier.slice(1)} · ${topic}`)
   );
-  return { solved: data.dsa_domain_data?.problem_count_data?.total_count ?? 0, ...levels, badges, days: days.value && Object.keys(days.value).length ? days.value : null };
+  return { solved: data.dsa_domain_data?.problem_count_data?.total_count ?? 0, ...levels, badges, contest, days: days.value && Object.keys(days.value).length ? days.value : null };
 }
 
 // HackerRank, all accounts combined: challenges solved (from the skill badges), the best star rating per

@@ -478,7 +478,7 @@ export const PLATFORMS = [
   // Platforms with more than one profile list each under accounts (its own number and link). The card's number is
   // the highest account, never the sum, so a problem solved on both accounts isn't counted twice.
   {
-    n: "LeetCode", c: "#ffa116", val: 455, lbl: "problems solved · 200 E / 204 M / 51 H · best of 2 accounts", meta: [["Rating", "1311"], ["Max streak", "109d"]],
+    n: "LeetCode", c: "#ffa116", val: 455, lbl: "problems solved · 200 E / 204 M / 51 H · best of 2 accounts", meta: [["Max streak", "109d"]],
     url: "https://leetcode.com/u/guruprasadgp22/",
     accounts: [
       { user: "guruprasadgp22", url: "https://leetcode.com/u/guruprasadgp22/", val: 455, note: "200 E / 204 M / 51 H" },
@@ -547,5 +547,6 @@ export const NAV = [
   ["skills", "Skills", "layers"],
   ["projects", "Projects", "folder"],
   ["coding", "Coding", "code"],
+  ["contests", "Contests", "award"], // every rated contest across platforms (phones: under More)
   ["contact", "Contact", "mail"],
 ];

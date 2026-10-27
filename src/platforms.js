@@ -13,7 +13,7 @@ function overlay(p, s) {
       ...p,
       val: l.solved,
       lbl: `problems solved · ${l.easy} E / ${l.medium} M / ${l.hard} H${l.accounts?.length > 1 ? ` · best of ${l.accounts.length} accounts` : ""}`,
-      meta: [["Rating", l.rating ?? "–"], ["Max streak", `${l.streak ?? 0}d`]],
+      meta: [["Max streak", `${l.streak ?? 0}d`]],
       accounts: l.accounts?.map((a) => ({ user: a.user, url: a.url, val: a.solved, note: `${a.easy} E / ${a.medium} M / ${a.hard} H` })) ?? p.accounts,
       live: true,
     };

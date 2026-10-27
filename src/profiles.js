@@ -1,7 +1,6 @@
 /*
   Turns each platform's live stats into one profile shape, so every platform's panel on the Coding page is drawn
-  by the same component (components/Profile.jsx), LeetCode-style:
-    contest  rating, global ranking, contests attended, rating history and where the rating sits ("Top x%")
+  by the same component (components/Profile.jsx), LeetCode-style (contest ratings live on the Contests page):
     ranking  "Top x%" with the distribution behind it, for platforms without contests (NeetCode)
     solved   total solved (out of how many), still attempting, and the split by difficulty
     side     badges, skill stars, certificates, topics or key facts: whatever that platform offers
@@ -13,9 +12,8 @@ const LEVEL = { School: "basic", Basic: "basic", Easy: "easy", Medium: "medium",
 const level = (k, n, of = null) => ({ k, n: n ?? 0, of, c: LEVEL[k] || "basic" });
 const fmt = (n) => (n == null ? "–" : Number(n).toLocaleString("en-IN"));
 
-function leetcode(a, hist) {
+function leetcode(a) {
   return {
-    contest: a.contest && { ...a.contest, hist },
     solved: {
       n: a.solved, of: a.of?.all, attempting: a.attempting,
       levels: [level("Easy", a.easy, a.of?.easy), level("Medium", a.medium, a.of?.medium), level("Hard", a.hard, a.of?.hard)],
@@ -27,7 +25,7 @@ function leetcode(a, hist) {
 }
 
 const BUILDERS = {
-  leetcode: (s, acct) => leetcode(acct || s.accounts?.[0] || s, s.histogram),
+  leetcode: (s, acct) => leetcode(acct || s.accounts?.[0] || s),
 
   gfg: (s) => ({
     solved: {

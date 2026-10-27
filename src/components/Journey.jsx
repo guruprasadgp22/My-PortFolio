@@ -27,11 +27,16 @@ export default function Journey() {
       raf = requestAnimationFrame(() => {
         const el = list.current;
         if (!el) return;
+        // read every position first, then write: mixing them made the browser redo layout once per stop
         const r = el.getBoundingClientRect();
         const line = innerHeight * 0.7;
-        el.style.setProperty("--p", REDUCED ? 1 : Math.min(1, Math.max(0, (line - r.top) / r.height)));
+        const items = [...el.querySelectorAll(".jt-item")];
+        const lit = items.map((s) => REDUCED || s.getBoundingClientRect().top < line);
+        // only the line itself changes (a variable on the whole list restyled every card on every frame)
+        const fill = el.querySelector(".jt-rail i");
+        if (fill) fill.style.transform = `scaleY(${REDUCED ? 1 : Math.min(1, Math.max(0, (line - r.top) / r.height))})`;
         // a data attribute, not a class: the reveal animation re-renders the class list and would wipe it
-        el.querySelectorAll(".jt-item").forEach((s) => s.toggleAttribute("data-lit", REDUCED || s.getBoundingClientRect().top < line));
+        items.forEach((s, i) => s.hasAttribute("data-lit") !== lit[i] && s.toggleAttribute("data-lit", lit[i]));
       });
     };
     on();

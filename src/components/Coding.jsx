@@ -259,7 +259,7 @@ function MiniLevels({ levels }) {
   );
 }
 
-// Everything about one platform: account switcher, contest / solved / badges profile, and the activity map.
+// Everything about one platform: account switcher, solved / badges profile, and the activity map.
 function Detail({ t, stats, onClose }) {
   const box = useRef(null);
   const [fit, setFit] = useState({ cell: 12, weeks: WEEKS });
@@ -448,7 +448,7 @@ function Sheet({ from, color, label, onClose, children }) {
 /*
   Coding page, kept compact: one tile per platform with the number of problems solved (and the easy / medium /
   hard split where the platform gives one). Tap a tile and everything about that platform opens below the
-  tiles: contest rating and history, rank, solved by difficulty, badges, certificates and the activity map.
+  tiles: rank, solved by difficulty, badges, certificates and the activity map.
   Tap it again (or ✕) to close. #coding/leetcode opens a platform directly, so it can be linked.
 */
 export default function Coding() {
@@ -490,6 +490,7 @@ export default function Coding() {
         <span className="lead-line"><b><Odometer value={total} suffix="+" /></b> problems solved across {platforms.length} platforms</span>
         <small>{open === "all" ? "Hide" : "See"} all activity <Icon name="chevron" size={14} /></small>
       </button>
+      <a className="ct-contests" href="#contests"><Icon name="award" size={16} /><span>Contest ratings across platforms</span><Icon name="arrow" size={14} /></a>
 
       <ul className="ct-grid" aria-label="Coding platforms">
         {tiles.map((t, i) => (
@@ -506,7 +507,7 @@ export default function Coding() {
         ))}
       </ul>
 
-      <p className="ct-hint">Tap a platform to open its full profile: contest rating, rank, difficulty split, badges, certificates and activity map.</p>
+      <p className="ct-hint">Tap a platform to open its full profile: rank, difficulty split, badges, certificates and activity map.</p>
 
       <AnimatePresence>
         {current && (

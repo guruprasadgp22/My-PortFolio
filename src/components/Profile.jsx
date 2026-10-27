@@ -6,7 +6,7 @@ import useInView from "../hooks/useInView";
 
 /*
   LeetCode-style profile panel for one coding platform (data shape: src/profiles.js):
-  contest card (rating, ranking, history line, "Top x%" bars), a solved ring split by difficulty with
+  a "Top x%" ranking card where the platform has one, a solved ring split by difficulty with
   per-difficulty chips, and a side card (badges, skill stars, topics or facts). Every chart has a hover
   tooltip, and every number is also written out as text, so nothing relies on colour alone.
 */
@@ -36,8 +36,8 @@ function useTip() {
   return [setTip, node];
 }
 
-// Contest rating over time: a 2px line, the latest point marked, crosshair + tooltip on hover.
-function RatingLine({ history }) {
+// Contest rating over time (used by the Contests page): a 2px line, the latest point marked, crosshair + tooltip on hover.
+export function RatingLine({ history }) {
   const [setTip, tipNode] = useTip();
   const [hover, setHover] = useState(null);
   // drawn at its real pixel width (not stretched), so the dots stay round on every screen
@@ -66,7 +66,7 @@ function RatingLine({ history }) {
     const x = ((e.clientX - r.left) / r.width) * W;
     const p = pts.reduce((a, b) => (Math.abs(b.x - x) < Math.abs(a.x - x) ? b : a));
     setHover(p);
-    setTip({ x: r.left + (p.x / W) * r.width, y: r.top + (p.y / H) * r.height - 6, body: <><b>{fmt(p.r)}</b> · {p.name}<br /><small>{day(p.t)}</small></> });
+    setTip({ x: r.left + (p.x / W) * r.width, y: r.top + (p.y / H) * r.height - 6, body: <><b>{fmt(p.r)}</b> · {p.name}<br /><small>{day(p.t)}{p.rank ? ` · rank ${fmt(p.rank)}` : ""}</small></> });
   };
   const leave = () => (setHover(null), setTip(null));
 
@@ -92,7 +92,7 @@ function RatingLine({ history }) {
 }
 
 // "Top x%": the distribution as bars, with the bucket this profile falls in highlighted.
-function TopBars({ bars, label }) {
+export function TopBars({ bars, label }) {
   const [setTip, tipNode] = useTip();
   const max = Math.max(...bars.map((b) => b.n));
   return (
@@ -111,32 +111,6 @@ function TopBars({ bars, label }) {
       ))}
       {tipNode}
     </div>
-  );
-}
-
-function Contest({ c }) {
-  // LeetCode's histogram, with this rating's bucket marked
-  const bars = (c.hist || []).filter((b) => b.n > 0).map((b) => ({
-    n: b.n, me: c.rating >= b.from && c.rating < b.to,
-    title: `${fmt(b.from)}–${fmt(b.to)} rating`, sub: `${fmt(b.n)} users · top ${b.top}%`,
-  }));
-  return (
-    <section className="pf-card pf-contest">
-      <div className="pf-contest-l">
-        <dl className="pf-kpis">
-          <div><dt>Contest rating</dt><dd className="big">{fmt(c.rating)}</dd></div>
-          <div><dt>Global ranking</dt><dd>{fmt(c.ranking)}<small>/{fmt(c.of)}</small></dd></div>
-          <div><dt>Attended</dt><dd>{c.attended}</dd></div>
-        </dl>
-        {c.history?.length > 1 && <RatingLine history={c.history} />}
-      </div>
-      {c.top != null && (
-        <div className="pf-contest-r">
-          <dl className="pf-kpis"><div><dt>Top</dt><dd className="big">{c.top}%</dd></div></dl>
-          {bars.length > 0 && <TopBars bars={bars} label={`Rating ${c.rating} is in the top ${c.top}% of contest participants`} />}
-        </div>
-      )}
-    </section>
   );
 }
 
@@ -279,7 +253,6 @@ export default function Profile({ p }) {
   if (!p) return null;
   return (
     <div className="pf">
-      {p.contest && <Contest c={p.contest} />}
       {p.ranking && <Ranking r={p.ranking} />}
       <div className={`pf-row ${p.side ? "" : "solo"}`}>
         {p.solved && <Solved s={p.solved} />}
