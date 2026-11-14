@@ -4,7 +4,7 @@
    Filled from your resume and LinkedIn profile. Lines marked "TODO" still need your input.
    ========================================================== */
 
-export const ME = {
+export let ME = {
   first: "GURU",
   last: "PRASAD",
   initials: "GP",
@@ -36,7 +36,7 @@ export const ME = {
   resumes: { default: "/Guruprasad_P_updated.pdf", backend: "" },
 };
 
-export const ABOUT = {
+export let ABOUT = {
   // Your photo lives at public/me.jpg. Leave "" to show the animated monogram instead.
   photo: "/me.jpg",
   bio: "I'm Guruprasad, a software developer with a Bachelor's degree in Computer Science and Engineering. I enjoy designing and building scalable, secure and user-focused applications.",
@@ -87,7 +87,7 @@ export const ABOUT = {
 
 // Your story, told the fun way. Shown on the Journey page.
 // icon = the emoji on the timeline, ch = starts a new chapter, big = a milestone (highlighted).
-export const JOURNEY = [
+export let JOURNEY = [
   { yr: "2018", icon: "🎒", ch: "School days", t: "SSLC cleared with 86.4%", d: "Finished 10th standard with 86.4%. Exams over, holidays on. Best feeling ever.", tags: ["SSLC", "86.4%"] },
   { yr: "2018", icon: "💻", t: "Hello, World!", d: "Picked PCMCs for PUC and wrote my first program in C. It came with my first bug, free of cost.", tags: ["PUC", "PCMCs", "C"] },
   { yr: "2020", icon: "😷", t: "PUC done, then COVID said hi", d: "Wrapped up PUC with 71.33%. Then COVID arrived and the whole world pressed the pause button.", tags: ["PUC", "71.33%"] },
@@ -105,7 +105,7 @@ export const JOURNEY = [
 
 // Stops on the animated map at the top of the Journey page, oldest first. lat/lon are the real places
 // (from OpenStreetMap). lbl = where the name sits relative to its pin: [dx, dy, "start" | "end"].
-export const JOURNEY_MAP = [
+export let JOURNEY_MAP = [
   { n: "Mudradi", d: "SSLC · M N D S M Aided High School", yrs: "2017 – 2018", lat: 13.4205, lon: 74.9924, lbl: [34, -30, "start"] },
   { n: "Hiriadka", d: "PUC · Karnataka Public School", yrs: "2018 – 2020", lat: 13.3506, lon: 74.8659, lbl: [-4, -50, "end"] },
   { n: "Moodabidri", d: "B.E. at MITE · DLithe internship", yrs: "2020 – 2024", lat: 13.051, lon: 74.9648, lbl: [32, 40, "start"] },
@@ -114,7 +114,7 @@ export const JOURNEY_MAP = [
 
 // Newest first. Every role from your resume and LinkedIn.
 // sum, tech and flow feed the stacked cards at the top of the Experience page; pts are the full details below them.
-export const EXPERIENCE = [
+export let EXPERIENCE = [
   {
     when: "Jun 2025 – Jun 2026",
     role: "Software Developer Apprentice", // exact title from the resume and offer letter
@@ -171,7 +171,7 @@ export const EXPERIENCE = [
 // TODO: swap the stats for real results when you have them (users, GitHub stars, accuracy, response time…).
 // phone = optional phone-sized screenshot for the phone mockup (otherwise img is cropped to fit).
 // TODO: projects with url: "" have no public repo yet. Push the code and paste the repo link to show a "View code" button.
-export const PROJECTS = [
+export let PROJECTS = [
   {
     t: "Job Board",
     stats: [["6", "job sources, synced every 6 hours"], ["165", "skills recognised in a resume"]],
@@ -450,7 +450,7 @@ export const PROJECTS = [
 // Grouped skills, no scores. at = where you used it (shown under the chip), so every skill can be backed up in an interview.
 // Only list what you've actually used. Removed for now (not in any project yet): Kubernetes, Kafka, Redis, LangChain4j, RAG,
 // automation testing. Add one back once a project uses it.
-export const SKILLS = [
+export let SKILLS = [
   { h: "Languages", s: ["Java", "Python", "JavaScript", "SQL", "C++"], at: { Java: "Job Board, FlightWise AI", Python: "Dental detection", JavaScript: "Job Board, FlightWise AI", SQL: "Job Board, FlightWise AI" } },
   { h: "Backend", s: ["Spring Boot", "Spring Security", "JWT", "Spring Cloud Gateway", "Eureka", "Hibernate / JPA", "JDBC", "RESTful APIs", "Microservices", "Flask", "Django"], at: { "Spring Boot": "Job Board, FlightWise AI", "Spring Security": "Job Board", JWT: "Job Board, FlightWise AI", "Spring Cloud Gateway": "FlightWise AI", Eureka: "FlightWise AI", "Hibernate / JPA": "Job Board, KodNest", JDBC: "KodNest", "RESTful APIs": "Job Board, FlightWise AI", Microservices: "FlightWise AI", Flask: "Dental detection", Django: "KodNest" } },
   { h: "Frontend", s: ["React.js", "HTML5", "CSS3", "Tailwind CSS", "Material UI", "Vite"], at: { "React.js": "Job Board, FlightWise AI", "Tailwind CSS": "FlightWise AI", "Material UI": "FlightWise AI", Vite: "Job Board, FlightWise AI" } },
@@ -463,7 +463,7 @@ export const SKILLS = [
 
 // Certifications from your resume and LinkedIn (newest first). by / when / url are optional.
 // TODO: add url: "https://..." (the certificate or its verification page) to show a "Verify" link.
-export const CERTIFICATIONS = [
+export let CERTIFICATIONS = [
   { t: "Java Spring Framework, Spring Boot & Spring AI (Generative AI)", by: "Udemy", when: "May 2026" },
   { t: "Python For Beginners Course In-Depth", by: "Udemy", when: "Apr 2026" },
   { t: "Artificial Intelligence for Beginners: Python and AI Basics", by: "Udemy", when: "Dec 2025" },
@@ -474,7 +474,7 @@ export const CERTIFICATIONS = [
 ];
 
 // LeetCode, GFG and Code360 numbers pulled from the public profiles on 17 Oct 2026.
-export const PLATFORMS = [
+export let PLATFORMS = [
   // Platforms with more than one profile list each under accounts (its own number and link). The card's number is
   // the highest account, never the sum, so a problem solved on both accounts isn't counted twice.
   {
@@ -500,10 +500,12 @@ export const PLATFORMS = [
   { n: "HackerEarth", more: true, c: "#7b83ff", val: 9, lbl: "problems solved · 35 submissions", meta: [["Score", "160"], ["Rank", "Top 20%"]], url: "https://www.hackerearth.com/@guruprasadgp/" },
   // Loads live while the InterviewBit profile is public. Set val to null to hide the card.
   { n: "InterviewBit", more: true, c: "#14b8a6", val: 6, lbl: "problems solved · score 1,228", meta: [["University rank", "#7"], ["Streak", "1d"]], url: "https://www.interviewbit.com/profile/guruprasad-gp_339/" },
+  // Live from the Codeforces API (rating, contests and solved by difficulty); these are the saved fallback numbers.
+  { n: "Codeforces", more: true, c: "#3b8fd9", val: 2, lbl: "problems solved · unrated", meta: [["Rating", "Unrated"], ["Contests", 0]], url: "https://codeforces.com/profile/guruprasadgp" },
 ];
 
 // score is optional: shown as plain text under the qualification
-export const EDUCATION = [
+export let EDUCATION = [
   {
     yr: "Dec 2020 – May 2024",
     t: "Bachelor of Engineering - Computer Science and Engineering",
@@ -525,7 +527,7 @@ export const EDUCATION = [
 ];
 
 // "What I'm doing" cards on the About page. icon: code | server | brain | git
-export const DOING = [
+export let DOING = [
   { icon: "server", t: "Backend & APIs", d: "Spring Boot REST APIs and microservices with Spring Security, JWT, JPA and PostgreSQL (Job Board, FlightWise AI)." },
   { icon: "code", t: "Frontend development", d: "Responsive React.js interfaces with Vite, Material UI and Tailwind CSS." },
   { icon: "brain", t: "AI & ML", d: "Computer vision with PyTorch and YOLOv5, served through ONNX Runtime (Dental detection)." },
@@ -533,10 +535,38 @@ export const DOING = [
 ];
 
 // Seasonal touches, shown only between from and to (dates in India time). Keep it to a few days a year.
-export const FESTIVALS = [
+export let FESTIVALS = [
   { kind: "diwali", name: "Happy Deepavali!", from: "2026-11-06", to: "2026-11-10" },
   { kind: "diwali", name: "Happy Deepavali!", from: "2027-10-27", to: "2027-10-31" },
 ];
+
+/*
+  Learning tab: what I'm studying right now and how far I've got.
+  Update `done` (lessons finished) as you go; null shows "In progress" without a number.
+  Lesson titles, counts and lengths come from src/learning.json, a snapshot of each YouTube playlist.
+*/
+export const LEARNING = {
+  updated: "14 Nov 2026",
+  by: { name: "codestorywithMIK", url: "https://www.youtube.com/@codestorywithMIK" },
+  groups: [
+    {
+      id: "ai", title: "AI & LLMs", icon: "brain",
+      tracks: [
+        { list: "PLGSKQmIKK2zQ", title: "Advanced AI: Build Real AI Projects", sub: "From a first Python script to autonomous agents", done: 2, focus: ["Local LLMs (Ollama)", "Tool calling", "Streaming", "RAG", "ChromaDB"] },
+        { list: "PLUqOqHuQynYk", title: "AI Fundamentals Decoded", sub: "How LLMs work, one idea per video", done: 0, focus: ["Tokens", "Embeddings", "Transformers & attention", "Context windows", "Fine-tuning", "LangChain & LangGraph"] },
+      ],
+    },
+    {
+      id: "dsa", title: "Data structures & algorithms", icon: "code",
+      tracks: [
+        { list: "PLpIkg8OmuX-JhFpkhgrAwZRtukO0SkwAt", title: "Dynamic Programming", sub: "DP Concepts & Qns: convert story to code", done: 45, focus: ["Recursion + memo", "Bottom-up", "LIS & LCS", "Palindromes", "Grid DP", "0/1 Knapsack"] },
+        { list: "PLpIkg8OmuX-K1qUIQToCllUO0UIKXt8dB", title: "Segment Tree", sub: "Concepts & questions", done: 21, focus: ["Build & update", "Range queries", "Lazy propagation", "Min / max queries"] },
+        { list: "PLpIkg8OmuX-IzZj8UNhVsiWKqTdDcHnP1", title: "Binary Lifting & DP on Trees", sub: "Concepts & questions", done: 4, focus: ["Kth ancestor", "Lowest common ancestor", "Path queries"] },
+        { list: "PLpIkg8OmuX-K3Lo6IqP65xUAZq_YNkX3c", title: "LeetCode Easy", sub: "Daily easy problems, solved more than one way", done: 84, focus: ["Arrays & strings", "Hashing", "Sorting", "Bit tricks"] },
+      ],
+    },
+  ],
+};
 
 // Tabs in the navbar: [page id, label, icon, short label for the phone tab bar]
 export const NAV = [
@@ -548,5 +578,37 @@ export const NAV = [
   ["projects", "Projects", "folder"],
   ["coding", "Coding", "code"],
   ["contests", "Contests", "award"], // every rated contest across platforms (phones: under More)
+  ["learning", "Learning", "book", "Learn"], // what I'm studying now and how far I've got (phones: under More)
   ["contact", "Contact", "mail"],
 ];
+
+/*
+  Editing everything from the admin page (#admin): each section above can be replaced by a copy saved in
+  MongoDB (collection "sections"). They're `let` exports, so every file that imports them sees the new value;
+  App re-renders once it arrives. DEFAULTS keeps the built-in copy (for "reset" in the admin page).
+*/
+export const SECTIONS = [
+  ["ME", "Profile & contact", "Sidebar, contact details, hiring facts, resume links, quick view"],
+  ["ABOUT", "About page", "Bio, facts, languages, interests, tech orbit, two truths"],
+  ["DOING", "What I'm doing", "The service cards on About"],
+  ["EXPERIENCE", "Experience", "Jobs and internships"],
+  ["EDUCATION", "Education", "Degrees and schools"],
+  ["CERTIFICATIONS", "Certifications", "On the Education page"],
+  ["JOURNEY", "Journey timeline", "The Journey page's stops"],
+  ["JOURNEY_MAP", "Journey map", "Places on the map (latitude / longitude)"],
+  ["SKILLS", "Skills", "Skill groups and where each was used"],
+  ["PROJECTS", "Projects", "Showcase and training projects"],
+  ["PLATFORMS", "Coding platforms", "Saved numbers and links (live stats replace them when they load)"],
+  ["FESTIVALS", "Festival themes", "Dates for the seasonal decorations"],
+];
+const CURRENT = () => ({ ME, ABOUT, DOING, EXPERIENCE, EDUCATION, CERTIFICATIONS, JOURNEY, JOURNEY_MAP, SKILLS, PROJECTS, PLATFORMS, FESTIVALS });
+export const DEFAULTS = JSON.parse(JSON.stringify(CURRENT()));
+
+// Put saved sections in place (anything missing or of the wrong shape keeps the built-in copy).
+export function applySections(saved = {}) {
+  const ok = (k) => saved?.[k] != null && Array.isArray(saved[k]) === Array.isArray(DEFAULTS[k]) && typeof saved[k] === "object";
+  const pick = (k) => (ok(k) ? saved[k] : DEFAULTS[k]);
+  ME = pick("ME"); ABOUT = pick("ABOUT"); DOING = pick("DOING"); EXPERIENCE = pick("EXPERIENCE"); EDUCATION = pick("EDUCATION");
+  CERTIFICATIONS = pick("CERTIFICATIONS"); JOURNEY = pick("JOURNEY"); JOURNEY_MAP = pick("JOURNEY_MAP"); SKILLS = pick("SKILLS");
+  PROJECTS = pick("PROJECTS"); PLATFORMS = pick("PLATFORMS"); FESTIVALS = pick("FESTIVALS");
+}

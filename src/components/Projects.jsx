@@ -13,9 +13,15 @@ import pic from "../hooks/img";
 
 // The showcase has the main projects; smaller internship and course projects are listed under it.
 // ?role=ai or ?role=python in the link puts the AI project first.
-const PROJECTS = projectsFor().filter((p) => !p.training);
-const TRAINING = projectsFor().filter((p) => p.training);
-const N = PROJECTS.length;
+// recomputed on every render (sync()), so projects edited in the admin page show up without a reload
+let PROJECTS, TRAINING, N;
+const sync = () => {
+  const all = projectsFor();
+  PROJECTS = all.filter((p) => !p.training);
+  TRAINING = all.filter((p) => p.training);
+  N = PROJECTS.length;
+};
+sync();
 
 // Shareable addresses: #projects/job-board opens the showcase on that project.
 export const slug = (t) => t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -33,6 +39,7 @@ const wakeDemos = () => {
 
 // Smaller projects from internships and courses: one compact card each, with whatever links exist.
 function Training() {
+  sync();
   if (!TRAINING.length) return null;
   return (
     <section className="tp">
@@ -114,11 +121,12 @@ function Stage({ p, dir, onPrev, onNext, onOpen }) {
   Arrow keys, the arrow buttons and swiping on the mockup all move between projects.
 */
 export default function Projects() {
+  sync();
   const [[i, dir], setI] = useState(() => [Math.max(0, PROJECTS.findIndex((p) => slug(p.t) === fromHash())), 1]);
   const [sel, setSel] = useState(null);
   const close = useCallback(() => setSel(null), []);
   const strip = useRef(null);
-  const p = PROJECTS[i];
+  const p = PROJECTS[Math.min(i, N - 1)]; // a project removed in the admin page can't leave the index pointing past the end
   const iRef = useRef(i);
   const moved = useRef(false);
   iRef.current = i;

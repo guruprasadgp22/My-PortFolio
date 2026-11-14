@@ -194,7 +194,7 @@ function Solved({ s }) {
           ))}
         </ul>
       ) : (
-        <p className="pf-nolv">{s.unit === "challenges" ? "HackerRank doesn't split challenges by difficulty; skill badges are on the right." : "This platform doesn't publish a difficulty split."}</p>
+        <p className="pf-nolv">{s.corrected ? "Total updated by hand, so the live split by difficulty is hidden." : s.unit === "challenges" ? "HackerRank doesn't split challenges by difficulty; skill badges are on the right." : "This platform doesn't publish a difficulty split."}</p>
       )}
     </section>
   );

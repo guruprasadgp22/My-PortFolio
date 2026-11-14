@@ -3,7 +3,7 @@ import { ABOUT, ME } from "../data";
 import { FINE, REDUCED } from "../hooks/motion";
 
 // the photo as WebP (about a third smaller); index.html preloads it so the header shows first
-const WEBP = ABOUT.photo?.endsWith(".jpg") ? ABOUT.photo.replace(/\.jpg$/, ".webp") : undefined;
+const webp = () => (ABOUT.photo?.endsWith(".jpg") ? ABOUT.photo.replace(/\.jpg$/, ".webp") : undefined);
 
 /*
   Profile photo as an old camcorder feed: a rotating gradient ring, a CRT power-on reveal,
@@ -36,8 +36,8 @@ export default function Avatar({ name }) {
       <span className="avatar-frame">
         {photo ? (
           <>
-            <img className="avatar-img" src={ABOUT.photo} srcSet={WEBP} alt={name} fetchpriority="high" onError={(e) => (e.currentTarget.srcset ? e.currentTarget.removeAttribute("srcset") : setFailed(true))} />
-            <img className={`avatar-ghost ${glitch ? "go" : ""}`} key={glitch} src={ABOUT.photo} srcSet={WEBP} alt="" aria-hidden="true" />
+            <img className="avatar-img" src={ABOUT.photo} srcSet={webp()} alt={name} fetchpriority="high" onError={(e) => (e.currentTarget.srcset ? e.currentTarget.removeAttribute("srcset") : setFailed(true))} />
+            <img className={`avatar-ghost ${glitch ? "go" : ""}`} key={glitch} src={ABOUT.photo} srcSet={webp()} alt="" aria-hidden="true" />
           </>
         ) : (
           <span className="mono">{ME.initials}</span>

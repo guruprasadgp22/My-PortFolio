@@ -44,6 +44,7 @@ const SOURCES = [
   { id: "neetcode", label: "NeetCode", short: "NeetCode", c: "#ff5fa2", unit: "submissions", get: (s) => s?.neetcode?.days && fromIso(s.neetcode.days), url: "https://neetcode.io/user/PrimalPikachu220" },
   { id: "hackerearth", label: "HackerEarth", short: "HackerEarth", c: "#7b83ff", unit: "submissions", get: (s) => s?.hackerearth?.days && fromIso(s.hackerearth.days), url: "https://www.hackerearth.com/@guruprasadgp/" },
   { id: "interviewbit", label: "InterviewBit", short: "InterviewBit", c: "#14b8a6", unit: "submissions", get: (s) => s?.interviewbit?.days && fromIso(s.interviewbit.days), url: "https://www.interviewbit.com/profile/guruprasad-gp_339/" },
+  { id: "codeforces", label: "Codeforces", short: "Codeforces", c: "#3b8fd9", unit: "submissions", get: (s) => s?.codeforces?.days && fromIso(s.codeforces.days), url: "https://codeforces.com/profile/guruprasadgp" },
 ];
 // "guruprasadgp22" from "https://leetcode.com/u/guruprasadgp22/"
 const handleOf = (url) => url.replace(/\/+$/, "").split("/").pop().replace(/^@/, "");
@@ -241,8 +242,14 @@ function Activity({ g, src, fit, label, title, note }) {
 }
 
 // Platforms in the order the tiles show them; card = the matching entry in PLATFORMS (data.js).
-const ORDER = ["leetcode", "gfg", "neetcode", "hackerrank", "interviewbit", "code360", "hackerearth", "github"];
-const CARD = { leetcode: "LeetCode", gfg: "GeeksforGeeks", neetcode: "NeetCode", hackerrank: "HackerRank", interviewbit: "InterviewBit", code360: "Code360", hackerearth: "HackerEarth" };
+const ORDER = ["leetcode", "gfg", "neetcode", "hackerrank", "interviewbit", "code360", "hackerearth", "codeforces", "github"];
+const CARD = { leetcode: "LeetCode", gfg: "GeeksforGeeks", neetcode: "NeetCode", hackerrank: "HackerRank", interviewbit: "InterviewBit", code360: "Code360", hackerearth: "HackerEarth", codeforces: "Codeforces" };
+// Platforms added in the admin page (Pages → Coding platforms) that the site has no live API for:
+// a tile with the saved numbers and a link, no activity map.
+const custom = (p) => ({
+  id: `p-${p.n.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`,
+  src: { label: p.n, short: p.n, c: p.c || "#8b8fa3", unit: "submissions", get: () => null, url: p.url, custom: true },
+});
 const fromHash = () => location.hash.slice(1).split("/")[1] || null;
 const nf = (n) => Number(n).toLocaleString("en-IN");
 
@@ -323,7 +330,7 @@ function Detail({ t, stats, onClose }) {
               note={accts.length > 1 ? `@${acct.user}` : ""}
             />
           ) : (
-            <p className="heat-empty">The activity map couldn't load right now.</p>
+            <p className="heat-empty">{t.src.custom ? "No activity map for this platform." : "The activity map couldn't load right now."}</p>
           )}
         </motion.div>
       </AnimatePresence>
@@ -468,6 +475,9 @@ export default function Coding() {
     if (!card) return null;
     return { id, src, card, val: card.val, unit: id === "hackerrank" ? "challenges solved" : "problems solved", levels, accounts: card.accounts?.length };
   }).filter((t) => t && t.val != null);
+  const known = new Set(Object.values(CARD));
+  const extra = platforms.filter((p) => !known.has(p.n)).map((p) => ({ ...custom(p), card: p, val: p.val, unit: "problems solved" }));
+  tiles.splice(tiles.findIndex((t) => t.id === "github") >>> 0, 0, ...extra); // before GitHub (or at the end)
 
   const choose = (id, e) => {
     haptic(6);

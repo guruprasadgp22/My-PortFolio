@@ -9,7 +9,7 @@ import CopyButton from "./CopyButton";
 import { iconFor, handle, softBreaks } from "../socials";
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const city = ME.location.split(",")[0];
+const city = () => ME.location.split(",")[0];
 const clock = () => new Date().toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: ME.timeZone || "Asia/Kolkata" }).toLowerCase();
 
 // "It's 2:27 pm in Bengaluru", ticking every 30 seconds.
@@ -22,7 +22,7 @@ function LocalTime() {
   return (
     <p className="local-time">
       <i aria-hidden="true" />
-      It's <b>{t}</b> in {city}{ME.replyTime ? ` · ${ME.replyTime}` : ""}
+      It's <b>{t}</b> in {city()}{ME.replyTime ? ` · ${ME.replyTime}` : ""}
     </p>
   );
 }

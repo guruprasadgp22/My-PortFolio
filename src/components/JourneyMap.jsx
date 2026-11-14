@@ -22,17 +22,21 @@ const MANGALURU = xy(12.8698, 74.843); // reference dot for orientation
 // Western Ghats crest runs roughly along 75.3°E – 75.7°E here
 const GHATS = [[13.75, 75.3], [13.35, 75.45], [12.95, 75.55], [12.6, 75.7]].map(([la, lo]) => xy(la, lo));
 
-const pts = JOURNEY_MAP.map((s) => xy(s.lat, s.lon));
-// A gentle curve through every stop; the long leg arcs up over the Ghats.
-const legs = pts.slice(1).map(([x, y], i) => {
-  const [px, py] = pts[i];
-  const d = Math.hypot(x - px, y - py);
-  return { d, c: [(px + x) / 2, Math.min(py, y) - Math.min(90, d * 0.3)], to: [x, y] };
-});
-const route = legs.reduce((p, l) => `${p} Q${l.c[0].toFixed(1)} ${l.c[1].toFixed(1)} ${l.to[0]} ${l.to[1]}`, `M${pts[0][0]} ${pts[0][1]}`);
-// When the drawing line reaches each stop (fraction of the whole route), so its pin pops in on time.
-const total = legs.reduce((n, l) => n + l.d, 0);
-const reach = pts.map((_, i) => legs.slice(0, i).reduce((n, l) => n + l.d, 0) / total);
+// The route through the stops (rebuilt per render, so stops edited in the admin page show up).
+function geometry() {
+  const pts = JOURNEY_MAP.map((s) => xy(s.lat, s.lon));
+  // A gentle curve through every stop; the long leg arcs up over the Ghats.
+  const legs = pts.slice(1).map(([x, y], i) => {
+    const [px, py] = pts[i];
+    const d = Math.hypot(x - px, y - py);
+    return { d, c: [(px + x) / 2, Math.min(py, y) - Math.min(90, d * 0.3)], to: [x, y] };
+  });
+  const route = legs.reduce((p, l) => `${p} Q${l.c[0].toFixed(1)} ${l.c[1].toFixed(1)} ${l.to[0]} ${l.to[1]}`, `M${pts[0][0]} ${pts[0][1]}`);
+  // When the drawing line reaches each stop (fraction of the whole route), so its pin pops in on time.
+  const total = legs.reduce((n, l) => n + l.d, 0);
+  const reach = pts.map((_, i) => legs.slice(0, i).reduce((n, l) => n + l.d, 0) / total);
+  return { pts, route, reach };
+}
 const DRAW = 2.4; // seconds the route takes to draw
 // the route is drawn with ease-in-out, so convert distance fraction → time fraction (inverse smoothstep, close enough)
 const timeAt = (f) => 0.5 - Math.sin(Math.asin(1 - 2 * f) / 3);
@@ -40,6 +44,7 @@ const timeAt = (f) => 0.5 - Math.sin(Math.asin(1 - 2 * f) / 3);
 // Animated route from school to work: the line draws itself, each stop pops in as the line reaches it,
 // and a small traveller dot follows the path.
 export default function JourneyMap() {
+  const { pts, route, reach } = geometry();
   const ref = useRef(null);
   const trip = useRef(null);
   const seen = useInView(ref, 0.35);

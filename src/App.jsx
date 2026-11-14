@@ -12,6 +12,7 @@ import Chat from "./components/Chat";
 import Skeleton from "./components/Skeleton";
 import Festive from "./components/Festive";
 import Intro from "./components/Intro";
+import useContent from "./hooks/useContent";
 
 // About ships with the first load. Every other tab is its own small file, fetched when the browser is idle
 // (so switching tabs is still instant) or the moment it's opened, whichever comes first.
@@ -23,9 +24,11 @@ const LOADERS = {
   projects: () => import("./components/Projects"),
   coding: () => import("./components/Coding"),
   contests: () => import("./components/Contests"),
+  learning: () => import("./components/Learning"),
   contact: () => import("./components/Contact"),
 };
-const PAGES = { about: About, ...Object.fromEntries(Object.entries(LOADERS).map(([id, load]) => [id, lazy(load)])) };
+// #admin (editing the site's data) isn't in the navbar and isn't prefetched for visitors.
+const PAGES = { about: About, ...Object.fromEntries(Object.entries(LOADERS).map(([id, load]) => [id, lazy(load)])), admin: lazy(() => import("./components/Admin")) };
 // "#projects/job-board" opens the Projects tab; the part after the slash is for the page itself.
 const fromHash = () => {
   const id = location.hash.slice(1).split("/")[0];
@@ -40,6 +43,8 @@ const BUILT = new Date(__BUILD_DATE__).toLocaleDateString("en-IN", { day: "numer
 export default function App() {
   // wide screens: the window stays still; the profile and the page card each scroll on their own
   const desktop = useDesktop();
+  // page content edited in the admin page (MongoDB): when it arrives, App re-renders and every page with it
+  useContent();
   useSmoothScroll(!desktop);
   const [scroller, setScroller] = useState(null); // the page card, which is the scroll area on wide screens
   const root = useMemo(() => ({ current: desktop ? scroller : null }), [desktop, scroller]);
@@ -59,7 +64,7 @@ export default function App() {
     return () => (window.cancelIdleCallback || clearTimeout)(id);
   }, []);
 
-  // Keyboard shortcuts: 1–8 open a tab, / opens search, ? lists the shortcuts (← → are handled by Projects).
+  // Keyboard shortcuts: 1–9 open the first nine tabs, / opens search, ? lists the shortcuts (← → are handled by Projects).
   useEffect(() => {
     const key = (e) => {
       if (typing(e) || document.querySelector('[aria-modal="true"]')) return;
@@ -101,6 +106,7 @@ export default function App() {
     const dx = t.clientX - s.x, dy = t.clientY - s.y;
     if (Date.now() - s.at > 600 || Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.6) return;
     const i = NAV.findIndex(([id]) => id === page);
+    if (i < 0) return; // pages outside the tabs (e.g. #admin) don't swipe
     const next = NAV[i + (dx < 0 ? 1 : -1)];
     if (next) go(next[0]);
   };

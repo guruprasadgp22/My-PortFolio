@@ -7,9 +7,6 @@ import Icon from "./Icons";
 import JourneyMap from "./JourneyMap";
 import { openQuickView } from "./Overlays";
 
-// "2018", "Dec 2020", "2021 – 2023", "Now" → the years for the summary line
-const years = JOURNEY.map((j) => +(j.yr.match(/\d{4}/)?.[0] || 0)).filter(Boolean);
-const span = `${Math.min(...years)} – today`;
 
 /*
   The story as a timeline in chapters. On wide screens the cards alternate left and right of a centre line;
@@ -19,6 +16,9 @@ const span = `${Math.min(...years)} – today`;
 */
 export default function Journey() {
   const list = useRef(null);
+  // "2018", "Dec 2020", "2021 – 2023", "Now" → the years for the summary line
+  const years = JOURNEY.map((j) => +(j.yr.match(/\d{4}/)?.[0] || 0)).filter(Boolean);
+  const span = `${Math.min(...years)} – today`;
 
   useEffect(() => {
     let raf;

@@ -1,12 +1,25 @@
 import { PLATFORMS } from "./data";
 
 // Which key in the /api/stats response feeds each card.
-const KEY = { LeetCode: "leetcode", GeeksforGeeks: "gfg", Code360: "code360", HackerRank: "hackerrank", HackerEarth: "hackerearth", InterviewBit: "interviewbit", NeetCode: "neetcode" };
+const KEY = { LeetCode: "leetcode", GeeksforGeeks: "gfg", Code360: "code360", HackerRank: "hackerrank", HackerEarth: "hackerearth", InterviewBit: "interviewbit", NeetCode: "neetcode", Codeforces: "codeforces" };
 const day = (iso) => new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" });
 
 // Overlay live numbers on the platform cards from data.js; any source that failed keeps its saved values.
 function overlay(p, s) {
   if (!s) return p;
+  if (p.n === "Codeforces" && s.codeforces) {
+    const c = s.codeforces;
+    return {
+      ...p,
+      c: p.c || "#3b8fd9",
+      val: c.solved,
+      url: c.url,
+      lbl: `problems solved · ${c.rating != null ? `rating ${c.rating}` : "unrated"}`,
+      meta: [["Rating", c.rating ?? "Unrated"], ...(c.maxRating ? [["Best", c.maxRating]] : []), ["Contests", c.contest?.attended ?? 0]],
+      accounts: [{ user: c.user, url: c.url, val: c.solved, note: c.rank || "unrated" }],
+      live: true,
+    };
+  }
   if (p.n === "LeetCode" && s.leetcode) {
     const l = s.leetcode;
     return {

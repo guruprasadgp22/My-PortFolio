@@ -8,7 +8,7 @@
 */
 
 // Difficulty → colour slot (CSS vars in global.css, validated for colour-blind safety in both themes).
-const LEVEL = { School: "basic", Basic: "basic", Easy: "easy", Medium: "medium", Moderate: "medium", Hard: "hard", Ninja: "hard" };
+const LEVEL = { School: "basic", Basic: "basic", Unrated: "basic", Easy: "easy", Medium: "medium", Moderate: "medium", Hard: "hard", Ninja: "hard" };
 const level = (k, n, of = null) => ({ k, n: n ?? 0, of, c: LEVEL[k] || "basic" });
 const fmt = (n) => (n == null ? "–" : Number(n).toLocaleString("en-IN"));
 
@@ -72,6 +72,19 @@ const BUILDERS = {
     };
   },
 
+  // Codeforces problems by rating: easy < 1200 ≤ medium < 1800 ≤ hard; unrated ones (new or gym problems) on their own
+  codeforces: (s) => ({
+    solved: { n: s.solved, levels: [level("Easy", s.easy), level("Medium", s.medium), level("Hard", s.hard), ...(s.unrated ? [level("Unrated", s.unrated)] : [])] },
+    side: {
+      kind: "facts", title: "Profile",
+      facts: [
+        ["Rating", s.rating != null ? `${fmt(s.rating)}${s.rank ? ` · ${s.rank}` : ""}` : "Unrated: no rated contest yet"],
+        ...(s.maxRating ? [["Best rating", `${fmt(s.maxRating)}${s.maxRank ? ` · ${s.maxRank}` : ""}`]] : []),
+        ["Rated contests", s.contest?.attended ?? 0],
+      ],
+    },
+  }),
+
   hackerearth: (s) => ({
     solved: { n: s.solved, levels: [] },
     side: {
@@ -93,5 +106,8 @@ const BUILDERS = {
 export function profileOf(id, stats, acct) {
   const s = stats?.[id];
   if (!s || !BUILDERS[id]) return null;
-  return BUILDERS[id](s, acct);
+  const p = BUILDERS[id](s, acct);
+  // numbers corrected in the admin page: say so where the difficulty split would be
+  if (p?.solved && s.corrected && !p.solved.levels?.length) p.solved.corrected = true;
+  return p;
 }

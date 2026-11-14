@@ -13,8 +13,9 @@ import { VISITOR } from "../hooks/visitor";
 
 const Wrap = ({ text }) => softBreaks(text).map((x) => (typeof x === "string" ? x : <wbr key={x.wbr} />));
 
-const name = ME.first[0] + ME.first.slice(1).toLowerCase() + ME.last.toLowerCase();
-const contacts = [
+// built on each render (not once at load), so edits from the admin page show up
+const nameOf = () => ME.first[0] + ME.first.slice(1).toLowerCase() + ME.last.toLowerCase();
+const contactsOf = () => [
   { icon: "mail", title: "Email", text: ME.email, href: `mailto:${ME.email}`, copy: true, whole: true },
   ...(ME.phone ? [{ icon: "phone", title: "Phone", text: ME.phone, href: `tel:${ME.phone.replace(/\s/g, "")}` }] : []),
   { icon: "pin", title: "Location", text: ME.location },
@@ -39,7 +40,7 @@ function ContactBlock() {
   return (
     <>
       <ul className="contacts-list">
-        {contacts.map((c) => (
+        {contactsOf().map((c) => (
           <li className="contact-item" key={c.title}>
             <div className="icon-box"><Icon name={c.icon} /></div>
             <div className="contact-info">
@@ -128,7 +129,7 @@ function CompactBar({ watch }) {
       {show && (
         <motion.div className="mini-bar" initial={{ y: "-110%" }} animate={{ y: 0 }} exit={{ y: "-110%" }} transition={SPRING}>
           <img src="/me.webp" alt="" aria-hidden="true" width="34" height="34" />
-          <span className="mini-name">{name}<small>{ME.hiring?.[0] || ME.roles[0]}</small></span>
+          <span className="mini-name">{nameOf()}<small>{ME.hiring?.[0] || ME.roles[0]}</small></span>
           <button className="qv-btn" onClick={openQuickView}><Icon name="zap" size={13} /><span>Quick view</span></button>
         </motion.div>
       )}
@@ -139,6 +140,7 @@ function CompactBar({ watch }) {
 
 // Profile card. On wide screens the contacts sit inside it; on smaller screens they open in a bottom sheet.
 export default function Sidebar() {
+  const name = nameOf();
   const [sheet, setSheet] = useState(false);
   const self = useRef(null);
   const closeSheet = useCallback(() => setSheet(false), []);

@@ -179,7 +179,7 @@ function QuickView({ go, onClose, sudo }) {
 // "?" lists the keyboard shortcuts.
 function Shortcuts({ onClose }) {
   const rows = [
-    [["1", "–", String(NAV.length)], "Open a tab"],
+    [["1", "–", String(Math.min(9, NAV.length))], "Open a tab"],
     [["←", "→"], "Previous / next project"],
     [["/"], "Search and quick actions"],
     [["⌘", "K"], "Search (also Ctrl + K)"],

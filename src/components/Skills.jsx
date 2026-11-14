@@ -2,10 +2,9 @@ import { SKILLS } from "../data";
 import Glitch from "./Glitch";
 import Reveal from "./Reveal";
 
-const ALL = SKILLS.flatMap((g) => g.s);
-
 // Skills grouped, with no scores: each chip says where the skill was used, so it can be backed up in an interview.
 export default function Skills() {
+  const ALL = SKILLS.flatMap((g) => g.s);
   return (
     <>
       <Glitch text="Skills" />

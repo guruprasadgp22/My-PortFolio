@@ -1,6 +1,10 @@
 // Live coding stats for the Coding page: LeetCode, GeeksforGeeks, Code360, HackerRank, HackerEarth, NeetCode,
-// InterviewBit and the GitHub contribution graph, fetched server-side
+// InterviewBit, Codeforces and the GitHub contribution graph, fetched server-side
 // (their APIs block browser requests) and cached on Netlify's CDN for 6 hours.
+// With a database (MONGODB_URI), every platform that loads is saved as its last good result, and a platform
+// whose API fails is answered from that save instead (listed in `snap` with when it's from).
+import { db, hasDb, within } from "../lib/db.mjs";
+
 const USERS = {
   leetcode: ["guruprasadgp22", "guruprasad6200"], // every account is shown on its own; totals use the highest, not the sum
   gfg: "guruprasadgp22",
@@ -10,6 +14,7 @@ const USERS = {
   hackerearth: "guruprasadgp",
   neetcode: "PrimalPikachu220",
   interviewbit: "guruprasad-gp_339",
+  codeforces: "guruprasadgp",
 };
 // Code360's firewall rejects non-browser user agents, so send a regular browser one.
 const UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36";
@@ -325,11 +330,68 @@ async function interviewbit() {
   };
 }
 
-export default async () => {
-  // Each source can fail on its own; the page falls back to the numbers in data.js for that card.
-  const [lc, g, c, gh, hr, he, nc, ib] = await Promise.allSettled([leetcode(), gfg(), code360(), github(), hackerrank(), hackerearth(), neetcode(), interviewbit()]);
-  const pick = (r) => (r.status === "fulfilled" ? r.value : null);
-  const body = { updated: new Date().toISOString(), leetcode: pick(lc), gfg: pick(g), code360: pick(c), github: pick(gh), hackerrank: pick(hr), hackerearth: pick(he), neetcode: pick(nc), interviewbit: pick(ib) };
+// Codeforces (public API, asks for no more than about one call a second): problems solved split by problem
+// rating, current / best rating and rank, rated contest history, and submissions per day.
+async function codeforces() {
+  const u = USERS.codeforces, api = "https://codeforces.com/api";
+  const pause = () => new Promise((r) => setTimeout(r, 600));
+  const info = await getJson(`${api}/user.info?handles=${u}`);
+  if (info.status !== "OK") throw new Error(`codeforces: ${info.comment}`);
+  await pause();
+  const subs = (await getJson(`${api}/user.status?handle=${u}&from=1&count=10000`)).result || [];
+  await pause();
+  const rated = (await getJson(`${api}/user.rating?handle=${u}`).catch(() => null))?.result || [];
+  const me = info.result[0];
+  const solved = new Map();
+  const days = {};
+  for (const x of subs) {
+    const d = new Date(x.creationTimeSeconds * 1000).toISOString().slice(0, 10);
+    days[d] = (days[d] || 0) + 1;
+    if (x.verdict === "OK") solved.set(`${x.problem.contestId}-${x.problem.index}`, x.problem.rating ?? null);
+  }
+  const by = (f) => [...solved.values()].filter(f).length;
+  return {
+    user: u, url: `https://codeforces.com/profile/${u}`,
+    solved: solved.size,
+    // Codeforces rates problems 800–3500; grouped the way most people read them
+    easy: by((r) => r != null && r < 1200), medium: by((r) => r != null && r >= 1200 && r < 1800), hard: by((r) => r != null && r >= 1800), unrated: by((r) => r == null),
+    rating: me.rating ?? null, maxRating: me.maxRating ?? null, rank: me.rank || null, maxRank: me.maxRank || null,
+    contest: rated.length
+      ? { rating: rated.at(-1).newRating, max: Math.max(...rated.map((c) => c.newRating)), attended: rated.length, rank: me.rank || null,
+          history: rated.map((c) => ({ t: c.ratingUpdateTimeSeconds, r: c.newRating, name: c.contestName, rank: c.rank })) }
+      : null,
+    days: Object.keys(days).length ? days : null,
+  };
+}
+
+const SOURCES = { leetcode, gfg, code360, github, hackerrank, hackerearth, neetcode, interviewbit, codeforces };
+
+// Save what loaded; fill in what didn't from the last save. Never slows the response by more than ~2.5s.
+async function withSnapshots(body, context) {
+  if (!hasDb()) return;
+  const keys = Object.keys(SOURCES);
+  const ok = keys.filter((k) => body[k]), failed = keys.filter((k) => !body[k]);
+  if (ok.length) {
+    const save = db().then((d) =>
+      d.collection("live").bulkWrite(ok.map((k) => ({ replaceOne: { filter: { _id: k }, replacement: { data: body[k], at: body.updated }, upsert: true } })))
+    ).catch((e) => console.error("stats snapshot save:", e.message));
+    context?.waitUntil ? context.waitUntil(save) : await within(save, 2500);
+  }
+  if (!failed.length) return;
+  const saved = await within(db().then((d) => d.collection("live").find({ _id: { $in: failed } }).toArray()), 2500, []);
+  for (const s of saved) {
+    body[s._id] = s.data;
+    (body.snap ??= {})[s._id] = s.at;
+  }
+}
+
+export default async (req, context) => {
+  // Each source can fail on its own; the page falls back to the last saved numbers, then to data.js.
+  const keys = Object.keys(SOURCES);
+  const results = await Promise.allSettled(keys.map((k) => SOURCES[k]()));
+  const body = { updated: new Date().toISOString() };
+  keys.forEach((k, i) => (body[k] = results[i].status === "fulfilled" ? results[i].value : null));
+  await withSnapshots(body, context);
   return new Response(JSON.stringify(body), {
     headers: {
       "Content-Type": "application/json",

@@ -22,7 +22,7 @@ const MAX_CHARS = 500;
 const MAX_JD = 6000;
 const STORE = "gp-chat";
 const resume = resumeFor();
-const linkedin = ME.socials.find((s) => s.label === "LinkedIn")?.url;
+const linkedin = () => ME.socials.find((s) => s.label === "LinkedIn")?.url;
 const isPhone = () => matchMedia("(max-width: 767px)").matches;
 
 const load = () => {
@@ -96,7 +96,7 @@ function Actions({ onCopy, copied }) {
       {resume && <a href={resume} target="_blank" rel="noopener noreferrer"><Icon name="download" size={14} />Resume</a>}
       <button onClick={onCopy}><Icon name="copy" size={14} />{copied ? "Copied ✓" : "Copy email"}</button>
       <a href={`mailto:${ME.email}?subject=${encodeURIComponent(`Let's schedule a call, ${NAME}`)}`}><Icon name="phone" size={14} />Book a call</a>
-      {linkedin && <a href={linkedin} target="_blank" rel="noopener noreferrer"><Icon name="linkedin" size={14} />LinkedIn</a>}
+      {linkedin() && <a href={linkedin()} target="_blank" rel="noopener noreferrer"><Icon name="linkedin" size={14} />LinkedIn</a>}
     </div>
   );
 }
