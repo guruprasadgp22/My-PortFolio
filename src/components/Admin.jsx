@@ -12,7 +12,7 @@ import PagesTab from "./SectionEditor";
     Pages     any page's content (profile, about, experience, education, journey, skills, projects, …)
     Learning  course progress (lessons done), titles, topics; add or remove courses
     Coding    correct a platform's numbers when its live API is wrong or down
-    Contests  add contests from platforms without a live API (CodeChef, Codeforces, …)
+    Contests  add contests from platforms without a live API (Codolio-style hand entries)
   Every save shows on the site within seconds.
 */
 async function api(path, { method = "GET", body } = {}) {
@@ -30,6 +30,7 @@ async function api(path, { method = "GET", body } = {}) {
 const PLATFORMS = [
   ["leetcode", "LeetCode", true], ["neetcode", "NeetCode", true], ["gfg", "GeeksforGeeks"], ["code360", "Code360"],
   ["hackerrank", "HackerRank"], ["hackerearth", "HackerEarth"], ["interviewbit", "InterviewBit"], ["codeforces", "Codeforces", true],
+  ["codechef", "CodeChef"], ["atcoder", "AtCoder", true],
 ];
 const CONTEST_SITES = ["CodeChef", "Codeforces", "AtCoder", "LeetCode", "Code360", "GeeksforGeeks", "HackerRank", "HackerEarth"];
 const blankContest = { platform: "", name: "", date: "", rank: "", players: "", solved: "", of: "", rating: "", url: "" };
@@ -49,7 +50,7 @@ const CAN_EDIT = [
   ["file", "Pages", "Profile, about, experience, projects, skills and more"],
   ["book", "Learning", "Tick off lessons, add new courses"],
   ["code", "Coding", "Fix a platform's numbers if its API is wrong"],
-  ["award", "Contests", "Add CodeChef, Codeforces and other contests"],
+  ["award", "Contests", "Add contests from platforms without a live API"],
 ];
 
 function Login({ onIn, setup }) {

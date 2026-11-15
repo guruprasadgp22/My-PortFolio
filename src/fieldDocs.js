@@ -152,7 +152,7 @@ export const DOCS = {
   "PROJECTS[].from": ["Built during", "For training projects, e.g. DLithe internship."],
 
   // ---------- Coding platforms ----------
-  "PLATFORMS[].n": ["Platform name", "LeetCode, GeeksforGeeks, Code360, HackerRank, HackerEarth, InterviewBit, NeetCode and Codeforces load live numbers by this exact name. Any other name gets a tile with the numbers below."],
+  "PLATFORMS[].n": ["Platform name", "LeetCode, GeeksforGeeks, Code360, HackerRank, HackerEarth, InterviewBit, NeetCode, Codeforces, CodeChef and AtCoder load live numbers by this exact name. Any other name gets a tile with the numbers below."],
   "PLATFORMS[].c": ["Colour", "Hex code for the tile, e.g. #ffa116."],
   "PLATFORMS[].val": ["Problems solved (fallback)", "Shown only if the live numbers can't load. Platforms with live numbers update on their own."],
   "PLATFORMS[].lbl": ["Line under the number (fallback)", "e.g. problems solved · 200 E / 204 M / 51 H. Replaced by live data when it loads."],

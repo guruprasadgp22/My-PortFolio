@@ -3,7 +3,7 @@
   or { error } with a message to show next to the form. Unknown fields are dropped, never stored.
 */
 export const GROUPS = ["ai", "dsa", "other"];
-export const CODING = ["leetcode", "gfg", "code360", "hackerrank", "hackerearth", "neetcode", "interviewbit", "codeforces"];
+export const CODING = ["leetcode", "gfg", "code360", "hackerrank", "hackerearth", "neetcode", "interviewbit", "codeforces", "codechef", "atcoder"];
 export const CODING_FIELDS = ["solved", "easy", "medium", "hard"];
 
 const str = (v, max) => (typeof v === "string" ? v.trim().slice(0, max) : "");

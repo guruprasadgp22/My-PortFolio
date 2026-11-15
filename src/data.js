@@ -502,6 +502,9 @@ export let PLATFORMS = [
   { n: "InterviewBit", more: true, c: "#14b8a6", val: 6, lbl: "problems solved · score 1,228", meta: [["University rank", "#7"], ["Streak", "1d"]], url: "https://www.interviewbit.com/profile/guruprasad-gp_339/" },
   // Live from the Codeforces API (rating, contests and solved by difficulty); these are the saved fallback numbers.
   { n: "Codeforces", more: true, c: "#3b8fd9", val: 2, lbl: "problems solved · unrated", meta: [["Rating", "Unrated"], ["Contests", 0]], url: "https://codeforces.com/profile/guruprasadgp" },
+  // Live from the CodeChef profile page and AtCoder (atcoder.jp + AtCoder Problems); saved fallback numbers.
+  { n: "CodeChef", more: true, c: "#b9875f", val: 89, lbl: "problems solved · unrated", meta: [["Rating", "Unrated"], ["Contests", 0]], url: "https://www.codechef.com/users/guruprasadgp" },
+  { n: "AtCoder", more: true, c: "#9aa3ad", val: 0, lbl: "problems solved · unrated", meta: [["Rating", "Unrated"], ["Contests", 1]], url: "https://atcoder.jp/users/guruprasadgp" },
 ];
 
 // score is optional: shown as plain text under the qualification

@@ -1,7 +1,7 @@
 import { PLATFORMS } from "./data";
 
 // Which key in the /api/stats response feeds each card.
-const KEY = { LeetCode: "leetcode", GeeksforGeeks: "gfg", Code360: "code360", HackerRank: "hackerrank", HackerEarth: "hackerearth", InterviewBit: "interviewbit", NeetCode: "neetcode", Codeforces: "codeforces" };
+const KEY = { LeetCode: "leetcode", GeeksforGeeks: "gfg", Code360: "code360", HackerRank: "hackerrank", HackerEarth: "hackerearth", InterviewBit: "interviewbit", NeetCode: "neetcode", Codeforces: "codeforces", CodeChef: "codechef", AtCoder: "atcoder" };
 const day = (iso) => new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" });
 
 // Overlay live numbers on the platform cards from data.js; any source that failed keeps its saved values.
@@ -17,6 +17,32 @@ function overlay(p, s) {
       lbl: `problems solved · ${c.rating != null ? `rating ${c.rating}` : "unrated"}`,
       meta: [["Rating", c.rating ?? "Unrated"], ...(c.maxRating ? [["Best", c.maxRating]] : []), ["Contests", c.contest?.attended ?? 0]],
       accounts: [{ user: c.user, url: c.url, val: c.solved, note: c.rank || "unrated" }],
+      live: true,
+    };
+  }
+  if (p.n === "CodeChef" && s.codechef) {
+    const c = s.codechef;
+    return {
+      ...p,
+      c: p.c || "#b9875f",
+      val: c.solved,
+      url: c.url,
+      lbl: `problems solved · ${c.rating != null ? `rating ${c.rating} (${c.stars}★)` : "unrated"}`,
+      meta: [["Rating", c.rating != null ? `${c.rating} · ${c.stars}★` : "Unrated"], ...(c.maxRating ? [["Best", c.maxRating]] : []), ["Contests", c.contest?.attended ?? c.contests ?? 0]],
+      accounts: [{ user: c.user, url: c.url, val: c.solved, note: c.rating != null ? `${c.stars}★` : "unrated" }],
+      live: true,
+    };
+  }
+  if (p.n === "AtCoder" && s.atcoder) {
+    const a = s.atcoder;
+    return {
+      ...p,
+      c: p.c || "#9aa3ad",
+      val: a.solved,
+      url: a.url,
+      lbl: `problems solved · ${a.rating != null ? `rating ${a.rating}` : "unrated"}`,
+      meta: [["Rating", a.rating ?? "Unrated"], ...(a.maxRating ? [["Best", a.maxRating]] : []), ["Contests", a.joined ?? 0]],
+      accounts: [{ user: a.user, url: a.url, val: a.solved, note: a.color ? `${a.color} coder` : "unrated" }],
       live: true,
     };
   }

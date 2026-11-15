@@ -24,7 +24,9 @@ const Api = createContext(null); // the admin page's request helper, for image u
 // ---------- Images ----------
 // A field holds an image when its name says so or its value is an image path; it then gets a preview and Upload.
 const IMAGE_KEYS = new Set(["img", "phone", "photo", "image", "cover", "src", "thumb", "logo", "avatar"]);
-const isImage = (k, v) => typeof v === "string" && (IMAGE_KEYS.has(k) || v.startsWith("/api/img/") || /\.(jpe?g|png|webp|gif|avif|svg)(\?.*)?$/i.test(v));
+// fields that share a name with an image field but are plain text (ME.phone is a phone number, not a screenshot)
+const TEXT_PATHS = new Set(["ME.phone"]);
+const isImage = (k, v, path) => typeof v === "string" && !TEXT_PATHS.has(path) && (IMAGE_KEYS.has(k) || v.startsWith("/api/img/") || /\.(jpe?g|png|webp|gif|avif|svg)(\?.*)?$/i.test(v));
 const ACCEPT = "image/png,image/jpeg,image/webp,image/gif,image/avif";
 const kb = (n) => `${Math.max(1, Math.round(n / 1024))} KB`;
 
@@ -163,7 +165,7 @@ function titleOf(item, i) {
 }
 
 function Prim({ v, set, label, k, help, path }) {
-  if (isImage(k, v)) return <ImageField v={v} set={set} label={label} help={help} />;
+  if (isImage(k, v, path)) return <ImageField v={v} set={set} label={label} help={help} />;
   if (typeof v === "boolean") {
     return (
       <label className="se-check">

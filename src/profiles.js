@@ -85,6 +85,33 @@ const BUILDERS = {
     },
   }),
 
+  codechef: (s) => ({
+    solved: { n: s.solved, levels: [] },
+    side: {
+      kind: "facts", title: "Profile",
+      facts: [
+        ["Rating", s.rating != null ? `${fmt(s.rating)} · ${s.stars}★` : "Unrated: no rated contest yet"],
+        ...(s.maxRating ? [["Best rating", fmt(s.maxRating)]] : []),
+        ...(s.globalRank ? [["Global rank", `#${fmt(s.globalRank)}`]] : []),
+        ["Contests", s.contest?.attended ?? s.contests ?? 0],
+      ],
+    },
+  }),
+
+  // AtCoder problems by points: easy ≤ 300 < medium ≤ 500 < hard
+  atcoder: (s) => ({
+    solved: { n: s.solved, levels: [level("Easy", s.easy), level("Medium", s.medium), level("Hard", s.hard)] },
+    side: {
+      kind: "facts", title: "Profile",
+      facts: [
+        ["Rating", s.rating != null ? `${fmt(s.rating)} · ${s.color}` : "Unrated: no rated contest yet"],
+        ...(s.maxRating ? [["Best rating", fmt(s.maxRating)]] : []),
+        ["Contests taken part in", s.joined ?? 0],
+        ["Rated contests", s.contest?.attended ?? 0],
+      ],
+    },
+  }),
+
   hackerearth: (s) => ({
     solved: { n: s.solved, levels: [] },
     side: {

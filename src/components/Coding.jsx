@@ -45,6 +45,8 @@ const SOURCES = [
   { id: "hackerearth", label: "HackerEarth", short: "HackerEarth", c: "#7b83ff", unit: "submissions", get: (s) => s?.hackerearth?.days && fromIso(s.hackerearth.days), url: "https://www.hackerearth.com/@guruprasadgp/" },
   { id: "interviewbit", label: "InterviewBit", short: "InterviewBit", c: "#14b8a6", unit: "submissions", get: (s) => s?.interviewbit?.days && fromIso(s.interviewbit.days), url: "https://www.interviewbit.com/profile/guruprasad-gp_339/" },
   { id: "codeforces", label: "Codeforces", short: "Codeforces", c: "#3b8fd9", unit: "submissions", get: (s) => s?.codeforces?.days && fromIso(s.codeforces.days), url: "https://codeforces.com/profile/guruprasadgp" },
+  { id: "codechef", label: "CodeChef", short: "CodeChef", c: "#b9875f", unit: "submissions", get: (s) => s?.codechef?.days && fromIso(s.codechef.days), url: "https://www.codechef.com/users/guruprasadgp" },
+  { id: "atcoder", label: "AtCoder", short: "AtCoder", c: "#9aa3ad", unit: "submissions", get: (s) => s?.atcoder?.days && fromIso(s.atcoder.days), url: "https://atcoder.jp/users/guruprasadgp" },
 ];
 // "guruprasadgp22" from "https://leetcode.com/u/guruprasadgp22/"
 const handleOf = (url) => url.replace(/\/+$/, "").split("/").pop().replace(/^@/, "");
@@ -242,8 +244,8 @@ function Activity({ g, src, fit, label, title, note }) {
 }
 
 // Platforms in the order the tiles show them; card = the matching entry in PLATFORMS (data.js).
-const ORDER = ["leetcode", "gfg", "neetcode", "hackerrank", "interviewbit", "code360", "hackerearth", "codeforces", "github"];
-const CARD = { leetcode: "LeetCode", gfg: "GeeksforGeeks", neetcode: "NeetCode", hackerrank: "HackerRank", interviewbit: "InterviewBit", code360: "Code360", hackerearth: "HackerEarth", codeforces: "Codeforces" };
+const ORDER = ["leetcode", "gfg", "neetcode", "hackerrank", "interviewbit", "code360", "hackerearth", "codeforces", "codechef", "atcoder", "github"];
+const CARD = { leetcode: "LeetCode", gfg: "GeeksforGeeks", neetcode: "NeetCode", hackerrank: "HackerRank", interviewbit: "InterviewBit", code360: "Code360", hackerearth: "HackerEarth", codeforces: "Codeforces", codechef: "CodeChef", atcoder: "AtCoder" };
 // Platforms added in the admin page (Pages → Coding platforms) that the site has no live API for:
 // a tile with the saved numbers and a link, no activity map.
 const custom = (p) => ({

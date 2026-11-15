@@ -60,6 +60,30 @@ const PLATFORMS = [
       };
     },
   },
+  {
+    id: "codechef", name: "CodeChef", c: "#b9875f", start: null,
+    read: (s) => {
+      const c = s?.codechef?.contest;
+      if (!c) return null;
+      return {
+        url: s.codechef.url, handle: s.codechef.user, rating: c.rating, max: c.max, attended: c.attended, history: c.history,
+        facts: [["Stars", `${c.stars}★`], ...(c.globalRank ? [["Global rank", `#${fmt(c.globalRank)}`]] : [])],
+        bars: [],
+      };
+    },
+  },
+  {
+    id: "atcoder", name: "AtCoder", c: "#9aa3ad", start: null,
+    read: (s) => {
+      const c = s?.atcoder?.contest;
+      if (!c) return null;
+      return {
+        url: s.atcoder.url, handle: s.atcoder.user, rating: c.rating, max: c.max, attended: c.attended, history: c.history,
+        facts: c.color ? [["Colour", c.color]] : [],
+        bars: [],
+      };
+    },
+  },
 ];
 
 // Colours for platforms that only have contests added by hand; anything else gets the neutral one.
@@ -214,7 +238,7 @@ export default function Contests() {
       <p className="note">
         // Live from {PLATFORMS.filter((x) => list.some((p) => p.id === x.id)).map((x) => x.name).join(", ").replace(/, ([^,]*)$/, " and $1") || "LeetCode and Code360"}{list.some((p) => !PLATFORMS.find((x) => x.id === p.id)) ? `; ${list.filter((p) => !PLATFORMS.find((x) => x.id === p.id)).map((p) => p.name).join(", ")} added by hand` : ""}.
         {(() => {
-          const none = [["gfg", "GeeksforGeeks"], ["hackerrank", "HackerRank"], ["neetcode", "NeetCode"], ["interviewbit", "InterviewBit"], ["hackerearth", "HackerEarth"], ["codeforces", "Codeforces"]].filter(([k]) => !list.some((p) => p.id === k)).map(([, n]) => n);
+          const none = [["gfg", "GeeksforGeeks"], ["hackerrank", "HackerRank"], ["neetcode", "NeetCode"], ["interviewbit", "InterviewBit"], ["hackerearth", "HackerEarth"], ["codeforces", "Codeforces"], ["codechef", "CodeChef"], ["atcoder", "AtCoder"]].filter(([k]) => !list.some((p) => p.id === k)).map(([, n]) => n);
           return none.length ? ` ${none.join(", ").replace(/, ([^,]*)$/, " and $1")} ${none.length > 1 ? "have" : "has"} no rated contests on my profiles yet.` : "";
         })()}
       </p>

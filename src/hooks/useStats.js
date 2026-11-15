@@ -12,7 +12,7 @@ import useContent from "./useContent";
   Shared by every component; null until something is available, so pages fall back to data.js.
 */
 const KEY = "gp-stats";
-const PLATFORMS = ["leetcode", "gfg", "code360", "github", "hackerrank", "hackerearth", "neetcode", "interviewbit", "codeforces"];
+const PLATFORMS = ["leetcode", "gfg", "code360", "github", "hackerrank", "hackerearth", "neetcode", "interviewbit", "codeforces", "codechef", "atcoder"];
 
 const read = () => {
   try {

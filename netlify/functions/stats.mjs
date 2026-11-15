@@ -1,5 +1,5 @@
 // Live coding stats for the Coding page: LeetCode, GeeksforGeeks, Code360, HackerRank, HackerEarth, NeetCode,
-// InterviewBit, Codeforces and the GitHub contribution graph, fetched server-side
+// InterviewBit, Codeforces, CodeChef, AtCoder and the GitHub contribution graph, fetched server-side
 // (their APIs block browser requests) and cached on Netlify's CDN for 6 hours.
 // With a database (MONGODB_URI), every platform that loads is saved as its last good result, and a platform
 // whose API fails is answered from that save instead (listed in `snap` with when it's from).
@@ -15,6 +15,8 @@ const USERS = {
   neetcode: "PrimalPikachu220",
   interviewbit: "guruprasad-gp_339",
   codeforces: "guruprasadgp",
+  codechef: "guruprasadgp",
+  atcoder: "guruprasadgp",
 };
 // Code360's firewall rejects non-browser user agents, so send a regular browser one.
 const UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36";
@@ -364,7 +366,86 @@ async function codeforces() {
   };
 }
 
-const SOURCES = { leetcode, gfg, code360, github, hackerrank, hackerearth, neetcode, interviewbit, codeforces };
+// CodeChef has no public API, so read its profile page: problems solved, contests, current / best rating and
+// stars, global rank, rated contest history (all_rating) and the submissions heat map.
+const CC_STARS = [[2500, 7], [2200, 6], [2000, 5], [1800, 4], [1600, 3], [1400, 2], [0, 1]];
+async function codechef() {
+  const u = USERS.codechef, url = `https://www.codechef.com/users/${u}`;
+  const res = await fetch(url, { headers: { "User-Agent": UA }, signal: AbortSignal.timeout(8000) });
+  if (!res.ok) throw new Error(`codechef → ${res.status}`);
+  // an unknown user is redirected to the home page
+  if (!new URL(res.url).pathname.startsWith("/users/")) throw new Error(`codechef: no user ${u}`);
+  const h = await res.text();
+  const solved = h.match(/Total Problems Solved:\s*(\d+)/);
+  if (!solved) throw new Error("codechef: profile layout changed");
+  const json = (re) => {
+    try {
+      return JSON.parse(h.match(re)?.[1] || "null");
+    } catch {
+      return null;
+    }
+  };
+  const all = json(/var all_rating = (\[.*?\]);/s) || [];
+  const history = all
+    .filter((c) => c.rating && !c.penalised_in)
+    .map((c) => ({ t: Math.floor(Date.parse(`${c.end_date.replace(" ", "T")}+05:30`) / 1000), r: +c.rating, name: c.name, rank: c.rank ? +c.rank : null }))
+    .filter((c) => c.t && c.r);
+  const rating = history.at(-1)?.r ?? null;
+  const max = history.length ? Math.max(...history.map((c) => c.r)) : null;
+  const days = {};
+  for (const d of json(/userDailySubmissionsStats = (\[.*?\]);/s) || []) if (/^\d{4}-\d{2}-\d{2}$/.test(d.date)) days[d.date] = +d.value || 0;
+  const globalRank = +(h.match(/class=.global-rank.>(\d+)/)?.[1] || 0) || null;
+  return {
+    user: u, url,
+    solved: +solved[1],
+    contests: +(h.match(/Contests \((\d+)\)/)?.[1] || 0),
+    rating, maxRating: max,
+    stars: rating != null ? CC_STARS.find(([r]) => rating >= r)[1] : null,
+    globalRank,
+    contest: history.length ? { rating, max, attended: history.length, stars: CC_STARS.find(([r]) => rating >= r)[1], globalRank, history } : null,
+    days, // empty when there's nothing yet: an empty map, not an error
+  };
+}
+
+// AtCoder: contest history from atcoder.jp's own JSON, and accepted problems from the AtCoder Problems
+// (kenkoooo) API, 500 submissions a page, about one call a second. Problems are grouped by their points:
+// easy ≤ 300 < medium ≤ 500 < hard.
+const AC_COLOR = [[2800, "Red"], [2400, "Orange"], [2000, "Yellow"], [1600, "Blue"], [1200, "Cyan"], [800, "Green"], [400, "Brown"], [0, "Gray"]];
+async function atcoder() {
+  const u = USERS.atcoder, url = `https://atcoder.jp/users/${u}`;
+  const all = await getJson(`${url}/history/json`);
+  const subs = [];
+  for (let from = 0, i = 0; i < 6; i++) {
+    const page = await getJson(`https://kenkoooo.com/atcoder/atcoder-api/v3/user/submissions?user=${u}&from_second=${from}`);
+    subs.push(...page);
+    if (page.length < 500) break;
+    from = page.at(-1).epoch_second + 1;
+    await new Promise((r) => setTimeout(r, 1000));
+  }
+  const solved = new Map(), days = {};
+  for (const x of subs) {
+    const d = new Date(x.epoch_second * 1000).toISOString().slice(0, 10);
+    days[d] = (days[d] || 0) + 1;
+    if (x.result === "AC") solved.set(x.problem_id, x.point);
+  }
+  const by = (f) => [...solved.values()].filter(f).length;
+  const rated = all.filter((c) => c.IsRated);
+  const history = rated.map((c) => ({ t: Math.floor(Date.parse(c.EndTime) / 1000), r: c.NewRating, name: c.ContestNameEn || c.ContestName, rank: c.Place, perf: c.Performance }));
+  const rating = history.at(-1)?.r ?? null;
+  const max = history.length ? Math.max(...history.map((c) => c.r)) : null;
+  const color = rating != null ? AC_COLOR.find(([r]) => rating >= r)[1] : null;
+  return {
+    user: u, url,
+    solved: solved.size,
+    easy: by((p) => p <= 300), medium: by((p) => p > 300 && p <= 500), hard: by((p) => p > 500),
+    joined: all.length, // contests taken part in, rated or not
+    rating, maxRating: max, color,
+    contest: history.length ? { rating, max, attended: history.length, color, history } : null,
+    days,
+  };
+}
+
+const SOURCES = { leetcode, gfg, code360, github, hackerrank, hackerearth, neetcode, interviewbit, codeforces, codechef, atcoder };
 
 // Save what loaded; fill in what didn't from the last save. Never slows the response by more than ~2.5s.
 async function withSnapshots(body, context) {
