@@ -20,6 +20,18 @@ import { RatingLine, TopBars } from "./Profile";
 const fmt = (n) => Number(n).toLocaleString("en-IN");
 const day = (t) => new Date(t * 1000).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
+// One of CodeChef's ratings. Provisional = CodeChef still shows it as "1312?" (fewer than 5 rated contests).
+function codechef(s, key) {
+  const c = s?.codechef?.[key];
+  if (!c) return null;
+  return {
+    url: s.codechef.url, handle: s.codechef.user, rating: c.rating, max: c.max, attended: c.attended, history: c.history, start: c.start,
+    provisional: c.provisional,
+    facts: [["Stars", `${c.stars}★`], ...(c.globalRank ? [["Global rank", `#${fmt(c.globalRank)}`]] : []), ...(c.provisional ? [["Status", "Provisional"]] : [])],
+    bars: [],
+  };
+}
+
 // Platforms that run rated contests, and how to read each one's contest data from the stats response.
 const PLATFORMS = [
   {
@@ -60,18 +72,9 @@ const PLATFORMS = [
       };
     },
   },
-  {
-    id: "codechef", name: "CodeChef", c: "#b9875f", start: null,
-    read: (s) => {
-      const c = s?.codechef?.contest;
-      if (!c) return null;
-      return {
-        url: s.codechef.url, handle: s.codechef.user, rating: c.rating, max: c.max, attended: c.attended, history: c.history,
-        facts: [["Stars", `${c.stars}★`], ...(c.globalRank ? [["Global rank", `#${fmt(c.globalRank)}`]] : [])],
-        bars: [],
-      };
-    },
-  },
+  // CodeChef keeps two separate ratings: the main one (Starters) and the DSA one (Monday Munch DSA challenges)
+  { id: "codechef", name: "CodeChef", c: "#b9875f", start: 1000, read: (s) => codechef(s, "contest") },
+  { id: "codechef-dsa", name: "CodeChef DSA", c: "#d4a373", start: 1000, read: (s) => codechef(s, "dsa") },
   {
     id: "atcoder", name: "AtCoder", c: "#9aa3ad", start: null,
     read: (s) => {
@@ -129,7 +132,7 @@ export default function Contests() {
   // every contest from every platform, newest first, with the rating change it caused
   const rows = useMemo(() => list.flatMap((p) => p.d.history.map((h, i) => {
     // change from the previous rated contest on the same platform (or the starting rating)
-    const before = p.d.history.slice(0, i).reverse().find((x) => x.r != null)?.r ?? p.start;
+    const before = p.d.history.slice(0, i).reverse().find((x) => x.r != null)?.r ?? p.d.start ?? p.start;
     return { ...h, p, delta: before != null && h.r != null ? h.r - before : null };
   })).sort((a, b) => b.t - a.t), [list]);
 
@@ -164,7 +167,7 @@ export default function Contests() {
           <div className="cx-graph-hd">
             <div>
               <small>Rating</small>
-              <b className="cx-rating">{cur.d.rating != null ? fmt(cur.d.rating) : "Unrated"}</b>
+              <b className="cx-rating">{cur.d.rating != null ? fmt(cur.d.rating) : "Unrated"}{cur.d.provisional && <span className="cx-prov" title="Provisional rating: settles after 5 rated contests">?</span>}</b>
             </div>
             <div className="cx-last">
               <small>{day(last.t)}</small>
@@ -196,7 +199,7 @@ export default function Contests() {
             </header>
             <div className="cx-rank-main">
               {p.d.icon && <img src={p.d.icon} alt="" aria-hidden="true" width="44" height="44" />}
-              <b>{p.d.rating != null ? fmt(p.d.rating) : "–"}</b>
+              <b>{p.d.rating != null ? fmt(p.d.rating) : "–"}{p.d.provisional && <span className="cx-prov" title="Provisional rating: settles after 5 rated contests">?</span>}</b>
               {p.d.max != null && <small>(max: {fmt(p.d.max)})</small>}
             </div>
             <dl className="pf-facts">
@@ -238,7 +241,7 @@ export default function Contests() {
       <p className="note">
         // Live from {PLATFORMS.filter((x) => list.some((p) => p.id === x.id)).map((x) => x.name).join(", ").replace(/, ([^,]*)$/, " and $1") || "LeetCode and Code360"}{list.some((p) => !PLATFORMS.find((x) => x.id === p.id)) ? `; ${list.filter((p) => !PLATFORMS.find((x) => x.id === p.id)).map((p) => p.name).join(", ")} added by hand` : ""}.
         {(() => {
-          const none = [["gfg", "GeeksforGeeks"], ["hackerrank", "HackerRank"], ["neetcode", "NeetCode"], ["interviewbit", "InterviewBit"], ["hackerearth", "HackerEarth"], ["codeforces", "Codeforces"], ["codechef", "CodeChef"], ["atcoder", "AtCoder"]].filter(([k]) => !list.some((p) => p.id === k)).map(([, n]) => n);
+          const none = [["gfg", "GeeksforGeeks"], ["hackerrank", "HackerRank"], ["neetcode", "NeetCode"], ["interviewbit", "InterviewBit"], ["hackerearth", "HackerEarth"], ["codeforces", "Codeforces"], ["codechef", "CodeChef"], ["codechef-dsa", "CodeChef DSA"], ["atcoder", "AtCoder"]].filter(([k]) => !list.some((p) => p.id === k)).map(([, n]) => n);
           return none.length ? ` ${none.join(", ").replace(/, ([^,]*)$/, " and $1")} ${none.length > 1 ? "have" : "has"} no rated contests on my profiles yet.` : "";
         })()}
       </p>

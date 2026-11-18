@@ -366,8 +366,31 @@ async function codeforces() {
   };
 }
 
-// CodeChef has no public API, so read its profile page: problems solved, contests, current / best rating and
-// stars, global rank, rated contest history (all_rating) and the submissions heat map.
+// The JSON object that follows `key` in the page, e.g. "date_versus_rating":{…}; null if it's missing or broken.
+function parseObject(h, key) {
+  let i = h.indexOf(key);
+  if (i < 0) return null;
+  i += key.length;
+  if (h[i] !== "{") return null;
+  for (let depth = 0, j = i, str = false; j < h.length; j++) {
+    const ch = h[j];
+    if (str) {
+      if (ch === "\\") j++;
+      else if (ch === '"') str = false;
+    } else if (ch === '"') str = true;
+    else if (ch === "{") depth++;
+    else if (ch === "}" && --depth === 0) {
+      try {
+        return JSON.parse(h.slice(i, j + 1));
+      } catch {
+        return null;
+      }
+    }
+  }
+  return null;
+}
+// CodeChef has no public API, so read its profile page: problems solved, the main and DSA ratings (each with
+// stars, global rank and rated contest history) and the submissions heat map.
 const CC_STARS = [[2500, 7], [2200, 6], [2000, 5], [1800, 4], [1600, 3], [1400, 2], [0, 1]];
 async function codechef() {
   const u = USERS.codechef, url = `https://www.codechef.com/users/${u}`;
@@ -385,24 +408,41 @@ async function codechef() {
       return null;
     }
   };
-  const all = json(/var all_rating = (\[.*?\]);/s) || [];
-  const history = all
-    .filter((c) => c.rating && !c.penalised_in)
-    .map((c) => ({ t: Math.floor(Date.parse(`${c.end_date.replace(" ", "T")}+05:30`) / 1000), r: +c.rating, name: c.name, rank: c.rank ? +c.rank : null }))
-    .filter((c) => c.t && c.r);
-  const rating = history.at(-1)?.r ?? null;
-  const max = history.length ? Math.max(...history.map((c) => c.r)) : null;
+  // Every rating CodeChef keeps, each with its own history: "all" is the main CodeChef rating, "dsa_monday" the
+  // DSA rating from the Monday Munch DSA challenges. Read from the page's settings JSON (date_versus_rating).
+  const tracks = parseObject(h, '"date_versus_rating":') || { all: json(/var all_rating = (\[.*?\]);/s) || [] };
+  const start = parseObject(h, '"user_initial_ratings":') || {};
+  const provisionalUpTo = +(h.match(/"provisional_rating_contest_limit":(\d+)/)?.[1] || 5);
+  // global rank per rating: <div id='global-rank-dsa-monday'>…<strong class='global-rank'>1008</strong>
+  const ranks = {};
+  for (const m of h.matchAll(/id=.global-rank-([\w-]+).>[\s\S]{0,120}?class=.global-rank.>(\d+)/g)) ranks[m[1].replace(/-/g, "_")] = +m[2];
+  const track = (key) => {
+    const history = (tracks[key] || [])
+      .filter((c) => c.rating && !c.penalised_in)
+      .map((c) => ({ t: Math.floor(Date.parse(`${c.end_date.replace(" ", "T")}+05:30`) / 1000), r: +c.rating, name: c.name, rank: c.rank ? +c.rank : null, url: c.code ? `https://www.codechef.com/${c.code}` : null }))
+      .filter((c) => c.t && c.r)
+      .sort((a, b) => a.t - b.t);
+    if (!history.length) return null;
+    const rating = history.at(-1).r;
+    return {
+      rating, max: Math.max(...history.map((c) => c.r)), attended: history.length,
+      stars: CC_STARS.find(([r]) => rating >= r)[1],
+      provisional: history.length < provisionalUpTo, // CodeChef shows "1312?" until enough rated contests
+      globalRank: ranks[key] ?? null,
+      start: +start[key] || 1000,
+      history,
+    };
+  };
+  const contest = track("all"), dsa = track("dsa_monday");
   const days = {};
   for (const d of json(/userDailySubmissionsStats = (\[.*?\]);/s) || []) if (/^\d{4}-\d{2}-\d{2}$/.test(d.date)) days[d.date] = +d.value || 0;
-  const globalRank = +(h.match(/class=.global-rank.>(\d+)/)?.[1] || 0) || null;
   return {
     user: u, url,
     solved: +solved[1],
-    contests: +(h.match(/Contests \((\d+)\)/)?.[1] || 0),
-    rating, maxRating: max,
-    stars: rating != null ? CC_STARS.find(([r]) => rating >= r)[1] : null,
-    globalRank,
-    contest: history.length ? { rating, max, attended: history.length, stars: CC_STARS.find(([r]) => rating >= r)[1], globalRank, history } : null,
+    contests: (contest?.attended ?? 0) + (dsa?.attended ?? 0),
+    rating: contest?.rating ?? null, maxRating: contest?.max ?? null, stars: contest?.stars ?? null, globalRank: contest?.globalRank ?? null,
+    contest, // main CodeChef rating (Starters)
+    dsa, // DSA rating (Monday Munch)
     days, // empty when there's nothing yet: an empty map, not an error
   };
 }

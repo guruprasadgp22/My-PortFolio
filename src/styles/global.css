@@ -1726,6 +1726,7 @@ body::before{display:none} /* the time-of-day glow now lives in the colour pools
 .cx-graph-hd{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
 .cx-graph-hd small{display:block;font-size:13px;color:var(--mute)}
 .cx-rating{font-family:var(--display);font-size:34px;font-weight:800;line-height:1.1}
+.cx-prov{font-size:.6em;font-weight:700;margin-left:2px;color:var(--mute);cursor:help;vertical-align:super}
 .cx-last{text-align:right;display:grid;gap:2px}
 .cx-last b{font-size:15px}
 .cx-tabs{display:flex;gap:6px;flex-wrap:wrap}
