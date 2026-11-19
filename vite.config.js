@@ -123,9 +123,12 @@ export default defineConfig(({ mode }) => {
   // build date, shown as "Last updated" in the footer (each Netlify deploy is a fresh build)
   const define = { __BUILD_DATE__: JSON.stringify(new Date().toISOString()) };
   // BACKEND_URL=http://localhost:8080 npm run dev  → /api goes to the Spring Boot gateway (backend/) instead
+  // (or a hosted one: BACKEND_URL=https://portfolio-api.onrender.com npm run dev)
   const backend = process.env.BACKEND_URL || env.BACKEND_URL;
   if (backend) {
-    const proxy = { "/api": { target: backend, changeOrigin: false, xfwd: true } };
+    // a hosted backend (e.g. https://portfolio-api.onrender.com) routes by host name, so send it its own
+    const remote = !/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(backend);
+    const proxy = { "/api": { target: backend, changeOrigin: remote, secure: true, xfwd: !remote } };
     return { plugins: [react(), securityHeaders()], define, server: { proxy }, preview: { proxy } };
   }
   return { plugins: [react(), localFunctions(), securityHeaders()], define };

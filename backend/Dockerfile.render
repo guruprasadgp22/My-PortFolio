@@ -1,0 +1,29 @@
+# Render (free plan, 512 MB): every service in one process (all-in-one module), built from the same code.
+# Render builds this from render.yaml at the repo root.
+FROM maven:3.9-eclipse-temurin-21 AS build
+WORKDIR /build
+COPY pom.xml .
+COPY common/pom.xml common/
+COPY discovery-server/pom.xml discovery-server/
+COPY api-gateway/pom.xml api-gateway/
+COPY auth-service/pom.xml auth-service/
+COPY content-service/pom.xml content-service/
+COPY learning-service/pom.xml learning-service/
+COPY coding-service/pom.xml coding-service/
+COPY contest-service/pom.xml contest-service/
+COPY media-service/pom.xml media-service/
+COPY chat-service/pom.xml chat-service/
+COPY all-in-one/pom.xml all-in-one/
+RUN mvn -q -B -pl all-in-one -am dependency:go-offline
+COPY . .
+RUN mvn -q -B -pl all-in-one -am package -DskipTests && cp all-in-one/target/app-exec.jar /build/app.jar
+
+FROM eclipse-temurin:21-jre
+RUN useradd --system --create-home --uid 10001 app
+WORKDIR /app
+COPY --from=build /build/app.jar app.jar
+USER app
+# fits Render's 512 MB: about 300 MB in use with every service running (measured)
+ENV JAVA_OPTS="-Xms64m -Xmx300m -Xss512k -XX:MaxMetaspaceSize=160m -XX:ReservedCodeCacheSize=40m -XX:MaxDirectMemorySize=32m -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -XX:+ExitOnOutOfMemoryError"
+EXPOSE 10000
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar app.jar"]

@@ -14,9 +14,10 @@ COPY coding-service/pom.xml coding-service/
 COPY contest-service/pom.xml contest-service/
 COPY media-service/pom.xml media-service/
 COPY chat-service/pom.xml chat-service/
+COPY all-in-one/pom.xml all-in-one/
 RUN mvn -q -B -pl ${SERVICE} -am dependency:go-offline
 COPY . .
-RUN mvn -q -B -pl ${SERVICE} -am package -DskipTests && cp ${SERVICE}/target/app.jar /build/app.jar
+RUN mvn -q -B -pl ${SERVICE} -am package -DskipTests && cp ${SERVICE}/target/app-exec.jar /build/app.jar
 
 FROM eclipse-temurin:21-jre
 RUN apt-get update \

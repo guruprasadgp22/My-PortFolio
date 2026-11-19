@@ -5,6 +5,7 @@ import com.guruprasad.portfolio.common.security.InternalAuthFilter;
 import com.guruprasad.portfolio.common.web.GlobalExceptionHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.apache.catalina.valves.ErrorReportValve;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
@@ -15,8 +16,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.Ordered;
 import org.springframework.web.client.RestClient;
 
-/** Switched on in every service that depends on common (see META-INF/spring/…AutoConfiguration.imports). */
+/** Switched on in every servlet service that depends on common (see META-INF/spring/…AutoConfiguration.imports). */
 @AutoConfiguration
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @Import(GlobalExceptionHandler.class)
 public class CommonAutoConfiguration {
 

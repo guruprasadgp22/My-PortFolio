@@ -29,7 +29,7 @@ for port in 8761 8080 8081 8082 8083 8084 8085 8086 8087; do
   if lsof -nP -iTCP:$port -sTCP:LISTEN >/dev/null 2>&1; then echo "Port $port is already in use. Stop whatever runs there first."; exit 1; fi
 done
 
-if [ ! -f api-gateway/target/app.jar ] || [ -n "$(find . -name '*.java' -newer api-gateway/target/app.jar -print -quit)" ] || [ -n "$(find . -name '*.yml' -path '*/src/*' -newer api-gateway/target/app.jar -print -quit)" ]; then
+if [ ! -f api-gateway/target/app-exec.jar ] || [ -n "$(find . -name '*.java' -newer api-gateway/target/app-exec.jar -print -quit)" ] || [ -n "$(find . -name '*.yml' -path '*/src/*' -newer api-gateway/target/app-exec.jar -print -quit)" ]; then
   command -v mvn >/dev/null || { echo "Install Maven to build the backend"; exit 1; }
   echo "Building the backend (first time takes a few minutes)…"
   mvn -q -B package -DskipTests
@@ -41,7 +41,7 @@ stop() { echo; echo "Stopping…"; kill "${PIDS[@]}" 2>/dev/null || true; wait 2
 trap stop INT TERM
 
 JAVA_OPTS="-Xms32m -Xmx256m -XX:+UseSerialGC -XX:TieredStopAtLevel=1"
-start() { java $JAVA_OPTS -jar "$1/target/app.jar" > "logs/$1.log" 2>&1 & PIDS+=($!); }
+start() { java $JAVA_OPTS -jar "$1/target/app-exec.jar" > "logs/$1.log" 2>&1 & PIDS+=($!); }
 
 echo "Starting discovery-server…"
 start discovery-server

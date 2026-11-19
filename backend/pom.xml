@@ -32,6 +32,7 @@
         <module>contest-service</module>
         <module>media-service</module>
         <module>chat-service</module>
+        <module>all-in-one</module>
     </modules>
 
     <properties>
@@ -81,6 +82,14 @@
     <build>
         <pluginManagement>
             <plugins>
+                <!-- runnable jar = target/app-exec.jar; the plain jar stays the module's artifact so all-in-one can use it -->
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <configuration>
+                        <classifier>exec</classifier>
+                    </configuration>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
