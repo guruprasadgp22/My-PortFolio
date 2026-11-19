@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: media-service
+  config:
+    import: classpath:portfolio-common.yml
+  codec:
+    max-in-memory-size: 8MB
+
+server:
+  port: ${PORT:8086}

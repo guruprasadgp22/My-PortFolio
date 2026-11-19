@@ -27,8 +27,9 @@ const LOADERS = {
   learning: () => import("./components/Learning"),
   contact: () => import("./components/Contact"),
 };
-// #admin (editing the site's data) isn't in the navbar and isn't prefetched for visitors.
-const PAGES = { about: About, ...Object.fromEntries(Object.entries(LOADERS).map(([id, load]) => [id, lazy(load)])), admin: lazy(() => import("./components/Admin")) };
+const PAGES = { about: About, ...Object.fromEntries(Object.entries(LOADERS).map(([id, load]) => [id, lazy(load)])) };
+// the site editor lives on its own page now: an old #admin link goes to its sign-in page
+if (location.hash.split("/")[0] === "#admin") location.replace("/admin/login");
 // "#projects/job-board" opens the Projects tab; the part after the slash is for the page itself.
 const fromHash = () => {
   const id = location.hash.slice(1).split("/")[0];
@@ -106,7 +107,7 @@ export default function App() {
     const dx = t.clientX - s.x, dy = t.clientY - s.y;
     if (Date.now() - s.at > 600 || Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.6) return;
     const i = NAV.findIndex(([id]) => id === page);
-    if (i < 0) return; // pages outside the tabs (e.g. #admin) don't swipe
+    if (i < 0) return; // pages outside the tabs don't swipe
     const next = NAV[i + (dx < 0 ? 1 : -1)];
     if (next) go(next[0]);
   };

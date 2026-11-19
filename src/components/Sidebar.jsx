@@ -148,6 +148,11 @@ export default function Sidebar() {
 
   return (
     <aside className="sidebar" ref={self}>
+      {/* the owner's way in: a near-invisible lock in the card's corner, opening the editor's sign-in page.
+          Hiding it only keeps it out of visitors' way; the sign-in itself is what protects the editor. */}
+      <a className="owner-key" href="/admin/login" aria-label="Owner sign-in" title="Owner sign-in">
+        <Icon name="lock" size={12} />
+      </a>
       <CompactBar watch={self} />
       <div className="sidebar-info">
         <Avatar name={name} />

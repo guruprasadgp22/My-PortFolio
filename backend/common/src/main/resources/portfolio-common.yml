@@ -1,0 +1,50 @@
+# Shared by every service (each service's application.yml imports it). Values come from environment variables.
+portfolio:
+  internal-token: ${INTERNAL_TOKEN:}
+
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017}
+      database: ${MONGODB_DB:portfolio}
+  jackson:
+    default-property-inclusion: non_null
+  threads:
+    virtual:
+      enabled: true
+  mvc:
+    problemdetails:
+      enabled: false
+  servlet:
+    multipart:
+      enabled: false
+
+server:
+  # never reveal versions, stack traces or exception names
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-exception: false
+    whitelabel:
+      enabled: false
+  server-header: ""
+  shutdown: graceful
+  tomcat:
+    max-swallow-size: 6MB
+    max-http-form-post-size: 1KB
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never

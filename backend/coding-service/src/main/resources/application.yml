@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: coding-service
+  config:
+    import: classpath:portfolio-common.yml
+
+server:
+  port: ${PORT:8084}
+
+# The profile on each coding platform
+portfolio:
+  accounts:
+    leetcode: [guruprasadgp22, guruprasad6200]
+    gfg: guruprasadgp22
+    code360: guruprasadgp
+    github: guruprasadgp22
+    hackerrank: [guruprasad6200, gp130143]
+    hackerearth: guruprasadgp
+    neetcode: PrimalPikachu220
+    interviewbit: guruprasad-gp_339
+    codeforces: guruprasadgp
+    codechef: guruprasadgp
+    atcoder: guruprasadgp

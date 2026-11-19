@@ -6,3 +6,8 @@ dist
 .netlify
 .lighthouseci
 !.env.example
+
+# Java backend build output
+backend/**/target/
+backend/.env
+backend/logs/

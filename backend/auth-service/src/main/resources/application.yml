@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: auth-service
+  config:
+    import: classpath:portfolio-common.yml
+  data:
+    mongodb:
+      auto-index-creation: true
+
+server:
+  port: ${PORT:8081}
+
+portfolio:
+  session-secret: ${SESSION_SECRET:}

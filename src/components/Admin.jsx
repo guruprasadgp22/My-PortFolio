@@ -7,8 +7,10 @@ import { BUILT_IN, GROUPS } from "../learning";
 import PagesTab from "./SectionEditor";
 
 /*
-  #admin (not in the navbar): sign in as the one admin user and edit what the site shows, stored in MongoDB
-  through /api/admin (netlify/functions/admin.mjs):
+  The site editor, on its own pages outside the portfolio (opened from the hidden lock on the profile card):
+    /admin/login  sign in as the one admin user
+    /admin        edit what the site shows, stored in MongoDB through /api/admin
+  Signed out on /admin → sent to /admin/login; signed in on /admin/login → sent to /admin.
     Pages     any page's content (profile, about, experience, education, journey, skills, projects, …)
     Learning  course progress (lessons done), titles, topics; add or remove courses
     Coding    correct a platform's numbers when its live API is wrong or down
@@ -131,7 +133,7 @@ function Login({ onIn, setup }) {
           <p className="lgn-foot"><Icon name="check" size={14} /> Stays signed in for 12 hours · 5 wrong tries pause sign-in for 15 minutes</p>
         </form>
       </div>
-      <a className="lgn-back" href="#about"><Icon name="chevron" size={14} /> Back to the portfolio</a>
+      <a className="lgn-back" href="/"><Icon name="chevron" size={14} /> Back to the portfolio</a>
     </section>
   );
 }
@@ -308,7 +310,8 @@ function ContestsTab({ items, run }) {
 
 const TABS = [["pages", "Pages", "file"], ["learning", "Learning", "book"], ["coding", "Coding", "code"], ["contests", "Contests", "award"]];
 
-export default function Admin() {
+// page: "login" (/admin/login) or "editor" (/admin); go(path) moves between them without reloading
+export default function Admin({ page = "editor", go = (path) => location.assign(path) }) {
   const [user, setUser] = useState(undefined); // undefined = checking, null = signed out
   const [setup, setSetup] = useState("");
   const [tab, setTab] = useState("pages");
@@ -323,10 +326,16 @@ export default function Admin() {
     });
   }, []);
 
+  // each page only for its own state: the editor needs a session, the sign-in page doesn't make sense with one
+  useEffect(() => {
+    if (user === null && page === "editor") go("/admin/login");
+    if (user && page === "login") go("/admin");
+  }, [user, page, go]);
+
   const load = useCallback(() => api("data").then(setData).catch((e) => (e.status === 401 ? setUser(null) : setNote({ err: true, text: e.message }))), []);
   useEffect(() => {
-    if (user) load();
-  }, [user, load]);
+    if (user && page === "editor") load();
+  }, [user, page, load]);
 
   // Run a change, then reload the editor and the site's copy; true when it worked.
   const run = useCallback(async (fn, done) => {
@@ -350,14 +359,17 @@ export default function Admin() {
 
   return (
     <>
-      {user && <Glitch text="Admin" />}
-      {user === undefined && <div className="heat-skel" aria-busy="true" aria-label="Checking sign-in" />}
-      {user === null && <Login onIn={setUser} setup={setup} />}
-      {user && (
+      {(user === undefined || (user === null && page === "editor") || (user && page === "login")) && <div className="heat-skel" aria-busy="true" aria-label="Checking sign-in" />}
+      {user === null && page === "login" && <Login onIn={setUser} setup={setup} />}
+      {user && page === "editor" && <Glitch text="Site editor" />}
+      {user && page === "editor" && (
         <>
           <div className="ad-bar">
             <span>Signed in as <b>{user}</b></span>
-            <button className="ad-btn" onClick={() => api("logout", { method: "POST" }).finally(() => (setUser(null), setData(null)))}>Sign out</button>
+            <span className="ad-bar-links">
+              <a className="ad-btn" href="/" target="_blank" rel="noopener">View site <Icon name="arrow" size={13} /></a>
+              <button className="ad-btn" onClick={() => api("logout", { method: "POST" }).finally(() => (setData(null), setUser(null)))}>Sign out</button>
+            </span>
           </div>
           <div className="cx-tabs ad-tabs" role="tablist" aria-label="What to edit">
             {TABS.map(([id, label, icon]) => (

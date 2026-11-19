@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: contest-service
+  config:
+    import: classpath:portfolio-common.yml
+
+server:
+  port: ${PORT:8085}

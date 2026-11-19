@@ -22,8 +22,18 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
   addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
 }
 
+// /admin and /admin/login are the site editor's own pages (components/AdminApp.jsx), loaded only there.
+const AdminApp = React.lazy(() => import("./components/AdminApp.jsx"));
+const admin = /^\/admin(\/|$)/.test(location.pathname);
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <App />
+    {admin ? (
+      <React.Suspense fallback={null}>
+        <AdminApp />
+      </React.Suspense>
+    ) : (
+      <App />
+    )}
   </React.StrictMode>
 );

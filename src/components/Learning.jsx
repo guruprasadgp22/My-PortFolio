@@ -4,6 +4,7 @@ import { LEARNING } from "../data";
 import { coursesFrom, GROUPS } from "../learning";
 import { REDUCED } from "../hooks/motion";
 import useContent from "../hooks/useContent";
+import useLessons from "../hooks/useLessons";
 import Glitch from "./Glitch";
 import Reveal from "./Reveal";
 import Icon from "./Icons";
@@ -11,7 +12,8 @@ import Icon from "./Icons";
 /*
   Learning: what I'm studying right now and how far I've got. One card per course with its progress,
   topics, the next lesson to watch and the full lesson list. Progress is updated in the admin page (#admin,
-  stored in MongoDB), falling back to data.js; lesson titles and lengths are a snapshot of each playlist.
+  stored in MongoDB), falling back to data.js; lesson titles and lengths load from YouTube (useLessons),
+  falling back to the snapshot in learning.json.
 */
 const playlist = (id) => `https://www.youtube.com/playlist?list=${id}`;
 const watch = (v, list) => `https://www.youtube.com/watch?v=${v}&list=${list}`;
@@ -99,7 +101,8 @@ const day = (iso) => new Date(iso).toLocaleDateString("en-IN", { day: "numeric",
 
 export default function Learning() {
   const content = useContent();
-  const COURSES = useMemo(() => coursesFrom(content), [content]);
+  const lessons = useLessons();
+  const COURSES = useMemo(() => coursesFrom(content, lessons), [content, lessons]);
   const total = COURSES.reduce((n, t) => n + t.count, 0);
   const complete = COURSES.filter(finished).length;
   const watched = COURSES.reduce((n, t) => n + Math.min(t.done || 0, t.count), 0);

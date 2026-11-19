@@ -1,0 +1,123 @@
+# Portfolio backend: every service on one server.
+#   cp .env.example .env    # then fill in the secrets
+#   docker compose up -d --build
+#
+# Only Caddy is published (ports 80/443, with automatic HTTPS for API_DOMAIN). The gateway, Eureka and every
+# service stay on the private Docker network, and each service also refuses requests without the internal token.
+# The database is MongoDB Atlas (MONGODB_URI); allow this server's IP in Atlas → Network Access.
+
+x-service: &service
+  restart: unless-stopped
+  read_only: true
+  tmpfs:
+    - /tmp
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  environment: &env
+    EUREKA_URL: http://discovery-server:8761/eureka/
+    MONGODB_URI: ${MONGODB_URI:?Set MONGODB_URI in .env}
+    MONGODB_DB: ${MONGODB_DB:-portfolio}
+    INTERNAL_TOKEN: ${INTERNAL_TOKEN:?Set INTERNAL_TOKEN in .env}
+    TZ: Asia/Kolkata
+  depends_on:
+    discovery-server:
+      condition: service_healthy
+  healthcheck: &health
+    test: ["CMD", "curl", "-fs", "http://localhost:8080/actuator/health"]
+    interval: 20s
+    timeout: 5s
+    retries: 10
+    start_period: 60s
+
+services:
+
+  discovery-server:
+    build: { context: ., args: { SERVICE: discovery-server } }
+    restart: unless-stopped
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    environment:
+      EUREKA_HOSTNAME: discovery-server
+    healthcheck:
+      <<: *health
+      test: ["CMD", "curl", "-fs", "http://localhost:8761/actuator/health"]
+
+  api-gateway:
+    <<: *service
+    build: { context: ., args: { SERVICE: api-gateway } }
+    environment:
+      <<: *env
+      PORT: 8080
+      SESSION_SECRET: ${SESSION_SECRET:?Set SESSION_SECRET in .env}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-^https://([a-z0-9-]+--)?guruprasadgp\.netlify\.app$}
+      CLIENT_IP_HEADER: ${CLIENT_IP_HEADER:-X-Nf-Client-Connection-Ip}
+
+  auth-service:
+    <<: *service
+    build: { context: ., args: { SERVICE: auth-service } }
+    environment:
+      <<: *env
+      PORT: 8080
+      SESSION_SECRET: ${SESSION_SECRET:?Set SESSION_SECRET in .env}
+
+  content-service:
+    <<: *service
+    build: { context: ., args: { SERVICE: content-service } }
+    environment: { <<: *env, PORT: 8080 }
+
+  learning-service:
+    <<: *service
+    build: { context: ., args: { SERVICE: learning-service } }
+    environment:
+      <<: *env
+      PORT: 8080
+      YOUTUBE_API_KEY: ${YOUTUBE_API_KEY:-}
+
+  coding-service:
+    <<: *service
+    build: { context: ., args: { SERVICE: coding-service } }
+    environment: { <<: *env, PORT: 8080 }
+
+  contest-service:
+    <<: *service
+    build: { context: ., args: { SERVICE: contest-service } }
+    environment: { <<: *env, PORT: 8080 }
+
+  media-service:
+    <<: *service
+    build: { context: ., args: { SERVICE: media-service } }
+    environment: { <<: *env, PORT: 8080 }
+
+  chat-service:
+    <<: *service
+    build: { context: ., args: { SERVICE: chat-service } }
+    environment:
+      <<: *env
+      PORT: 8080
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      CHAT_MODEL: ${CHAT_MODEL:-claude-sonnet-5-5}
+
+  # HTTPS in front of the gateway (certificates from Let's Encrypt, renewed automatically)
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      API_DOMAIN: ${API_DOMAIN:?Set API_DOMAIN in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+
+volumes:
+  caddy-data:
+  caddy-config:

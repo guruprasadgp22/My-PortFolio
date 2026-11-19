@@ -1,0 +1,20 @@
+# HTTPS for the API (e.g. api.example.com). Only /api/* is passed on; everything else is a 404.
+{$API_DOMAIN} {
+	encode zstd gzip
+	@api path /api/*
+	handle @api {
+		reverse_proxy api-gateway:8080 {
+			header_up -X-Admin-User
+			header_up -X-Internal-Token
+			header_up -X-Client-Ip
+		}
+	}
+	handle {
+		respond "Not found" 404
+	}
+	header -Server
+	log {
+		output stdout
+		format json
+	}
+}

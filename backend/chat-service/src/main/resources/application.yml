@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: chat-service
+  config:
+    import: classpath:portfolio-common.yml
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
+  mvc:
+    async:
+      request-timeout: 60s
+
+server:
+  port: ${PORT:8087}
+
+portfolio:
+  anthropic:
+    key: ${ANTHROPIC_API_KEY:}
+    model: ${CHAT_MODEL:claude-sonnet-5-5}
+    base-url: ${ANTHROPIC_BASE_URL:https://api.anthropic.com}

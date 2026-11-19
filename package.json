@@ -8,7 +8,10 @@
     "build": "vite build",
     "preview": "vite preview",
     "admin:user": "node --env-file=.env scripts/admin.mjs user",
-    "db:seed": "node --env-file=.env scripts/admin.mjs seed"
+    "db:seed": "node --env-file=.env scripts/admin.mjs seed",
+    "backend:knowledge": "node scripts/knowledge.mjs",
+    "backend": "bash backend/run-local.sh",
+    "dev:java": "BACKEND_URL=http://localhost:8080 vite"
   },
   "dependencies": {
     "@netlify/functions": "^2.8.2",

@@ -18,15 +18,19 @@ export default function Intro() {
   useEffect(() => {
     if (!INTRO) return;
     // "intro-go" starts the page's entrance (its delays in global.css count from this moment)
-    const lift = () => (setPhase("lift"), root.classList.add("intro-go"));
+    // the skip listeners go as soon as the curtain lifts: left in place, the first click long after the intro
+    // replayed the entrance animation and moved the page under the pointer, so that click was lost
+    const off = () => (removeEventListener("keydown", skip), removeEventListener("pointerdown", skip));
+    const lift = () => (off(), setPhase("lift"), root.classList.add("intro-go"));
     const done = () => root.classList.remove("intro", "intro-go", "intro-fast");
     const t = [setTimeout(lift, LIFT), setTimeout(() => setPhase("gone"), LIFT + 950), setTimeout(done, LIFT + SETTLE)];
-    const skip = () => {
+    function skip() {
+      off();
       t.forEach(clearTimeout);
       root.classList.add("intro-fast");
       lift();
       t.push(setTimeout(() => setPhase("gone"), 500), setTimeout(done, 1200));
-    };
+    }
     addEventListener("keydown", skip, { once: true });
     addEventListener("pointerdown", skip, { once: true });
     return () => {

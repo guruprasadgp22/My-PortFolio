@@ -12,10 +12,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!-- fonts load without blocking the first paint; text shows in fallback fonts for a moment, then swaps -->
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Manrope:wght@400;500;700&family=JetBrains+Mono:wght@400;600&family=VT323&display=swap" />
-    <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Manrope:wght@400;500;700&family=JetBrains+Mono:wght@400;600&family=VT323&display=swap" />
+    <link id="gp-fonts" rel="stylesheet" media="print" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Manrope:wght@400;500;700&family=JetBrains+Mono:wght@400;600&family=VT323&display=swap" />
     <script>
       // Apply the saved (or system) theme before first paint so the page never flashes the wrong one.
+      // (This is the page's only inline script; the Content-Security-Policy allows it by its hash, see vite.config.js.)
       (function () {
+        // switch the fonts stylesheet on once it has loaded (done here, not with onload="", so the CSP can forbid inline handlers)
+        var f = document.getElementById("gp-fonts");
+        var on = function () { f.media = "all"; };
+        if (f) { if (f.sheet) on(); else f.addEventListener("load", on); }
         var t;
         try { t = localStorage.getItem("theme"); } catch (e) {}
         if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";

@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: learning-service
+  config:
+    import: classpath:portfolio-common.yml
+
+server:
+  port: ${PORT:8083}
+
+portfolio:
+  youtube-key: ${YOUTUBE_API_KEY:}

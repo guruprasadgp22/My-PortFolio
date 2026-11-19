@@ -19,3 +19,25 @@
   for = "/sw.js"
   [headers.values]
     Cache-Control = "no-cache"
+
+# The site editor's own pages (/admin/login, /admin) are part of the same app: serve index.html for them.
+[[redirects]]
+  from = "/admin"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin/*"
+  to = "/index.html"
+  status = 200
+
+# Java backend (backend/, Spring Boot microservices). Once it's running on its own server (see backend/README.md):
+#   1. delete the netlify/functions folder (the Node API it replaces)
+#   2. uncomment this, with your API domain, and push. The site keeps calling /api/... on its own address,
+#      so the admin cookie stays first-party and no CORS is needed.
+# [[redirects]]
+#   from = "/api/*"
+#   to = "https://api.example.com/api/:splat"
+#   status = 200
+#   force = true
+

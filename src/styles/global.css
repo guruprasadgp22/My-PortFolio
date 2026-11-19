@@ -1514,7 +1514,8 @@ body::before{display:none} /* the time-of-day glow now lives in the colour pools
    The window doesn't scroll. The profile on the left scrolls on its own (contacts, socials, resume),
    and the page card scrolls inside itself, under the tab bar. Phones and tablets keep normal page scrolling. */
 @media (min-width:1250px){
-  html,body{height:100%;overflow:hidden}
+  /* not on the admin pages (html.admin-mode), which have no cards of their own and scroll the window normally */
+  html:not(.admin-mode),html:not(.admin-mode) body{height:100%;overflow:hidden}
   .shell{height:100dvh;margin-top:0;margin-bottom:0;padding:36px 0 18px;align-items:stretch}
   .sidebar{position:relative;top:auto;height:100%;max-height:none;overflow-y:auto;overscroll-behavior:contain}
   .main-content{height:100%;display:flex;flex-direction:column;min-height:0}
@@ -1839,7 +1840,18 @@ body::before{display:none} /* the time-of-day glow now lives in the colour pools
 .ln-more{display:inline-flex;align-items:center;gap:4px;margin:8px 0 0 38px;font-size:13.5px;color:var(--signal)}
 @media (prefers-reduced-motion:reduce){.ln-status.now i{animation:none}}
 
-/* ---------- Admin (#admin): edit the site's data ---------- */
+/* ---------- the owner's hidden sign-in lock on the profile card ---------- */
+.owner-key{position:absolute;top:8px;left:8px;z-index:3;display:grid;place-items:center;width:26px;height:26px;border-radius:8px;color:var(--mute);opacity:.06;transition:opacity .3s,color .3s,background-color .3s}
+.owner-key:hover,.owner-key:focus-visible{opacity:.85;color:var(--ember-2);background:var(--glass-pane)}
+.owner-key:focus-visible{outline:2px solid var(--ember-2);outline-offset:2px}
+@media (hover:none){.owner-key{opacity:.1}}
+
+/* ---------- the editor's own pages: /admin/login and /admin ---------- */
+.admin-page{position:relative;z-index:1;min-height:100dvh;width:min(1180px,100%);margin:0 auto;padding:clamp(16px,4vw,48px) 16px 48px}
+.admin-page.login{display:grid;align-content:center}
+.ad-bar-links{display:inline-flex;gap:8px;flex-wrap:wrap}
+
+/* ---------- Admin: edit the site's data ---------- */
 .ad-muted{color:var(--mute);font-size:14.5px;margin-bottom:14px}
 .ad-login{display:grid;gap:14px;max-width:420px}
 .ad-login .h3{margin:0}
