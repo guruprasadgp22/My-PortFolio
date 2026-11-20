@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import Glitch from "./Glitch";
 import Icon from "./Icons";
 import { useLiveStats } from "../hooks/useStats";
 import { refreshContent } from "../hooks/useContent";
@@ -308,7 +307,13 @@ function ContestsTab({ items, run }) {
   );
 }
 
-const TABS = [["pages", "Pages", "file"], ["learning", "Learning", "book"], ["coding", "Coding", "code"], ["contests", "Contests", "award"]];
+// [id, label, icon, what it's for]
+const TABS = [
+  ["pages", "Pages", "file", "Text, photos and lists on every page"],
+  ["learning", "Learning", "book", "Courses and lessons done"],
+  ["coding", "Coding", "code", "Correct a platform's numbers"],
+  ["contests", "Contests", "award", "Add contests by hand"],
+];
 
 // page: "login" (/admin/login) or "editor" (/admin); go(path) moves between them without reloading
 export default function Admin({ page = "editor", go = (path) => location.assign(path) }) {
@@ -361,24 +366,38 @@ export default function Admin({ page = "editor", go = (path) => location.assign(
     <>
       {(user === undefined || (user === null && page === "editor") || (user && page === "login")) && <div className="heat-skel" aria-busy="true" aria-label="Checking sign-in" />}
       {user === null && page === "login" && <Login onIn={setUser} setup={setup} />}
-      {user && page === "editor" && <Glitch text="Site editor" />}
       {user && page === "editor" && (
         <>
-          <div className="ad-bar">
-            <span>Signed in as <b>{user}</b></span>
-            <span className="ad-bar-links">
-              <a className="ad-btn" href="/" target="_blank" rel="noopener">View site <Icon name="arrow" size={13} /></a>
-              <button className="ad-btn" onClick={() => api("logout", { method: "POST" }).finally(() => (setData(null), setUser(null)))}>Sign out</button>
-            </span>
-          </div>
-          <div className="cx-tabs ad-tabs" role="tablist" aria-label="What to edit">
-            {TABS.map(([id, label, icon]) => (
+          <header className="ad-head">
+            <div className="ad-head-main">
+              <span className="ad-logo" aria-hidden="true"><Icon name="layers" size={22} /></span>
+              <div>
+                <h1 className="ad-h1">Site editor</h1>
+                <p className="ad-sub">Change what visitors see on your portfolio. Saved changes go live within a few seconds.</p>
+              </div>
+            </div>
+            <div className="ad-head-side">
+              <span className="ad-user"><i aria-hidden="true" />Signed in as <b>{user}</b></span>
+              <span className="ad-bar-links">
+                <a className="ad-btn" href="/" target="_blank" rel="noopener">View site <Icon name="arrow" size={13} /></a>
+                <button className="ad-btn" onClick={() => api("logout", { method: "POST" }).finally(() => (setData(null), setUser(null)))}>Sign out</button>
+              </span>
+            </div>
+          </header>
+          <div className="ad-tabs" role="tablist" aria-label="What to edit">
+            {TABS.map(([id, label, icon, what]) => (
               <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? "on" : ""} onClick={() => setTab(id)}>
-                {tab === id && <span className="cx-pill" />}<Icon name={icon} size={15} /> {label}
+                <span className="ad-tab-ic" aria-hidden="true"><Icon name={icon} size={18} /></span>
+                <span className="ad-tab-txt"><b>{label}</b><small>{what}</small></span>
               </button>
             ))}
           </div>
-          {note && <p className={`ad-note ${note.err ? "err" : ""}`} role={note.err ? "alert" : "status"}>{note.text}</p>}
+          {note && (
+            <p className={`ad-note ${note.err ? "err" : ""}`} role={note.err ? "alert" : "status"} key={note.text}>
+              <Icon name={note.err ? "x" : "check"} size={16} /> <span>{note.text}</span>
+              {note.err && <button type="button" onClick={() => setNote(null)} aria-label="Dismiss">✕</button>}
+            </p>
+          )}
           {!data ? (
             <div className="heat-skel" aria-busy="true" aria-label="Loading" />
           ) : tab === "pages" ? (

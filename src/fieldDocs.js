@@ -165,6 +165,34 @@ export const DOCS = {
   "PLATFORMS[].accounts[].note": ["Note", "e.g. 200 E / 204 M / 51 H."],
   "PLATFORMS[].more": ["Smaller platform", "Not used on the site at the moment."],
 
+  // ---------- Interview experiences ----------
+  "INTERVIEWS": ["Interviews", "Newest first on the site (by date). Open one to fill it in; ✕ removes it."],
+  "INTERVIEWS[].title": ["Title", "The heading people see, e.g. \"SDE-1 at Zoho: 4 rounds, selected\"."],
+  "INTERVIEWS[].company": ["Company", "e.g. Zoho, TCS, Amazon."],
+  "INTERVIEWS[].role": ["Designation", "The job you interviewed for, e.g. Software Developer, Java Backend Engineer."],
+  "INTERVIEWS[].date": ["Date", "When the interview (or its last round) happened."],
+  "INTERVIEWS[].mode": ["Mode of interview", "Online, onsite, hybrid or phone."],
+  "INTERVIEWS[].location": ["Location", "City or office for onsite rounds, e.g. Chennai. Leave empty for fully online."],
+  "INTERVIEWS[].source": ["How you applied", "Where the opportunity came from."],
+  "INTERVIEWS[].level": ["Experience level", "Your level when you applied, e.g. Fresher, 1 year."],
+  "INTERVIEWS[].result": ["Result", "The outcome. Pick Pending while you're waiting."],
+  "INTERVIEWS[].difficulty": ["Difficulty", "How hard the process felt overall."],
+  "INTERVIEWS[].duration": ["Process length", "Optional. From application to result, e.g. 3 weeks."],
+  "INTERVIEWS[].ctc": ["CTC / stipend", "Optional. Only if you're happy to share it, e.g. 6 LPA."],
+  "INTERVIEWS[].summary": ["Summary", "A few lines on the whole experience: how it went and what stood out."],
+  "INTERVIEWS[].rounds": ["Rounds", "One entry per round, in order."],
+  "INTERVIEWS[].rounds[].name": ["Round name", "e.g. Round 1: Online assessment."],
+  "INTERVIEWS[].rounds[].type": ["Round type", "What kind of round it was."],
+  "INTERVIEWS[].rounds[].mode": ["Mode", "Optional, if this round differs from the interview's mode."],
+  "INTERVIEWS[].rounds[].duration": ["Duration", "e.g. 60 min."],
+  "INTERVIEWS[].rounds[].d": ["What happened", "How the round went: the platform, the interviewer, what they focused on."],
+  "INTERVIEWS[].rounds[].questions": ["Questions asked", "One per line. Paste a LeetCode / GfG link after the question if there is one."],
+  "INTERVIEWS[].rounds[].result": ["Round result", "Optional: cleared, not cleared, or empty."],
+  "INTERVIEWS[].topics": ["Topics", "One per line, shown as chips, e.g. Java OOP, SQL joins, Spring Boot."],
+  "INTERVIEWS[].tips": ["Tips for others", "One per line: what you'd tell someone interviewing there next."],
+  "INTERVIEWS[].url": ["Link", "Optional. The full write-up (e.g. your LeetCode Discuss post), the job post or the careers page."],
+  "INTERVIEWS[].hidden": ["Hide from the site", "Tick to keep this as a draft: it stays here but isn't shown on the site."],
+
   // ---------- Festivals ----------
   "FESTIVALS[].kind": ["Decoration", "Type diwali for a row of lit diyas, or paste up to 6 emoji (e.g. 🎄 or 🙏🎉). Empty shows 👋."],
   "FESTIVALS[].name": ["Greeting", "The message shown next to the decoration, e.g. Happy Deepavali!"],
@@ -181,7 +209,21 @@ export const TUPLES = {
 };
 
 // Fields edited with a date picker (stored as YYYY-MM-DD).
-export const DATES = new Set(["FESTIVALS[].from", "FESTIVALS[].to"]);
+export const DATES = new Set(["FESTIVALS[].from", "FESTIVALS[].to", "INTERVIEWS[].date"]);
+
+// Fields that always get a big text box (they're paragraphs, even when empty).
+export const LONG = new Set(["INTERVIEWS[].summary", "INTERVIEWS[].rounds[].d", "EXPERIENCE[].sum", "PROJECTS[].d", "JOURNEY[].d"]);
+
+// Fields picked from a short list (a value typed earlier that isn't in the list is kept and shown too).
+export const CHOICES = {
+  "INTERVIEWS[].mode": ["Online", "Onsite", "Hybrid", "Phone"],
+  "INTERVIEWS[].rounds[].mode": ["Online", "Onsite", "Phone"],
+  "INTERVIEWS[].result": ["Selected", "Rejected", "Pending", "Withdrew", "No response"],
+  "INTERVIEWS[].difficulty": ["Easy", "Medium", "Hard"],
+  "INTERVIEWS[].source": ["Campus placement", "Off-campus drive", "Referral", "LinkedIn", "Naukri", "Company website", "Recruiter reached out", "Other"],
+  "INTERVIEWS[].rounds[].type": ["Online assessment", "Coding", "Technical", "System design", "Managerial", "HR", "Group discussion", "Assignment", "Aptitude"],
+  "INTERVIEWS[].rounds[].result": ["Cleared", "Not cleared"],
+};
 
 // "SKILLS[].at.React.js" → the skill's own name, with help
 export function docFor(path, key) {

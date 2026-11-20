@@ -571,6 +571,62 @@ export const LEARNING = {
   ],
 };
 
+/*
+  Interviews tab: interview experiences, written for people preparing for the same companies.
+  Added and edited from the admin page (Pages → Interview experiences); a saved list there replaces this one.
+  Each item: see INTERVIEW_TEMPLATE below. hidden: true keeps a draft off the site.
+*/
+export let INTERVIEWS = [
+  {
+    title: "Intern at Sony India Software Centre: 3 rounds, selected",
+    company: "Sony India Software Centre", role: "Intern", date: "2025-05-01", mode: "Online", location: "", source: "",
+    level: "Fresher", result: "Selected", difficulty: "Easy", duration: "", ctc: "",
+    summary: "Three virtual rounds: aptitude, technical and HR. The technical round mixed theory (HTTP vs HTTPS, OOP, my projects) with two easy coding problems, and HR was relaxed and friendly. Easy overall, and I was selected.",
+    rounds: [
+      {
+        name: "Round 1: Aptitude test", type: "Aptitude", mode: "Online", duration: "",
+        d: "A straightforward test. Nothing too tricky: revise your standard aptitude topics and you'll be fine.",
+        questions: ["Basic reasoning and logical thinking", "Quantitative aptitude", "Number systems and algebra"], result: "Cleared",
+      },
+      {
+        name: "Round 2: Technical interview", type: "Technical", mode: "Online", duration: "35 min",
+        d: "A conversational round with a decent mix of theory and coding. They're not looking for optimal solutions at intern level: be clear about your preferred language and write clean code.",
+        questions: [
+          "HTTP vs HTTPS: the differences, security and ports",
+          "OOP concepts, asked verbally (be ready to explain each with an example)",
+          "Project discussion",
+          "Coding (easy): Fibonacci series, iterative or recursive (either works)",
+          "Coding (easy): an array-based problem",
+        ],
+        result: "Cleared",
+      },
+      {
+        name: "Round 3: HR interview", type: "HR", mode: "Online", duration: "30 min",
+        d: "Very relaxed and friendly. Keep it honest and conversational: no trick questions.",
+        questions: ["Self-introduction", "Family background", "Strengths and weaknesses", "Project overview", "Do you have any questions for us?"],
+        result: "Cleared",
+      },
+    ],
+    topics: ["Aptitude", "HTTP vs HTTPS", "OOP", "Fibonacci", "Arrays", "Projects"],
+    tips: [
+      "Revise the standard aptitude topics: reasoning, quantitative aptitude, number systems.",
+      "Practise explaining OOP concepts out loud, each with an example.",
+      "Know your projects well: they come up in both the technical and the HR round.",
+      "Write clean code in the language you're most comfortable with; optimal solutions aren't expected at intern level.",
+      "Have a couple of questions ready for the end of the HR round.",
+    ],
+    url: "https://leetcode.com/discuss/post/8188344/my-interview-experience-in-sony-for-inte-1z4f/",
+    hidden: false,
+  },
+];
+// the shape of one interview, so the admin form knows the fields before the first one exists
+export const INTERVIEW_TEMPLATE = {
+  title: "", company: "", role: "", date: "", mode: "", location: "", source: "", level: "", result: "", difficulty: "",
+  duration: "", ctc: "", summary: "",
+  rounds: [{ name: "", type: "", mode: "", duration: "", d: "", questions: [""], result: "" }],
+  topics: [""], tips: [""], url: "", hidden: false,
+};
+
 // Tabs in the navbar: [page id, label, icon, short label for the phone tab bar]
 export const NAV = [
   ["about", "About", "user"],
@@ -582,6 +638,7 @@ export const NAV = [
   ["coding", "Coding", "code"],
   ["contests", "Contests", "award"], // every rated contest across platforms (phones: under More)
   ["learning", "Learning", "book", "Learn"], // what I'm studying now and how far I've got (phones: under More)
+  ["interviews", "Interviews", "chat"], // interview experiences (phones: under More)
   ["contact", "Contact", "mail"],
 ];
 
@@ -602,9 +659,12 @@ export const SECTIONS = [
   ["SKILLS", "Skills", "Skill groups and where each was used"],
   ["PROJECTS", "Projects", "Showcase and training projects"],
   ["PLATFORMS", "Coding platforms", "Saved numbers and links (live stats replace them when they load)"],
+  ["INTERVIEWS", "Interview experiences", "The Interviews page: companies, rounds, questions and tips"],
   ["FESTIVALS", "Festival themes", "Dates for the seasonal decorations"],
 ];
-const CURRENT = () => ({ ME, ABOUT, DOING, EXPERIENCE, EDUCATION, CERTIFICATIONS, JOURNEY, JOURNEY_MAP, SKILLS, PROJECTS, PLATFORMS, FESTIVALS });
+// what "+ Add" creates in a section whose built-in copy is empty
+export const TEMPLATES = { INTERVIEWS: [INTERVIEW_TEMPLATE] };
+const CURRENT = () => ({ ME, ABOUT, DOING, EXPERIENCE, EDUCATION, CERTIFICATIONS, JOURNEY, JOURNEY_MAP, SKILLS, PROJECTS, PLATFORMS, INTERVIEWS, FESTIVALS });
 export const DEFAULTS = JSON.parse(JSON.stringify(CURRENT()));
 
 // Put saved sections in place (anything missing or of the wrong shape keeps the built-in copy).
@@ -613,5 +673,5 @@ export function applySections(saved = {}) {
   const pick = (k) => (ok(k) ? saved[k] : DEFAULTS[k]);
   ME = pick("ME"); ABOUT = pick("ABOUT"); DOING = pick("DOING"); EXPERIENCE = pick("EXPERIENCE"); EDUCATION = pick("EDUCATION");
   CERTIFICATIONS = pick("CERTIFICATIONS"); JOURNEY = pick("JOURNEY"); JOURNEY_MAP = pick("JOURNEY_MAP"); SKILLS = pick("SKILLS");
-  PROJECTS = pick("PROJECTS"); PLATFORMS = pick("PLATFORMS"); FESTIVALS = pick("FESTIVALS");
+  PROJECTS = pick("PROJECTS"); PLATFORMS = pick("PLATFORMS"); INTERVIEWS = pick("INTERVIEWS"); FESTIVALS = pick("FESTIVALS");
 }

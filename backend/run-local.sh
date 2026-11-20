@@ -32,7 +32,8 @@ done
 if [ ! -f api-gateway/target/app-exec.jar ] || [ -n "$(find . -name '*.java' -newer api-gateway/target/app-exec.jar -print -quit)" ] || [ -n "$(find . -name '*.yml' -path '*/src/*' -newer api-gateway/target/app-exec.jar -print -quit)" ]; then
   command -v mvn >/dev/null || { echo "Install Maven to build the backend"; exit 1; }
   echo "Building the backend (first time takes a few minutes)…"
-  mvn -q -B package -DskipTests
+  # "clean" first: iCloud Drive (Documents) leaves "Name 2.class" copies in target/, which break the build
+  mvn -q -B clean package -DskipTests
 fi
 
 mkdir -p logs

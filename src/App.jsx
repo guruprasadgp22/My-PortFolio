@@ -25,6 +25,7 @@ const LOADERS = {
   coding: () => import("./components/Coding"),
   contests: () => import("./components/Contests"),
   learning: () => import("./components/Learning"),
+  interviews: () => import("./components/Interviews"),
   contact: () => import("./components/Contact"),
 };
 const PAGES = { about: About, ...Object.fromEntries(Object.entries(LOADERS).map(([id, load]) => [id, lazy(load)])) };

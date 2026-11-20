@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { DEFAULTS, SECTIONS } from "../data";
+import { DEFAULTS, SECTIONS, TEMPLATES } from "../data";
 import Icon from "./Icons";
-import { DATES, docFor, TUPLES } from "../fieldDocs";
+import { CHOICES, DATES, docFor, LONG, TUPLES } from "../fieldDocs";
 
 /*
   "Pages" in the admin page: edit any section of the site's content (src/data.js) and save it to MongoDB.
@@ -165,6 +165,9 @@ function titleOf(item, i) {
 }
 
 function Prim({ v, set, label, k, help, path }) {
+  // a text box grows into a bigger one for long text, decided once when it appears: switching while typing
+  // swapped the element under the cursor and the rest of what was typed was lost
+  const [grown] = useState(() => typeof v === "string" && (v.length > 70 || v.includes("\n")));
   if (isImage(k, v, path)) return <ImageField v={v} set={set} label={label} help={help} />;
   if (typeof v === "boolean") {
     return (
@@ -174,12 +177,17 @@ function Prim({ v, set, label, k, help, path }) {
       </label>
     );
   }
-  const long = typeof v === "string" && (v.length > 70 || v.includes("\n"));
+  const long = typeof v === "string" && (grown || LONG.has(path));
   return (
     <label className={`ad-field ${long ? "wide" : ""}`}>
       <span>{label}</span>
       <Help text={help} />
-      {DATES.has(path) && typeof v === "string" ? (
+      {CHOICES[path] && typeof v === "string" ? (
+        <select value={v} onChange={(e) => set(e.target.value)}>
+          <option value="">Not set</option>
+          {[...CHOICES[path], ...(v && !CHOICES[path].includes(v) ? [v] : [])].map((o) => <option key={o} value={o}>{o}</option>)}
+        </select>
+      ) : DATES.has(path) && typeof v === "string" ? (
         <input type="date" value={v} onChange={(e) => set(e.target.value)} />
       ) : typeof v === "number" ? (
         <input type="number" step="any" value={Number.isFinite(v) ? v : ""} onChange={(e) => set(e.target.value === "" ? 0 : Number(e.target.value))} />
@@ -254,7 +262,7 @@ function List({ v, set, label, tpl, path, help }) {
         <div className={`se-item ${open.has(i) ? "open" : ""}`} key={i}>
           <div className="se-item-hd">
             <button type="button" className="se-title" onClick={() => toggle(i)} aria-expanded={open.has(i)}>
-              <Icon name="chevron" size={14} /> {titleOf(item, i)}
+              <Icon name="chevron" size={14} /><span className="se-num" aria-hidden="true">{i + 1}</span><span className="se-name">{titleOf(item, i)}</span>
             </button>
             <span className="se-tools">
               <button type="button" onClick={() => move(i, -1)} disabled={!i} aria-label="Move up" title="Move up">↑</button>
@@ -342,8 +350,12 @@ function SectionForm({ k, saved, run, api }) {
     <div className="cx-card se-form">
       <header className="se-hd">
         <div>
-          <h4>{title}</h4>
-          <p className="ad-muted">{hint} · {saved ? `saved in the database${saved.updatedAt ? ` ${new Date(saved.updatedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}` : ""}` : "showing the built-in content"}</p>
+          <h2 className="se-h">{title}</h2>
+          <p className="se-hint">{hint}</p>
+          <p className={`se-state ${saved ? "edited" : ""}`}>
+            <i aria-hidden="true" />
+            {saved ? `Your saved version${saved.updatedAt ? `, last saved ${new Date(saved.updatedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}` : ""}` : "Built-in content from the code (nothing saved yet)"}
+          </p>
         </div>
         <div className="cx-tabs se-mode" role="tablist" aria-label="Editor">
           <button role="tab" aria-selected={mode === "form"} className={mode === "form" ? "on" : ""} onClick={() => !jsonErr && setMode("form")} disabled={!!jsonErr}>{mode === "form" && <span className="cx-pill" />}Form</button>
@@ -352,7 +364,7 @@ function SectionForm({ k, saved, run, api }) {
       </header>
 
       {mode === "form" ? (
-        <Value v={draft} set={setDraft} tpl={DEFAULTS[k]} path={k} label={docFor(k)?.[0]} help={docFor(k)?.[1]} />
+        <Value v={draft} set={setDraft} tpl={TEMPLATES[k] || DEFAULTS[k]} path={k} label={docFor(k)?.[0]} help={docFor(k)?.[1]} />
       ) : (
         <label className="ad-field wide">
           <span>Edit as JSON {jsonErr ? <small className="ad-err"> · {jsonErr}</small> : <small> · valid</small>}</span>
@@ -360,7 +372,8 @@ function SectionForm({ k, saved, run, api }) {
         </label>
       )}
 
-      <div className="ad-actions se-actions">
+      <div className={`ad-actions se-actions ${dirty ? "dirty" : ""}`}>
+        <span className="se-dirty" role="status">{jsonErr ? "Fix the JSON before saving" : dirty ? "Unsaved changes" : "No changes"}</span>
         <button className="ad-btn primary" disabled={!dirty || !!jsonErr} onClick={() => run(() => api(`sections/${k}`, { method: "PUT", body: { data: draft } }), `${title} saved`)}>Save {title}</button>
         <button className="ad-btn" disabled={!dirty} onClick={() => (setDraft(base), setMode("form"), setJsonErr(""))}>Discard changes</button>
         {saved && <button className="ad-btn danger" onClick={() => confirm(`Delete the saved ${title} and go back to the built-in content?`) && run(() => api(`sections/${k}`, { method: "DELETE" }), `${title} back to built-in`)}>Use built-in</button>}
@@ -374,9 +387,11 @@ export default function PagesTab({ saved, run, api }) {
   return (
     <div className="se">
       <nav className="se-nav" aria-label="Sections">
-        {SECTIONS.map(([id, title]) => (
-          <button key={id} className={id === k ? "on" : ""} onClick={() => setK(id)} aria-current={id === k ? "true" : undefined}>
-            <span>{title}</span>
+        <p className="se-nav-hd">Sections <small>{SECTIONS.length}</small></p>
+        {SECTIONS.map(([id, title, hint], i) => (
+          <button key={id} className={id === k ? "on" : ""} onClick={() => setK(id)} aria-current={id === k ? "true" : undefined} title={hint}>
+            <span className="se-nav-n" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+            <span className="se-nav-t">{title}</span>
             {saved?.[id] ? <i className="ad-pill">Edited</i> : <i className="ad-pill live">Built-in</i>}
           </button>
         ))}

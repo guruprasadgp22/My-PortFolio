@@ -78,7 +78,7 @@ export function cleanContest(b) {
 // Page sections (src/data.js) the admin can replace, and whether each is a list or a single object.
 export const SECTION_TYPES = {
   ME: "object", ABOUT: "object", DOING: "array", EXPERIENCE: "array", EDUCATION: "array", CERTIFICATIONS: "array",
-  JOURNEY: "array", JOURNEY_MAP: "array", SKILLS: "array", PROJECTS: "array", PLATFORMS: "array", FESTIVALS: "array",
+  JOURNEY: "array", JOURNEY_MAP: "array", SKILLS: "array", PROJECTS: "array", PLATFORMS: "array", INTERVIEWS: "array", FESTIVALS: "array",
 };
 const MAX_SECTION = 300 * 1024; // bytes of JSON; the biggest built-in section (Projects) is ~18 KB
 // "$…" would read as a MongoDB operator; dots are fine (MongoDB 5+ stores them, and skills like "React.js" need them)

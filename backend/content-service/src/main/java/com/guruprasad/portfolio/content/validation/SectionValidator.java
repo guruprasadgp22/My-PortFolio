@@ -21,7 +21,8 @@ public final class SectionValidator {
             Map.entry("ME", "object"), Map.entry("ABOUT", "object"), Map.entry("DOING", "array"),
             Map.entry("EXPERIENCE", "array"), Map.entry("EDUCATION", "array"), Map.entry("CERTIFICATIONS", "array"),
             Map.entry("JOURNEY", "array"), Map.entry("JOURNEY_MAP", "array"), Map.entry("SKILLS", "array"),
-            Map.entry("PROJECTS", "array"), Map.entry("PLATFORMS", "array"), Map.entry("FESTIVALS", "array"));
+            Map.entry("PROJECTS", "array"), Map.entry("PLATFORMS", "array"), Map.entry("INTERVIEWS", "array"),
+            Map.entry("FESTIVALS", "array"));
 
     private static final int MAX_BYTES = 300 * 1024;
     private static final Pattern BAD_KEY = Pattern.compile("^\\$|^(__proto__|constructor|prototype)$");
