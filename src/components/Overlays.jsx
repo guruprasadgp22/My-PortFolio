@@ -68,6 +68,7 @@ function Palette({ go, onClose }) {
 
   const items = useMemo(
     () => [
+      { k: "Go to Home", icon: "home", run: () => go("home") },
       ...NAV.map(([id, label, icon]) => ({ k: `Go to ${label}`, icon, run: () => go(id) })),
       { k: "Recruiter quick view", icon: "zap", run: openQuickView, keep: true }, // swaps the palette for the quick view
       { k: "Ask GP Assistant (AI chat, job matcher)", icon: "sparkle", run: openChat },

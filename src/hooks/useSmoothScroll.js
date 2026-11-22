@@ -20,12 +20,14 @@ export function scrollToEl(el, offset = -16) {
 export const stopScroll = () => lenis?.stop();
 export const startScroll = () => lenis?.start();
 
-// Inertial smooth scrolling (Lenis) for the window. Skipped when the visitor prefers reduced motion, and on
-// wide screens, where the window doesn't scroll (the profile and the page card scroll on their own).
-export default function useSmoothScroll(enabled = true) {
+// Inertial smooth scrolling (Lenis). For the window by default; with `wrapper`, inside that element instead
+// (the page card on wide screens, which scrolls on its own). wrapper === null means "not there yet": skip.
+// Skipped when the visitor prefers reduced motion.
+export default function useSmoothScroll(enabled = true, wrapper) {
   useEffect(() => {
-    if (REDUCED || !enabled) return;
+    if (REDUCED || !enabled || wrapper === null) return;
     lenis = new Lenis({
+      ...(wrapper ? { wrapper, content: wrapper } : {}),
       duration: 1.15,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // expo-out
       smoothWheel: true,
@@ -43,5 +45,5 @@ export default function useSmoothScroll(enabled = true) {
       lenis?.destroy();
       lenis = null;
     };
-  }, [enabled]);
+  }, [enabled, wrapper]);
 }

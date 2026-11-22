@@ -139,6 +139,12 @@ function CompactBar({ watch }) {
 }
 
 // Profile card. On wide screens the contacts sit inside it; on smaller screens they open in a bottom sheet.
+// App listens for hashchange; leaving the hash empty opens Home
+const goHome = () => {
+  history.pushState(null, "", location.pathname + location.search);
+  dispatchEvent(new HashChangeEvent("hashchange"));
+};
+
 export default function Sidebar() {
   const name = nameOf();
   const [sheet, setSheet] = useState(false);
@@ -161,6 +167,10 @@ export default function Sidebar() {
           </button>
         </div>
         <div className="corner-btns">
+          {/* back to the full-screen Home page (the plain site address) */}
+          <button className="home-btn" onClick={goHome} aria-label="Home" title="Home">
+            <Icon name="home" size={16} />
+          </button>
           <button className="theme-btn" onClick={toggleTheme} aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`} title="Toggle theme">
             <span className="theme-ic" key={theme}><Icon name={theme === "dark" ? "sun" : "moon"} size={16} /></span>
           </button>

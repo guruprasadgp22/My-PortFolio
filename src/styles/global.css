@@ -771,7 +771,8 @@ kbd{font-family:var(--mono);font-size:10.5px;padding:2px 6px;border-radius:6px;b
   .hello-co{text-align:center}
   .info-more-btn{display:none!important}
   .corner-btns{top:-78px;right:-30px} /* flush with the card corner (sidebar padding-top is 78px) */
-  .corner-btns .theme-btn{border-radius:0 0 0 14px}
+  .corner-btns .theme-btn{border-radius:0}
+  .corner-btns .home-btn{border-radius:0 0 0 14px}
   .corner-btns .search-btn{border-radius:0 14px 0 0}
   .sidebar-info-more{display:block}
   .contacts-list{grid-template-columns:minmax(0,1fr)}
@@ -1497,7 +1498,7 @@ body::before{display:none} /* the time-of-day glow now lives in the colour pools
 .form-btn{background:linear-gradient(160deg,var(--glass-rim),var(--glass-rim-2))!important}
 .chip:hover{background:var(--fg)!important;color:var(--ink)}
 /* the terminal stays a dark screen in both themes so its green-on-black text keeps its contrast */
-.term{background:rgba(6,5,10,.82)!important}
+.term.term.term{background:rgba(6,5,10,.86)!important} /* tripled class: the glass-pane rule above lists ".hire-strip span:not(:first-child)", which outweighs one or two classes */
 /* readable text on glass: muted copy one step brighter in dark, one step deeper in light */
 :root{--mute:#b4abc6}
 :root[data-theme="light"]{--mute:#584d61}
@@ -2302,3 +2303,201 @@ body::before{display:none} /* the time-of-day glow now lives in the colour pools
   .hire-strip::-webkit-scrollbar{display:none}
   .hire-strip span{font-family:var(--body);font-size:11.5px;padding:3px 8px;flex-shrink:0}
 }
+
+
+
+
+/* ==========================================================================
+   Liquid glass, site-wide.
+   One artwork sits behind everything (public/glass-dark.webp, glass-light.webp: ember waves and glass
+   bubbles); every surface on top is glass: a translucent tint, heavy blur with extra colour, a bright rim
+   lit from the top-left and a soft inner sheen. The tints are dark (or milky) enough that text keeps
+   its contrast where the artwork is brightest.
+   ========================================================================== */
+:root{--art:url("/glass-dark.webp");--glass-panel:rgba(16,10,22,.6)}
+:root[data-theme="light"]{--art:url("/glass-light.webp");--glass-panel:rgba(255,251,246,.62)}
+/* phones: the page card sits over the brightest part of the artwork, so its glass is a little denser there */
+@media (max-width:767px){:root{--glass-panel:rgba(16,10,22,.68)}:root[data-theme="light"]{--glass-panel:rgba(255,251,246,.72)}}
+
+/* the artwork behind the portfolio pages (replaces the colour pools) */
+.ambient{background:var(--art) center/cover no-repeat,var(--bg-base)}
+.ambient i{display:none}
+.ambient::after{background:rgba(6,4,10,.32)}
+:root[data-theme="light"] .ambient::after{background:rgba(255,250,244,.12)}
+.fx-scan{display:none} /* CRT scanlines don't belong on glass */
+
+/* the big surfaces: sidebar, page card, tab bar, dialogs, chat */
+.sidebar,.page,.navbar,.pd,.ov,.sheet,.chat,.c-fab{
+  background:linear-gradient(140deg,rgba(255,255,255,.13),rgba(255,255,255,.03) 36%,rgba(255,255,255,0) 60%,rgba(255,255,255,.05)),var(--glass-panel)!important;
+  backdrop-filter:blur(28px) saturate(190%) brightness(1.04)!important;-webkit-backdrop-filter:blur(28px) saturate(190%) brightness(1.04)!important;
+  border:1px solid rgba(255,255,255,.1)!important;border-top-color:rgba(255,255,255,.42)!important;border-left-color:rgba(255,255,255,.26)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 1px 0 0 rgba(255,255,255,.14),inset 0 -1px 0 rgba(255,255,255,.05),inset 0 0 40px rgba(255,255,255,.035),0 30px 80px -30px rgba(0,0,0,.7)!important}
+:root[data-theme="light"] :is(.sidebar,.page,.navbar,.pd,.ov,.sheet,.chat,.c-fab){
+  background:linear-gradient(140deg,rgba(255,255,255,.8),rgba(255,255,255,.3) 40%,rgba(255,255,255,.12) 65%,rgba(255,255,255,.4)),var(--glass-panel)!important;
+  border-color:rgba(255,255,255,.6)!important;border-top-color:#fff!important;border-left-color:rgba(255,255,255,.9)!important;
+  box-shadow:inset 0 1px 0 #fff,inset 1px 0 0 rgba(255,255,255,.7),0 30px 70px -32px rgba(120,50,20,.35)!important}
+@media (min-width:1250px){.navbar{box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 1px 0 0 rgba(255,255,255,.14)!important}}
+
+/* cards inside them: lighter panes with a lit top edge (no second blur, so scrolling stays smooth) */
+:is(.content-card,.service-item,.fact,.edu-card,.cert,.lang,.project-img,.plat,.heat,.social-card,.ttl-card,.xcard,.jmap,.tp-card,.pf-card,.ct,.skill-group,.arch-node,.sc-btn,.cx-card,.iv-card,.icon-box,.social-link){
+  background:linear-gradient(150deg,rgba(255,255,255,.1),rgba(255,255,255,.02) 45%,rgba(255,255,255,0) 70%),var(--glass-pane)!important;
+  border-color:rgba(255,255,255,.08)!important;border-top-color:rgba(255,255,255,.3)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 1px 0 0 rgba(255,255,255,.06),0 14px 34px -20px rgba(0,0,0,.6)}
+:root[data-theme="light"] :is(.content-card,.service-item,.fact,.edu-card,.cert,.lang,.project-img,.plat,.heat,.social-card,.ttl-card,.xcard,.jmap,.tp-card,.pf-card,.ct,.skill-group,.arch-node,.sc-btn,.cx-card,.iv-card,.icon-box,.social-link){
+  background:linear-gradient(150deg,rgba(255,255,255,.85),rgba(255,255,255,.45) 55%),var(--glass-pane)!important;
+  border-color:rgba(255,255,255,.7)!important;border-top-color:#fff!important;box-shadow:inset 0 1px 0 #fff,0 14px 30px -20px rgba(120,50,20,.3)}
+
+
+
+
+
+/* ==========================================================================
+   Home: the landing page at the plain site address (components/Home.jsx).
+   A 3D retro computer (components/Retro3D.js) fills the screen; liquid-glass cards scroll over it,
+   one per step (Hello · What I do · Projects · Let's talk), with a glass top bar and a progress rail.
+   ========================================================================== */
+html.home-mode,html.home-mode body{overflow:hidden;height:100%}
+.home{position:fixed;inset:0;z-index:1;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;outline:none;color:var(--fg);isolation:isolate;--pad:clamp(16px,5vw,90px)}
+.home a{color:inherit;text-decoration:none}
+.home :focus-visible{outline:2px solid var(--ember-2);outline-offset:4px;border-radius:12px}
+html.intro:not(.intro-go) .home *{animation-play-state:paused!important}
+.home:has(.rt-canvas[data-hover="1"]){cursor:pointer}
+@keyframes hmUp{from{opacity:0;transform:translateY(24px)}}
+@keyframes hmFade{from{opacity:0}}
+
+/* ---- liquid glass, the same recipe as the portfolio's sidebar and page card, plus a light that follows the pointer ---- */
+.lg-glass{position:relative;isolation:isolate;--gx:-400px;--gy:-400px;--rx:0deg;--ry:0deg;
+  background:linear-gradient(140deg,rgba(255,255,255,.13),rgba(255,255,255,.03) 36%,rgba(255,255,255,0) 60%,rgba(255,255,255,.05)),var(--glass-panel);
+  backdrop-filter:blur(26px) saturate(190%) brightness(1.04);-webkit-backdrop-filter:blur(26px) saturate(190%) brightness(1.04);
+  border:1px solid rgba(255,255,255,.1);border-top-color:rgba(255,255,255,.42);border-left-color:rgba(255,255,255,.26);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 1px 0 0 rgba(255,255,255,.14),inset 0 -1px 0 rgba(255,255,255,.05),inset 0 0 40px rgba(255,255,255,.035),0 30px 80px -30px rgba(0,0,0,.7)}
+.lg-glass::after{content:"";position:absolute;inset:-1px;z-index:0;pointer-events:none;border-radius:inherit;opacity:0;transition:opacity .45s;
+  background:radial-gradient(280px circle at var(--gx) var(--gy),rgba(255,190,140,.17),rgba(255,255,255,.04) 40%,transparent 65%)}
+.lg-glass:hover::after{opacity:1}
+.lg-glass > *{position:relative;z-index:1}
+:root[data-theme="light"] .lg-glass{background:linear-gradient(140deg,rgba(255,255,255,.8),rgba(255,255,255,.3) 40%,rgba(255,255,255,.12) 65%,rgba(255,255,255,.4)),var(--glass-panel);
+  border-color:rgba(255,255,255,.6);border-top-color:#fff;border-left-color:rgba(255,255,255,.9);box-shadow:inset 0 1px 0 #fff,inset 1px 0 0 rgba(255,255,255,.7),0 30px 70px -32px rgba(120,50,20,.35)}
+:root[data-theme="light"] .lg-glass::after{background:radial-gradient(280px circle at var(--gx) var(--gy),rgba(255,140,80,.16),transparent 60%)}
+/* tilt and the magnetic pull are animated by GSAP (components/Home.jsx) */
+.tilt{will-change:transform}
+.magnet{transition:background .3s,box-shadow .3s,color .3s}
+
+/* ---- the 3D stage, fixed behind everything ---- */
+.rt-stage{position:fixed;inset:0;z-index:0;opacity:0;transition:opacity 1.2s ease}
+.rt-stage.on{opacity:1}
+.rt-canvas{display:block;width:100%;height:100%}
+.rt-boot{position:absolute;left:50%;top:50%;translate:-50% -50%;margin:0;font:400 22px var(--retro);letter-spacing:.06em;color:var(--ember-2);opacity:1;animation:rtBlink 1s steps(2,start) infinite}
+@keyframes rtBlink{to{opacity:.35}}
+.rt-stage:not(.on){opacity:1}
+.rt-stage:not(.on) .rt-canvas{opacity:0}
+/* no WebGL: the flat halftone portrait in a glass lens */
+.rt-flat{position:fixed;right:var(--pad);top:50%;translate:0 -50%;z-index:1;width:min(42vw,560px);aspect-ratio:1;border-radius:50%;overflow:hidden}
+.rt-flat-art{position:absolute;inset:6% 6% 0}
+
+/* ---- top bar: a floating glass pill ---- */
+.hm-nav{position:fixed;left:var(--pad);right:var(--pad);top:16px;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:8px 8px 8px 10px;border-radius:999px}
+@keyframes hmDrop{from{opacity:0;transform:translateY(-14px)}}
+.hm-brand{display:inline-flex;align-items:center;gap:12px;font-weight:700;font-size:16px;-webkit-tap-highlight-color:transparent}
+.hm-logo{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;font:800 15px var(--display);letter-spacing:-.04em;color:#140b0a;background:linear-gradient(180deg,#fff,#ffd9c2);
+  box-shadow:inset 0 -3px 6px rgba(255,120,60,.25),0 0 0 4px color-mix(in srgb,var(--ember) 16%,transparent),0 8px 22px -10px var(--ember);transition:transform .5s var(--ease)}
+.hm-brand:hover .hm-logo{transform:rotate(-12deg) scale(1.05)}
+.hm-links{display:flex;align-items:center;gap:6px;font:700 12.5px var(--body);letter-spacing:.14em;text-transform:uppercase}
+.hm-links a{display:inline-block;padding:11px 18px;border-radius:999px;color:color-mix(in srgb,var(--fg) 82%,transparent);transition:color .3s,background .3s}
+.hm-links a:hover{color:var(--fg);background:rgba(255,255,255,.08)}
+:root[data-theme="light"] .hm-links a:hover{background:rgba(255,255,255,.6)}
+.hm-boxed{margin-left:6px;color:#140b0a!important;background:linear-gradient(180deg,#fff,#ffe6d6)!important;box-shadow:inset 0 1px 0 #fff,inset 0 -3px 8px rgba(255,140,80,.2),0 10px 24px -12px var(--ember)}
+.hm-boxed:hover{background:linear-gradient(180deg,#ffd0a8,#ffb27a)!important}
+
+/* ---- the progress rail on the right ---- */
+.rt-rail{position:fixed;right:clamp(10px,1.6vw,26px);top:50%;margin-top:-90px;z-index:15;display:flex;flex-direction:column;gap:2px;padding:8px 6px;border-radius:22px}
+.rt-rail button{position:relative;display:flex;align-items:center;gap:8px;padding:8px 8px;border-radius:14px;color:var(--mute);font:600 11px var(--mono);cursor:pointer;transition:color .3s,background .3s}
+.rt-rail button i{width:6px;height:6px;border-radius:50%;background:currentColor;transition:transform .35s var(--ease),background .3s}
+.rt-rail button b{position:absolute;right:calc(100% + 10px);top:50%;translate:0 -50%;padding:6px 10px;border-radius:10px;white-space:nowrap;font:600 12px var(--body);color:var(--fg);
+  background:var(--glass-panel);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.12);opacity:0;pointer-events:none;transition:opacity .25s,translate .3s var(--ease)}
+.rt-rail button:hover b,.rt-rail button:focus-visible b{opacity:1;translate:-4px -50%}
+.rt-rail button.on{color:var(--fg)}
+.rt-rail button.on i{background:var(--ember-2);transform:scale(1.6);box-shadow:0 0 10px var(--ember)}
+.rt-rail button:hover{background:rgba(255,255,255,.06)}
+
+/* ---- the story: one screen per step, a glass card on the left (the computer sits right of centre) ---- */
+.rt-story{position:relative;z-index:2;pointer-events:none}
+.rt-step{min-height:100svh;display:flex;align-items:center;padding:110px var(--pad) 60px}
+.rt-float{width:min(520px,100%);will-change:transform}
+.rt-card{pointer-events:auto;width:100%;padding:clamp(24px,2.8vw,40px);border-radius:30px}
+.hm-kicker{display:flex;align-items:center;gap:10px;margin:0 0 12px;font-weight:700;font-size:clamp(14px,1.15vw,17px)}
+.hm-wave{display:inline-block;transform-origin:70% 70%;animation:hmWave 2.8s 2s ease-in-out infinite}
+@keyframes hmWave{0%,55%,100%{transform:rotate(0)}10%,30%{transform:rotate(16deg)}20%,40%{transform:rotate(-8deg)}}
+.hm-title{margin:0 0 16px;font:800 clamp(42px,4.8vw,82px)/.98 var(--display);letter-spacing:-.035em}
+.hm-word{display:inline-block;color:transparent;background:var(--grad-ember);-webkit-background-clip:text;background-clip:text}
+.hm-word{white-space:nowrap}
+.hm-word > span,.hm-word .ch{display:inline-block;background:var(--grad-ember);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hm-lead{display:inline-block}
+.hm-text{margin:0 0 24px;font-size:clamp(15px,1.05vw,16.5px);line-height:1.7;color:var(--mute)}
+.hm-ctas{display:flex;align-items:center;flex-wrap:wrap;gap:12px 14px}
+.hm-btn{display:inline-flex;align-items:center;padding:14px 26px;border-radius:999px;font:800 12.5px var(--body);letter-spacing:.14em;text-transform:uppercase;color:#140b0a!important;
+  background:linear-gradient(180deg,#fff,#ffe1cf);border:1px solid rgba(255,255,255,.9);box-shadow:inset 0 1px 0 #fff,inset 0 -3px 8px rgba(255,140,80,.22),0 16px 34px -14px var(--ember)}
+.hm-btn:hover{background:linear-gradient(180deg,#ffd6b4,#ffad75);box-shadow:inset 0 1px 0 #fff,0 20px 40px -14px var(--ember)}
+.hm-ghost{display:inline-flex;align-items:center;gap:8px;padding:13px 20px;border-radius:999px;font-weight:700;font-size:15px;color:var(--fg)!important;
+  background:linear-gradient(150deg,rgba(255,255,255,.14),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.14);border-top-color:rgba(255,255,255,.4);box-shadow:inset 0 1px 0 rgba(255,255,255,.3)}
+.hm-ghost:hover{background:linear-gradient(150deg,rgba(255,255,255,.22),rgba(255,255,255,.06))}
+.hm-ghost svg{transition:transform .35s var(--ease)}.hm-ghost:hover svg{transform:translateX(4px)}
+:root[data-theme="light"] .hm-ghost{background:rgba(255,255,255,.6);border-color:rgba(255,255,255,.9)}
+:root[data-theme="light"] .hm-btn{color:#fff!important;background:linear-gradient(180deg,#3a1d16,#241210);border-color:#241210;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 16px 34px -14px rgba(160,60,20,.6)}
+.rt-hint{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;margin:22px 0 0;font-size:13px;color:var(--mute)}
+.rt-hint kbd{font:600 12px var(--mono);padding:2px 7px;border-radius:6px;border:1px solid rgba(255,255,255,.2);border-bottom-width:2px;color:var(--fg)}
+.rt-mouse{width:16px;height:24px;border:2px solid currentColor;border-radius:9px;position:relative}
+.rt-mouse::after{content:"";position:absolute;left:50%;top:4px;width:2px;height:5px;margin-left:-1px;border-radius:2px;background:currentColor;animation:rtWheel 1.6s ease-in-out infinite}
+@keyframes rtWheel{0%{transform:translateY(0);opacity:1}100%{transform:translateY(7px);opacity:0}}
+
+.rt-num{margin:0 0 6px;font:600 12px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--ember-2)}
+.rt-h{margin:0 0 20px;font:800 clamp(30px,3vw,46px)/1.02 var(--display);letter-spacing:-.03em}
+.rt-list{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.rt-list li{display:grid;grid-template-columns:44px minmax(0,1fr);gap:14px;align-items:start}
+.rt-list b{display:block;font:700 16px var(--display);margin:2px 0 3px}
+.rt-list p{margin:0;font-size:14px;line-height:1.55;color:var(--mute)}
+.hm-ring{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;color:var(--ember-2);
+  background:linear-gradient(150deg,rgba(255,255,255,.16),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.14);border-top-color:rgba(255,255,255,.42);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 10px 24px -14px var(--ember)}
+:root[data-theme="light"] .hm-ring{background:rgba(255,255,255,.7);border-color:#fff}
+.rt-projects{list-style:none;margin:0 0 22px;padding:0;display:grid;gap:8px}
+.rt-projects a{display:grid;grid-template-columns:76px minmax(0,1fr) auto;align-items:center;gap:14px;padding:8px 12px 8px 8px;border-radius:16px;border:1px solid transparent;transition:background .3s,border-color .3s,transform .35s var(--ease)}
+.rt-projects a:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.12);transform:translateX(4px)}
+:root[data-theme="light"] .rt-projects a:hover{background:rgba(255,255,255,.6)}
+.rt-projects img{width:76px;aspect-ratio:16/10;object-fit:cover;object-position:top left;border-radius:10px;border:1px solid rgba(255,255,255,.12)}
+.rt-projects b{display:block;font:700 15px var(--display)}
+.rt-projects small{font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ember-2)}
+.rt-projects svg{color:var(--mute);transition:transform .35s var(--ease),color .3s}
+.rt-projects a:hover svg{color:var(--ember-2);transform:translate(2px,-2px)}
+.rt-foot{display:flex;flex-wrap:wrap;gap:8px 20px;margin:24px 0 0;padding-top:18px;border-top:1px solid rgba(255,255,255,.12);font-size:14px;color:var(--mute)}
+.rt-foot a:hover{color:var(--fg)}
+
+/* ---- phones and tablets: the computer up top, the card at the bottom of each screen ---- */
+@media (max-width:900px){
+  .rt-step{align-items:flex-end;padding:90px var(--pad) 24px}
+  .rt-float{width:100%}
+  .rt-rail{display:none}
+  .rt-flat{right:50%;top:96px;translate:50% 0;width:min(78vw,420px)}
+}
+@media (max-width:560px){
+  .home{--pad:12px}
+  .hm-nav{top:10px;padding:6px}
+  .hm-brand-name{display:none}
+  .hm-logo{width:40px;height:40px;font-size:14px}
+  .hm-links{gap:0;font-size:11px;letter-spacing:.08em}
+  .hm-links a{padding:10px 11px}
+  .hm-title{font-size:clamp(36px,11vw,50px)}
+  .rt-card{padding:22px 18px;border-radius:24px}
+  .rt-list p{display:none}
+  .rt-projects li:nth-child(n+4){display:none} /* phones: the top three, so the computer stays in view */
+}
+@media (prefers-reduced-motion:reduce){.home *,.home{animation:none!important;transition:none!important}}
+
+/* the giant line of text behind the 3D computer: GSAP slides it with the scroll and leans it with the scroll speed */
+.rt-marquee{position:fixed;left:0;right:0;top:58%;z-index:0;overflow:hidden;pointer-events:none;translate:0 -50%}
+.rt-mq-track{display:flex;width:max-content;will-change:transform}
+.rt-mq-track span{display:flex}
+.rt-mq-track b{display:inline-flex;align-items:center;gap:.35em;padding-right:.35em;font:800 clamp(90px,15vw,260px)/1 var(--display);letter-spacing:-.045em;white-space:nowrap;color:rgba(255,236,220,.07)}
+.rt-mq-track b i{font-style:normal;font-size:.4em;color:color-mix(in srgb,var(--ember) 45%,transparent)}
+:root[data-theme="light"] .rt-mq-track b{color:rgba(60,25,15,.07)}
+.rt-stage{z-index:1}
+.rt-story{z-index:3}
+@media (max-width:900px){.rt-marquee{top:30%}}

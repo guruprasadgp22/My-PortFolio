@@ -12,6 +12,8 @@ import Chat from "./components/Chat";
 import Skeleton from "./components/Skeleton";
 import Festive from "./components/Festive";
 import Intro from "./components/Intro";
+// Home (the landing page) brings GSAP and, through it, the 3D scene: loaded only when the plain address is opened
+const Home = lazy(() => import("./components/Home"));
 import useContent from "./hooks/useContent";
 
 // About ships with the first load. Every other tab is its own small file, fetched when the browser is idle
@@ -32,9 +34,10 @@ const PAGES = { about: About, ...Object.fromEntries(Object.entries(LOADERS).map(
 // the site editor lives on its own page now: an old #admin link goes to its sign-in page
 if (location.hash.split("/")[0] === "#admin") location.replace("/admin/login");
 // "#projects/job-board" opens the Projects tab; the part after the slash is for the page itself.
+// No hash at all (the plain site address) or #home opens the full-screen Home page (components/Home.jsx).
 const fromHash = () => {
   const id = location.hash.slice(1).split("/")[0];
-  return PAGES[id] ? id : NAV[0][0];
+  return !id || id === "home" ? "home" : PAGES[id] ? id : NAV[0][0];
 };
 const typing = (e) => e.target.closest?.("input, textarea, select, [contenteditable]") || e.metaKey || e.ctrlKey || e.altKey;
 const BUILT = new Date(__BUILD_DATE__).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Kolkata" });
@@ -47,10 +50,11 @@ export default function App() {
   const desktop = useDesktop();
   // page content edited in the admin page (MongoDB): when it arrives, App re-renders and every page with it
   useContent();
-  useSmoothScroll(!desktop);
   const [scroller, setScroller] = useState(null); // the page card, which is the scroll area on wide screens
   const root = useMemo(() => ({ current: desktop ? scroller : null }), [desktop, scroller]);
   const [page, setPage] = useState(fromHash);
+  // smooth scrolling: the window on phones and tablets, the page card on wide screens (Home runs its own)
+  useSmoothScroll(page !== "home", desktop ? scroller : undefined);
   const pageRef = useRef(page);
   pageRef.current = page;
   // the new page fades in (CSS on .page); with reduced motion it simply appears
@@ -88,7 +92,8 @@ export default function App() {
 
   const go = (id) => {
     if (id === page) return;
-    history.pushState(null, "", `#${id}`);
+    // Home is the plain address, without a hash
+    history.pushState(null, "", id === "home" ? location.pathname + location.search : `#${id}`);
     show(id);
   };
 
@@ -114,6 +119,18 @@ export default function App() {
   };
 
   const Page = PAGES[page];
+  if (page === "home")
+    return (
+      <>
+        <Intro />
+        <Festive />
+        <Suspense fallback={null}>
+          <Home go={go} />
+        </Suspense>
+        <Overlays go={go} />
+        <Chat go={go} />
+      </>
+    );
   return (
     <>
       {/* hash routing: a plain #content link would switch tabs, so this moves focus instead */}

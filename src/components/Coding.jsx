@@ -480,6 +480,8 @@ export default function Coding() {
   const known = new Set(Object.values(CARD));
   const extra = platforms.filter((p) => !known.has(p.n)).map((p) => ({ ...custom(p), card: p, val: p.val, unit: "problems solved" }));
   tiles.splice(tiles.findIndex((t) => t.id === "github") >>> 0, 0, ...extra); // before GitHub (or at the end)
+  // most problems solved first (live numbers, so the order follows them); GitHub counts contributions, so it stays last
+  tiles.sort((a, b) => (a.id === "github") - (b.id === "github") || b.val - a.val);
   // the sources that actually came back live this time, named in the note at the bottom
   const liveFrom = tiles.filter((t) => (t.id === "github" ? stats?.github : t.card?.live)).map((t) => (t.src.short === "GFG" ? "GFG" : t.src.label));
 
