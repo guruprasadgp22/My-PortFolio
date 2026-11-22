@@ -253,6 +253,7 @@ const custom = (p) => ({
   src: { label: p.n, short: p.n, c: p.c || "#8b8fa3", unit: "submissions", get: () => null, url: p.url, custom: true },
 });
 const fromHash = () => location.hash.slice(1).split("/")[1] || null;
+const MIN_SOLVED = 10; // below this, a platform is listed in a line under the grid instead of getting a tile
 const nf = (n) => Number(n).toLocaleString("en-IN");
 
 // Small stacked bar of easy / medium / hard on a tile, with the numbers written underneath.
@@ -480,6 +481,12 @@ export default function Coding() {
   const known = new Set(Object.values(CARD));
   const extra = platforms.filter((p) => !known.has(p.n)).map((p) => ({ ...custom(p), card: p, val: p.val, unit: "problems solved" }));
   tiles.splice(tiles.findIndex((t) => t.id === "github") >>> 0, 0, ...extra); // before GitHub (or at the end)
+  // A platform with only a handful of problems doesn't get a tile (it would read as "barely used"): it's named in
+  // one line under the grid instead, and gets its tile once it passes MIN_SOLVED. Its problems still count in the total.
+  const small = tiles.filter((t) => t.id !== "github" && t.val < MIN_SOLVED);
+  const shown = tiles.filter((t) => !small.includes(t));
+  // the sources that actually came back live this time, named in the note at the bottom
+  const liveFrom = tiles.filter((t) => (t.id === "github" ? stats?.github : t.card?.live)).map((t) => (t.src.short === "GFG" ? "GFG" : t.src.label));
 
   const choose = (id, e) => {
     haptic(6);
@@ -493,7 +500,7 @@ export default function Coding() {
     setOpen(null);
     history.replaceState(null, "", "#coding");
   }, []);
-  const current = open === "all" ? "all" : tiles.find((t) => t.id === open);
+  const current = open === "all" ? "all" : shown.find((t) => t.id === open);
 
   return (
     <>
@@ -505,7 +512,7 @@ export default function Coding() {
       <a className="ct-contests" href="#contests"><Icon name="award" size={16} /><span>Contest ratings across platforms</span><Icon name="arrow" size={14} /></a>
 
       <ul className="ct-grid" aria-label="Coding platforms">
-        {tiles.map((t, i) => (
+        {shown.map((t, i) => (
           <Reveal as="li" key={t.id} delay={(i % 4) * 60}>
             <button className={`ct ${open === t.id ? "on" : ""}`} style={{ "--c": t.src.c }} onClick={(e) => choose(t.id, e)} aria-haspopup="dialog">
               {open === t.id && <motion.span className="ct-ring" layoutId="ct-ring" transition={SPRING} />}
@@ -519,6 +526,18 @@ export default function Coding() {
         ))}
       </ul>
 
+      {small.length > 0 && (
+        <p className="ct-also">
+          Also on{" "}
+          {small.map((t, i) => (
+            <span key={t.id}>
+              {i > 0 && (i === small.length - 1 ? " and " : ", ")}
+              {t.card?.url || t.src.url ? <a href={t.card?.url || t.src.url} target="_blank" rel="noopener noreferrer">{t.src.label}</a> : t.src.label}
+            </span>
+          ))}
+          , just getting started there.
+        </p>
+      )}
       <p className="ct-hint">Tap a platform to open its full profile: rank, difficulty split, badges, certificates and activity map.</p>
 
       <AnimatePresence>
@@ -537,7 +556,7 @@ export default function Coding() {
 
       <p className="note">
         {updated
-          ? `// Live from LeetCode, GFG, GitHub, Code360, HackerRank, HackerEarth, NeetCode and InterviewBit · refreshed ${updated.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}`
+          ? `// Live from ${liveFrom.join(", ").replace(/, ([^,]*)$/, " and $1") || "public profiles"} · refreshed ${updated.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}`
           : "// Saved stats from public profiles. Live numbers load on the deployed site."}
       </p>
     </>

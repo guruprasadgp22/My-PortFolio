@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
 import "./styles/global.css";
 import { haptic } from "./hooks/spring";
+import { startGuard } from "./hooks/guard";
 
 // Lets CSS know JavaScript is running, so scroll-reveal styles only apply when they can finish.
 document.documentElement.classList.add("js");
@@ -25,6 +26,8 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
 // /admin and /admin/login are the site editor's own pages (components/AdminApp.jsx), loaded only there.
 const AdminApp = React.lazy(() => import("./components/AdminApp.jsx"));
 const admin = /^\/admin(\/|$)/.test(location.pathname);
+// right-click and developer-tools shortcuts off on desktop (hooks/guard.js); not on the editor pages
+if (!admin) startGuard();
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

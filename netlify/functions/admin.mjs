@@ -17,9 +17,10 @@ import { cleanCoding, cleanContest, cleanImage, cleanLearning, cleanSection, COD
     PUT    /api/admin/sections/:KEY    replace a page section  { data }   DELETE goes back to the built-in copy
     GET    /api/admin/images           uploaded images         POST uploads one, DELETE /api/admin/images/:id (if unused)
   Safety: every change needs the signed session cookie (HttpOnly, SameSite=Strict) and the X-GP-Admin header,
-  which a page on another site can't send; 5 wrong passwords lock the login for 15 minutes.
+  which a page on another site can't send; 5 wrong passwords lock the login for 15 minutes, and 20 failed
+  sign-ins from one IP address (any usernames) block that address for 15 minutes.
 */
-const MAX_FAILS = 5, LOCK_MIN = 15;
+const MAX_FAILS = 5, LOCK_MIN = 15, MAX_IP_FAILS = 20;
 
 async function signedIn(req, d) {
   const t = readToken(getCookie(req, COOKIE));
@@ -36,7 +37,12 @@ async function touched(d) {
   } catch {} // not running on Netlify (local tests): nothing to purge
 }
 
-async function login(req, d) {
+async function login(req, d, ip) {
+  // per-address limit, kept in the database because each function call may run on a different server
+  const tries = d.collection("loginTries");
+  const seen = await tries.findOne({ _id: ip });
+  const fresh = seen && seen.since > Date.now() - LOCK_MIN * 60e3;
+  if (fresh && seen.n >= MAX_IP_FAILS) return json({ error: `Too many sign-in attempts. Try again in ${LOCK_MIN} min.` }, 429);
   let body;
   try {
     body = await req.json();
@@ -56,6 +62,7 @@ async function login(req, d) {
       const fails = (user.fails || 0) + 1;
       await admins.updateOne({ _id: user._id }, { $set: fails >= MAX_FAILS ? { fails: 0, lockUntil: Date.now() + LOCK_MIN * 60e3 } : { fails } });
     }
+    await tries.updateOne({ _id: ip }, fresh ? { $inc: { n: 1 } } : { $set: { n: 1, since: Date.now() } }, { upsert: true });
     await new Promise((r) => setTimeout(r, 400));
     return json({ error: "Wrong username or password" }, 401);
   }
@@ -72,7 +79,7 @@ async function readBody(req) {
   }
 }
 
-export default async (req) => {
+export default async (req, context) => {
   if (!hasDb() || !process.env.ADMIN_SECRET) return json({ error: "The database isn't set up yet (MONGODB_URI / ADMIN_SECRET)" }, 503);
   const url = new URL(req.url);
   const [section, id] = url.pathname.replace(/^\/api\/admin\/?/, "").split("/").map(decodeURIComponent);
@@ -92,7 +99,7 @@ export default async (req) => {
     return json({ error: "Can't reach the database" }, 503);
   }
 
-  if (section === "login" && method === "POST") return login(req, d);
+  if (section === "login" && method === "POST") return login(req, d, String(context?.ip || req.headers.get("x-nf-client-connection-ip") || "unknown").slice(0, 64));
   if (section === "logout" && method === "POST") return json({ ok: true }, 200, { "Set-Cookie": clearCookie() });
 
   const user = await signedIn(req, d);

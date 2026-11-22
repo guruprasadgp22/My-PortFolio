@@ -161,7 +161,7 @@ export default function Interviews() {
             <div><dt>Interviews</dt><dd>{list.length}</dd></div>
             <div><dt>Companies</dt><dd>{companies}</dd></div>
             <div><dt>Rounds</dt><dd>{rounds}</dd></div>
-            <div><dt>Offers</dt><dd>{offers}</dd></div>
+            <div title="Interviews written up on this page that ended in an offer"><dt>Selected</dt><dd>{offers}</dd></div>
           </dl>
 
           <div className="iv-tools">

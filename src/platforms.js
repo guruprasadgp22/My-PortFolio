@@ -27,8 +27,8 @@ function overlay(p, s) {
       c: p.c || "#b9875f",
       val: c.solved,
       url: c.url,
-      lbl: `problems solved · ${c.rating != null ? `rating ${c.rating} (${c.stars}★)` : c.dsa ? `DSA rating ${c.dsa.rating}${c.dsa.provisional ? "?" : ""}` : "unrated"}`,
-      meta: [["Rating", c.rating != null ? `${c.rating} · ${c.stars}★` : "Unrated"], ...(c.dsa ? [["DSA rating", `${c.dsa.rating}${c.dsa.provisional ? "?" : ""}`]] : []), ["Contests", c.contests ?? 0]],
+      lbl: `problems solved · ${c.rating != null ? `rating ${c.rating} (${c.stars}★)` : c.dsa ? `DSA rating ${c.dsa.rating}${c.dsa.provisional ? " (provisional)" : ""}` : "unrated"}`,
+      meta: [["Rating", c.rating != null ? `${c.rating} · ${c.stars}★` : "Unrated"], ...(c.dsa ? [["DSA rating", `${c.dsa.rating}${c.dsa.provisional ? " · provisional" : ""}`]] : []), ["Contests", c.contests ?? 0]],
       accounts: [{ user: c.user, url: c.url, val: c.solved, note: c.rating != null ? `${c.stars}★` : c.dsa ? `DSA ${c.dsa.rating}` : "unrated" }],
       live: true,
     };

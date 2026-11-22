@@ -8,7 +8,8 @@ export let ME = {
   first: "GURU",
   last: "PRASAD",
   initials: "GP",
-  roles: ["Full Stack Developer", "Software Engineer", "Java Developer", "Backend Developer", "Python Developer"],
+  // roles[0] is the title under your name and in the quick view: keep it the same focus as hiring[2] and the bio
+  roles: ["Java Backend Developer", "Spring Boot Developer", "Software Engineer", "Full Stack Developer"],
   headline: "Java | Python | Spring | Spring Boot",
   lede:
     "Software developer with a B.E. in Computer Science, building scalable, secure and user-focused applications with Java, Python, Spring Boot and React.js.",
@@ -19,7 +20,7 @@ export let ME = {
   timeZone: "Asia/Kolkata", // for the live local time on the Contact page
   replyTime: "I usually reply within 24 hours", // TODO: keep this true, or change it
   // Recruiter quick view and the chatbot use these.
-  lookingFor: ["Software Engineer", "Java Developer", "Backend Developer", "Full Stack Developer", "Python Developer"],
+  lookingFor: ["Java Backend Developer", "Software Engineer (SDE-1)", "Full Stack Developer (Java + React)"],
   availability: "Available to join immediately",
   // The three things recruiters filter on first, shown as one line under your name and in the quick view.
   // TODO: check the location / work-mode line says what you actually want.
@@ -39,9 +40,9 @@ export let ME = {
 export let ABOUT = {
   // Your photo lives at public/me.jpg. Leave "" to show the animated monogram instead.
   photo: "/me.jpg",
-  bio: "I'm Guruprasad, a software developer with a Bachelor's degree in Computer Science and Engineering. I enjoy designing and building scalable, secure and user-focused applications.",
+  bio: "I'm Guruprasad, a Java backend developer in Bengaluru. My main project is Job Board, a live hiring platform built on Spring Boot, PostgreSQL and React: it gathers jobs from several sites, ranks them against your resume and tracks every application.",
   bio2:
-    "At Sony India Software Centre I worked in SAP Identity and Access Management: user lifecycle, role-based access control, authentication, authorization and security compliance. Before that I built full-stack apps with Java, Python, Spring Boot, Hibernate and React.js at KodNest, and a Car Rental Management System at DLithe. I'm a quick learner who likes hard problems, and I'm looking for roles as a Software Engineer, Java, Backend, Full Stack or Python Developer.",
+    "At Sony India Software Centre I worked in SAP Identity and Access Management: user lifecycle, role-based access control, authentication, authorization and security compliance. Before that I built full-stack apps with Java, Spring Boot, Hibernate and React.js at KodNest. I have a B.E. in Computer Science, I like hard problems, and I'm looking for Java backend roles (SDE-1).",
   facts: [
     // live = counted from the rest of the site (companies, projects, solved); value is only the fallback
     { value: 3, suffix: "", label: "companies worked with", live: "companies" },
@@ -392,7 +393,7 @@ export let PROJECTS = [
     img: "/projects/car-rental.svg",
     cat: "Full-stack",
     d: "Rental platform where users browse available vehicles, register accounts, book cars and manage their reservations through a responsive interface. Built during my DLithe internship.",
-    stack: ["HTML", "CSS", "JavaScript", "React.js", "PHP", "SQL"],
+    stack: ["React.js", "PHP", "SQL", "JavaScript", "HTML", "CSS"], // same order as the Experience and Journey entries
     hue: 38,
     url: "",
   },

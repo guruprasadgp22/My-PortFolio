@@ -17,6 +17,7 @@ import { RatingLine, TopBars } from "./Profile";
   contests added in the admin page (MongoDB, /api/content) join them: on their own platform card for a
   platform without a live API (e.g. CodeChef), or in the history of LeetCode / Code360.
 */
+const SHORT_ROWS = 8;
 const fmt = (n) => Number(n).toLocaleString("en-IN");
 const day = (t) => new Date(t * 1000).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
@@ -125,6 +126,7 @@ export default function Contests() {
   const content = useContent();
   const list = useMemo(() => withManual(PLATFORMS.map((p) => ({ ...p, d: p.read(stats) })).filter((p) => p.d), content?.contests), [stats, content]);
   const [pick, setPick] = useState(null);
+  const [allRows, setAllRows] = useState(false); // the history shows the newest SHORT_ROWS until "Show all"
   const cur = list.find((p) => p.id === pick) || list[0];
   const total = list.reduce((t, p) => t + p.d.attended, 0);
   const best = list.reduce((m, p) => Math.max(m, p.d.max ?? 0), 0);
@@ -167,7 +169,7 @@ export default function Contests() {
           <div className="cx-graph-hd">
             <div>
               <small>Rating</small>
-              <b className="cx-rating">{cur.d.rating != null ? fmt(cur.d.rating) : "Unrated"}{cur.d.provisional && <span className="cx-prov" title="Provisional rating: settles after 5 rated contests">?</span>}</b>
+              <b className="cx-rating">{cur.d.rating != null ? fmt(cur.d.rating) : "Unrated"}{cur.d.provisional && <span className="cx-prov" title="CodeChef marks a rating provisional until it settles after 5 rated contests">Provisional</span>}</b>
             </div>
             <div className="cx-last">
               <small>{day(last.t)}</small>
@@ -199,7 +201,7 @@ export default function Contests() {
             </header>
             <div className="cx-rank-main">
               {p.d.icon && <img src={p.d.icon} alt="" aria-hidden="true" width="44" height="44" />}
-              <b>{p.d.rating != null ? fmt(p.d.rating) : "–"}{p.d.provisional && <span className="cx-prov" title="Provisional rating: settles after 5 rated contests">?</span>}</b>
+              <b>{p.d.rating != null ? fmt(p.d.rating) : "–"}{p.d.provisional && <span className="cx-prov" title="CodeChef marks a rating provisional until it settles after 5 rated contests">Provisional</span>}</b>
               {p.d.max != null && <small>(max: {fmt(p.d.max)})</small>}
             </div>
             <dl className="pf-facts">
@@ -223,7 +225,7 @@ export default function Contests() {
             <tr><th scope="col">Date</th><th scope="col">Contest</th><th scope="col">Rank</th><th scope="col">Solved</th><th scope="col">Rating</th></tr>
           </thead>
           <tbody>
-            {rows.map((h) => (
+            {(allRows ? rows : rows.slice(0, SHORT_ROWS)).map((h) => (
               <tr key={h.p.id + h.t + h.name} style={{ "--c": h.p.c }}>
                 <td data-label="Date">{day(h.t)}</td>
                 <th scope="row" data-label="Contest"><i aria-hidden="true" />{h.url ? <a href={h.url} target="_blank" rel="noopener noreferrer">{h.name}</a> : h.name}<small>{h.p.name}</small></th>
@@ -237,6 +239,11 @@ export default function Contests() {
             ))}
           </tbody>
         </table>
+        {rows.length > SHORT_ROWS && (
+          <button className="cx-more" onClick={() => (haptic(5), setAllRows((v) => !v))} aria-expanded={allRows}>
+            {allRows ? "Show fewer" : `Show all ${rows.length} contests`} <Icon name="chevron" size={14} />
+          </button>
+        )}
       </Reveal>
       <p className="note">
         // Live from {PLATFORMS.filter((x) => list.some((p) => p.id === x.id)).map((x) => x.name).join(", ").replace(/, ([^,]*)$/, " and $1") || "LeetCode and Code360"}{list.some((p) => !PLATFORMS.find((x) => x.id === p.id)) ? `; ${list.filter((p) => !PLATFORMS.find((x) => x.id === p.id)).map((p) => p.name).join(", ")} added by hand` : ""}.

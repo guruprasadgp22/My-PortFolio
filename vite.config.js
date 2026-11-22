@@ -131,5 +131,6 @@ export default defineConfig(({ mode }) => {
     const proxy = { "/api": { target: backend, changeOrigin: remote, secure: true, xfwd: !remote } };
     return { plugins: [react(), securityHeaders()], define, server: { proxy }, preview: { proxy } };
   }
-  return { plugins: [react(), localFunctions(), securityHeaders()], define };
+  // no source maps in the build: visitors get only minified code, never the original source files
+  return { plugins: [react(), localFunctions(), securityHeaders()], define, build: { sourcemap: false } };
 });

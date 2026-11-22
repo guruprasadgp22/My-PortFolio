@@ -20,6 +20,17 @@
   [headers.values]
     Cache-Control = "no-cache"
 
+# The site editor's pages: never in search results (the page also adds a noindex meta tag).
+[[headers]]
+  for = "/admin/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/admin"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
 # The site editor's own pages (/admin/login, /admin) are part of the same app: serve index.html for them.
 [[redirects]]
   from = "/admin"

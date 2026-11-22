@@ -13,6 +13,7 @@ export default function Avatar({ name }) {
   const ref = useRef(null);
   const [glitch, setGlitch] = useState(0);
   const [failed, setFailed] = useState(false);
+  const taps = useRef([]); // times of recent taps, for the hidden sign-in
   const photo = ABOUT.photo && !failed;
 
   const move = (e) => {
@@ -30,7 +31,14 @@ export default function Avatar({ name }) {
       onMouseMove={move}
       onMouseEnter={() => setGlitch((n) => n + 1)}
       onMouseLeave={() => (ref.current.style.transform = "")}
-      onClick={() => setGlitch((n) => n + 1)}
+      onClick={() => {
+        setGlitch((n) => n + 1);
+        // the owner's secret way into the editor: 5 taps on the photo within 2 seconds opens /admin/login.
+        // Nothing on screen hints at it; the password is still what protects the editor.
+        const now = Date.now();
+        taps.current = [...taps.current.filter((t) => now - t < 2000), now];
+        if (taps.current.length >= 5) location.assign("/admin/login");
+      }}
     >
       <span className="avatar-ring" aria-hidden="true" />
       <span className="avatar-frame">

@@ -93,7 +93,7 @@ const BUILDERS = {
         ["Rating", s.rating != null ? `${fmt(s.rating)} · ${s.stars}★` : "Unrated: no rated contest yet"],
         ...(s.maxRating ? [["Best rating", fmt(s.maxRating)]] : []),
         ...(s.globalRank ? [["Global rank", `#${fmt(s.globalRank)}`]] : []),
-        ...(s.dsa ? [["DSA rating", `${fmt(s.dsa.rating)}${s.dsa.provisional ? "? (provisional)" : ""} · ${s.dsa.stars}★`], ...(s.dsa.globalRank ? [["DSA global rank", `#${fmt(s.dsa.globalRank)}`]] : [])] : []),
+        ...(s.dsa ? [["DSA rating", `${fmt(s.dsa.rating)}${s.dsa.provisional ? " · provisional" : ""} · ${s.dsa.stars}★`], ...(s.dsa.globalRank ? [["DSA global rank", `#${fmt(s.dsa.globalRank)}`]] : [])] : []),
         ["Rated contests", s.contests ?? 0],
       ],
     },
