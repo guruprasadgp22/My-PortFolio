@@ -1795,7 +1795,13 @@ body::before{display:none} /* the time-of-day glow now lives in the colour pools
 .ln-gh{margin-bottom:16px}
 .ln-grid{display:grid;gap:14px}
 @media (min-width:768px){.ln-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.ln-card{display:flex;flex-direction:column;gap:12px;border-top:3px solid var(--c)}
+.ln-card{--c:var(--ember);display:flex;flex-direction:column;gap:12px;border-top:3px solid var(--c)}
+.ln-card.ln-ai{--c:var(--signal)} /* each card keeps its topic colour, now that sections are by status */
+.ln-hd .ln-status{white-space:nowrap;flex-shrink:0}
+.ln-topic{white-space:nowrap;margin-left:auto;font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;color:color-mix(in srgb,var(--c) 75%,var(--fg))}
+.ln-n-count{display:inline-grid;place-items:center;min-width:26px;height:26px;margin-left:6px;padding:0 8px;border-radius:999px;font:700 13px var(--mono);vertical-align:middle;color:var(--mute);border:1px solid var(--glass-rim-2)}
+.ln-empty{margin:0;padding:16px 18px;border-radius:16px;border:1px dashed var(--line);color:var(--mute);font-size:14.5px}
+.ln-stage-done .icon-box{color:#3ddc84}
 .ln-card.done{border-top-color:#3ddc84}
 .ln-hd{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .ln-status{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.04em;border:1px solid}
@@ -2501,3 +2507,21 @@ html.intro:not(.intro-go) .home *{animation-play-state:paused!important}
 .rt-stage{z-index:1}
 .rt-story{z-index:3}
 @media (max-width:900px){.rt-marquee{top:30%}}
+
+/* Learning: the Completed · Ongoing · Upcoming tab bar (a glass segmented control with a sliding pill) */
+.ln-tabs{display:flex;gap:4px;width:max-content;max-width:100%;margin:0 0 22px;padding:5px;border-radius:16px;overflow-x:auto;scrollbar-width:none;
+  background:linear-gradient(150deg,rgba(255,255,255,.08),rgba(255,255,255,.02)),var(--glass-pane);border:1px solid var(--glass-rim-2);border-top-color:color-mix(in srgb,var(--glass-rim) 70%,transparent);box-shadow:inset 0 1px 0 color-mix(in srgb,var(--glass-hi) 50%,transparent)}
+.ln-tabs::-webkit-scrollbar{display:none}
+.ln-tabs button{position:relative;isolation:isolate;display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:12px;font-weight:700;font-size:14.5px;white-space:nowrap;color:var(--mute);cursor:pointer;transition:color .25s}
+.ln-tabs button:hover{color:var(--fg)}
+.ln-tabs button.on{color:var(--fg)}
+.ln-tabs button b{min-width:22px;padding:1px 7px;border-radius:999px;font:700 12px var(--mono);text-align:center;color:var(--mute);background:color-mix(in srgb,var(--fg) 8%,transparent)}
+.ln-tabs button.on b{color:var(--fg);background:color-mix(in srgb,var(--tc) 28%,transparent)}
+.ln-tabs button svg{color:var(--tc)}
+.ln-tab-done{--tc:#3ddc84}.ln-tab-now{--tc:var(--ember-2)}.ln-tab-next{--tc:var(--signal)}
+.ln-tab-pill{position:absolute;inset:0;z-index:-1;border-radius:inherit;background:color-mix(in srgb,var(--tc) 16%,var(--ink-3));border:1px solid color-mix(in srgb,var(--tc) 45%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+:root[data-theme="light"] .ln-tab-pill{background:color-mix(in srgb,var(--tc) 14%,#fff)}
+:root[data-theme="light"] .ln-tab-done{--tc:#178a46}
+.ln-tabs button:focus-visible{outline:2px solid var(--ember-2);outline-offset:2px}
+@media (max-width:480px){.ln-tabs{width:100%;gap:2px;padding:4px}.ln-tabs button{flex:1 1 0;min-width:0;justify-content:center;padding:9px 4px;font-size:13px;gap:5px}.ln-tabs button svg{display:none}.ln-tabs button b{min-width:18px;padding:0 5px;font-size:11px}}
+@media (max-width:360px){.ln-tabs button b{display:none}} /* very narrow phones: just the names (the counts are in the stats above) */

@@ -1,8 +1,9 @@
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { LEARNING } from "../data";
 import { coursesFrom, GROUPS } from "../learning";
 import { REDUCED } from "../hooks/motion";
+import { SPRING, haptic } from "../hooks/spring";
 import useContent from "../hooks/useContent";
 import useLessons from "../hooks/useLessons";
 import Glitch from "./Glitch";
@@ -29,16 +30,27 @@ const hours = (c) => {
 const finished = (t) => t.done != null && t.done >= t.count;
 const unstarted = (t) => t.done === 0;
 
-function Course({ t, k }) {
+// short topic tags on the cards (the full name is in the tooltip)
+const SHORT = { dsa: "DSA", ai: "AI & LLMs", other: "Other" };
+
+// the three sections of the page, in this order; a course is in exactly one
+const STAGES = [
+  { id: "done", slug: "completed", title: "Completed", icon: "check", empty: "No course finished yet.", has: finished },
+  { id: "now", slug: "ongoing", title: "Ongoing", icon: "zap", empty: "Nothing in progress right now.", has: (t) => !finished(t) && !unstarted(t) },
+  { id: "next", slug: "upcoming", title: "Upcoming", icon: "book", empty: "Nothing queued up next.", has: unstarted },
+];
+
+function Course({ t, k, group }) {
   const done = finished(t);
   const pct = t.done != null ? Math.min(100, Math.round((t.done / t.count) * 100)) : null;
   const next = t.done != null && !done ? t.lessons[t.done] : null;
   return (
-    <Reveal as="li" className={`cx-card ln-card ${done ? "done" : ""}`} delay={(k % 2) * 70}>
+    <Reveal as="li" className={`cx-card ln-card ln-${t.group} ${done ? "done" : ""}`} delay={(k % 2) * 70}>
       <header className="ln-hd">
         <span className={`ln-status ${done ? "done" : unstarted(t) ? "next" : "now"}`}>
           {done ? <><Icon name="check" size={13} /> Completed</> : unstarted(t) ? "Up next" : <><i aria-hidden="true" /> In progress</>}
         </span>
+        {group && <span className="ln-topic" title={group.title}>{SHORT[group.id] || group.title}</span>}
         <a className="ln-yt" href={playlist(t.list)} target="_blank" rel="noopener noreferrer" aria-label={`${t.title} playlist on YouTube`}>
           YouTube <Icon name="arrow" size={13} />
         </a>
@@ -97,6 +109,9 @@ function Course({ t, k }) {
   );
 }
 
+// #learning/completed opens that tab (Ongoing when there is none), so a tab can be linked
+const tabFromHash = () => STAGES.find((s) => s.slug === location.hash.slice(1).split("/")[1])?.id || "now";
+
 const day = (iso) => new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
 export default function Learning() {
@@ -106,6 +121,22 @@ export default function Learning() {
   const total = COURSES.reduce((n, t) => n + t.count, 0);
   const complete = COURSES.filter(finished).length;
   const watched = COURSES.reduce((n, t) => n + Math.min(t.done || 0, t.count), 0);
+  const [tab, setTab] = useState(tabFromHash);
+  const tabs = useRef([]);
+  const pick = (id) => {
+    haptic(5);
+    setTab(id);
+    history.replaceState(null, "", `#learning/${STAGES.find((s) => s.id === id).slug}`);
+  };
+  // arrow keys move between the tabs (Home / End jump to the ends), as tab bars do
+  const onKey = (e, i) => {
+    const n = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: STAGES.length - 1 }[e.key];
+    if (n == null) return;
+    e.preventDefault();
+    const j = (n + STAGES.length) % STAGES.length;
+    pick(STAGES[j].id);
+    tabs.current[j]?.focus();
+  };
   const stats = [
     ["Courses", COURSES.length],
     ["In progress", COURSES.filter((t) => !finished(t) && !unstarted(t)).length],
@@ -124,17 +155,36 @@ export default function Learning() {
         {stats.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}
       </dl>
 
-      {GROUPS.filter((g) => COURSES.some((t) => t.group === g.id)).map((g) => (
-        <section key={g.id} className={`ln-group ln-${g.id}`} aria-labelledby={`ln-${g.id}`}>
-          <div className="title-wrapper ln-gh">
-            <div className="icon-box"><Icon name={g.icon} /></div>
-            <h3 className="h3" id={`ln-${g.id}`}>{g.title}</h3>
-          </div>
-          <ul className="ln-grid">
-            {COURSES.filter((t) => t.group === g.id).map((t, k) => <Course key={t.list} t={t} k={k} />)}
-          </ul>
-        </section>
-      ))}
+      {/* the tab bar: Completed · Ongoing · Upcoming (opens on Ongoing) */}
+      <div className="ln-tabs" role="tablist" aria-label="Courses by status">
+        {STAGES.map((st, i) => {
+          const on = tab === st.id;
+          return (
+            <button key={st.id} ref={(el) => (tabs.current[i] = el)} role="tab" id={`ln-tab-${st.id}`} aria-selected={on} aria-controls={`ln-${st.id}`}
+              tabIndex={on ? 0 : -1} className={`ln-tab-${st.id} ${on ? "on" : ""}`} onClick={() => pick(st.id)} onKeyDown={(e) => onKey(e, i)}>
+              {on && <motion.span className="ln-tab-pill" layoutId="ln-tab-pill" transition={REDUCED ? { duration: 0 } : SPRING} />}
+              <Icon name={st.icon} size={15} />
+              <span>{st.title}</span>
+              <b>{COURSES.filter(st.has).length}</b>
+            </button>
+          );
+        })}
+      </div>
+
+      {STAGES.filter((st) => st.id === tab).map((st) => {
+        const list = COURSES.filter(st.has);
+        return (
+          <section key={st.id} className={`ln-group ln-stage-${st.id}`} id={`ln-${st.id}`} role="tabpanel" aria-labelledby={`ln-tab-${st.id}`}>
+            {list.length ? (
+              <ul className="ln-grid">
+                {list.map((t, k) => <Course key={t.list} t={t} k={k} group={GROUPS.find((g) => g.id === t.group)} />)}
+              </ul>
+            ) : (
+              <p className="ln-empty">{st.empty}</p>
+            )}
+          </section>
+        );
+      })}
 
       <p className="note">// Progress updated by hand · last on {content?.updated ? day(content.updated) : LEARNING.updated}. Lesson lists are from each playlist.</p>
     </>
